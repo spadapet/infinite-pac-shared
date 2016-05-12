@@ -1,0 +1,542 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="App.xaml.cpp" />
+    <ClCompile Include="MainPage.xaml.cpp" />
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="States\HighScoreScreen.cpp">
+      <Filter>States</Filter>
+    </ClCompile>
+    <ClCompile Include="States\PacApplication.cpp">
+      <Filter>States</Filter>
+    </ClCompile>
+    <ClCompile Include="States\TitleScreen.cpp">
+      <Filter>States</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Actors.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Audio.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Difficulty.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\GhostBrains.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Helpers.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Maze.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Mazes.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\PlayingGame.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\PlayingMaze.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\RenderMaze.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\RenderText.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Stats.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Tiles.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\GlobalResources.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="AboutControl.xaml.cpp" />
+    <ClCompile Include="FailurePage.xaml.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="App.xaml.h" />
+    <ClInclude Include="MainPage.xaml.h" />
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="States\HighScoreScreen.h">
+      <Filter>States</Filter>
+    </ClInclude>
+    <ClInclude Include="States\PacApplication.h">
+      <Filter>States</Filter>
+    </ClInclude>
+    <ClInclude Include="States\TitleScreen.h">
+      <Filter>States</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Actors.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Audio.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Difficulty.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\GhostBrains.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Helpers.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Maze.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Mazes.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\PlayingGame.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\PlayingMaze.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\RenderMaze.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\RenderText.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Stats.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Tiles.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\GlobalResources.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="AboutControl.xaml.h" />
+    <ClInclude Include="FailurePage.xaml.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Assets\mr-move.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\ms-move.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\mr-dead.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\ms-dead.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\ghost-1-pupils.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\ghost-1-move.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\ghost-1-eyes.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\ghost-1-flash.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\ghost-1-scared.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\ghost-3-eyes.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\ghost-3-move.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\ghost-3-pupils.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\ghost-2-eyes.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\ghost-2-flash.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\ghost-2-move.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\ghost-2-pupils.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\ghost-2-scared.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\ghost-3-flash.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\ghost-3-scared.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\ghost-4-eyes.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\ghost-4-flash.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\ghost-4-pupils.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\ghost-4-scared.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\ghost-4-move.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\dot.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\edges.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\edges-orig.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\edges-bg.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\mr-power.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\ms-power.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\power-aura.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\power.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\bubble.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\SplashScreen.scale-100.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\StoreLogo.scale-100.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\AboutFace.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\move-arrow.png">
+      <Filter>Assets\Images</Filter>
+    </Image>
+    <Image Include="Assets\SquareLogo.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square71x71Logo.scale-400.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square71x71Logo.scale-200.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square71x71Logo.scale-150.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square71x71Logo.scale-125.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square71x71Logo.scale-100.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square150x150Logo.scale-400.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square150x150Logo.scale-200.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square150x150Logo.scale-150.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square150x150Logo.scale-125.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square150x150Logo.scale-100.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square310x310Logo.scale-400.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square310x310Logo.scale-200.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square310x310Logo.scale-150.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square310x310Logo.scale-125.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square310x310Logo.scale-100.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.scale-400.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.scale-200.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.scale-150.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.scale-125.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.scale-100.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-256.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-96.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-80.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-72.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-64.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-60.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-48.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-40.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-36.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-32.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-30.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-24.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-20.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-16.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-256_altform-unplated.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-96_altform-unplated.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-80_altform-unplated.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-72_altform-unplated.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-64_altform-unplated.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-60_altform-unplated.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-48_altform-unplated.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-40_altform-unplated.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-36_altform-unplated.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-32_altform-unplated.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-30_altform-unplated.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-20_altform-unplated.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-16_altform-unplated.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\StoreLogo.scale-400.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\StoreLogo.scale-200.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\StoreLogo.scale-150.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\StoreLogo.scale-125.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Wide310x150Logo.scale-400.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Wide310x150Logo.scale-200.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Wide310x150Logo.scale-150.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Wide310x150Logo.scale-125.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\Wide310x150Logo.scale-100.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\SplashScreen.scale-400.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\SplashScreen.scale-200.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\SplashScreen.scale-150.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\SplashScreen.scale-125.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+    <Image Include="Assets\WideLogo.png">
+      <Filter>Assets\Logo</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="MainPage.xaml" />
+    <Page Include="AboutControl.xaml" />
+    <Page Include="FailurePage.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Assets">
+      <UniqueIdentifier>{4a4c3f78-f106-4a86-a4e0-f50a6a616e9e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="States">
+      <UniqueIdentifier>{018c99c9-d5f9-4fbd-9475-b47f478996a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Package">
+      <UniqueIdentifier>{fdf6c490-14cc-4176-bdd9-de7dc6f94ef9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core">
+      <UniqueIdentifier>{7953c821-87f0-415d-a1af-fa696c4154b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Assets\Images">
+      <UniqueIdentifier>{5efb1eb3-90ee-4b9d-9dda-a887ba34337c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Assets\Audio">
+      <UniqueIdentifier>{f64d1ea3-64d1-4d34-965e-0e2f1da0c9cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Assets\Json">
+      <UniqueIdentifier>{cb74dc9c-27b1-410b-84b0-ad3972a21edd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Assets\Logo">
+      <UniqueIdentifier>{7f892818-636a-4e3b-a1de-20f2c104525e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="TemporaryKey.pfx">
+      <Filter>Package</Filter>
+    </None>
+    <None Include="Assets\font.png">
+      <Filter>Assets\Images</Filter>
+    </None>
+    <None Include="Assets\font-small.png">
+      <Filter>Assets\Images</Filter>
+    </None>
+    <None Include="Assets\fruit.png">
+      <Filter>Assets\Images</Filter>
+    </None>
+    <None Include="Assets\mr-bg-1.wav">
+      <Filter>Assets\Audio</Filter>
+    </None>
+    <None Include="Assets\mr-bg-eaten.wav">
+      <Filter>Assets\Audio</Filter>
+    </None>
+    <None Include="Assets\mr-bg-scared.wav">
+      <Filter>Assets\Audio</Filter>
+    </None>
+    <None Include="Assets\mr-die.wav">
+      <Filter>Assets\Audio</Filter>
+    </None>
+    <None Include="Assets\mr-eat-dot-1.wav">
+      <Filter>Assets\Audio</Filter>
+    </None>
+    <None Include="Assets\mr-eat-dot-2.wav">
+      <Filter>Assets\Audio</Filter>
+    </None>
+    <None Include="Assets\mr-eat-ghost.wav">
+      <Filter>Assets\Audio</Filter>
+    </None>
+    <None Include="Assets\mr-free-life.wav">
+      <Filter>Assets\Audio</Filter>
+    </None>
+    <None Include="Assets\mr-fruit.wav">
+      <Filter>Assets\Audio</Filter>
+    </None>
+    <None Include="Assets\Values.Maze.res.json">
+      <Filter>Assets\Json</Filter>
+    </None>
+    <None Include="Assets\Values.Mazes.res.json">
+      <Filter>Assets\Json</Filter>
+    </None>
+    <None Include="Assets\Values.Tiles.res.json">
+      <Filter>Assets\Json</Filter>
+    </None>
+    <None Include="Assets\Assets.Anim.res.json">
+      <Filter>Assets\Json</Filter>
+    </None>
+    <None Include="Assets\Assets.Audio.res.json">
+      <Filter>Assets\Json</Filter>
+    </None>
+    <None Include="Assets\Assets.GhostAnim.res.json">
+      <Filter>Assets\Json</Filter>
+    </None>
+    <None Include="Assets\Assets.res.json">
+      <Filter>Assets\Json</Filter>
+    </None>
+    <None Include="Assets\Assets.Sprites.res.json">
+      <Filter>Assets\Json</Filter>
+    </None>
+    <None Include="Assets\mr-fruit-bounce.wav">
+      <Filter>Assets\Audio</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <AppxManifest Include="Package.appxmanifest">
+      <Filter>Package</Filter>
+    </AppxManifest>
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="Assets\mr-level-win.wav">
+      <Filter>Assets\Audio</Filter>
+    </Media>
+    <Media Include="Assets\mr-intro.wav">
+      <Filter>Assets\Audio</Filter>
+    </Media>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="StoreManifest.xml">
+      <Filter>Package</Filter>
+    </Xml>
+  </ItemGroup>
+</Project>

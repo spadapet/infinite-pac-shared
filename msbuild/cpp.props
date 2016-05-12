@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="shared.props" />
+
+  <PropertyGroup>
+    <!-- Project config -->
+    <AppType Condition=" '$(AppType)' == '' ">Desktop</AppType>
+    <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <XPlatform>$(Platform)</XPlatform>
+    <XPlatform Condition=" '$(Platform)' == 'Win32' ">x86</XPlatform>
+    <APlatform>$(XPlatform)</APlatform>
+    <APlatform Condition=" '$(Platform)' == 'x64' ">amd64</APlatform>
+
+    <!-- Project properties -->
+    <CharacterSet Condition=" '$(CharacterSet)' == '' ">Unicode</CharacterSet>
+    <ConfigurationType Condition=" '$(ConfigurationType)' == '' ">Application</ConfigurationType>
+    <DefaultLanguage Condition=" '$(DefaultLanguage)' == '' ">en-US</DefaultLanguage>
+    <Keyword Condition=" '$(Keyword)' == '' ">Win32Proj</Keyword>
+    <MinimumVisualStudioVersion Condition=" '$(MinimumVisualStudioVersion)' == '' ">$(VsRelease).0</MinimumVisualStudioVersion>
+    <PlatformToolset Condition=" '$(PlatformToolset)' == '' ">v143</PlatformToolset>
+    <ProjectName Condition=" '$(ProjectName)' == '' ">$(MSBuildProjectName)</ProjectName>
+    <RootNamespace Condition=" '$(RootNamespace)' == '' ">$(RootNamespace)</RootNamespace>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+
+    <!-- Output paths -->
+    <ConfigOutRoot>$(OutRoot)\$(Configuration).$(XPlatform).$(AppType)</ConfigOutRoot>
+    <ProjectOutRoot>$(ConfigOutRoot)\$(ProjectName)</ProjectOutRoot>
+    <IntDir>$(ProjectOutRoot)\obj\</IntDir>
+    <OutDir>$(ProjectOutRoot)\bin\</OutDir>
+    <GeneratedFilesDir>$(ProjectOutRoot)\inc\</GeneratedFilesDir>
+  </PropertyGroup>
+
+  <!-- Metro app properties -->
+  <Choose>
+    <When Condition=" '$(AppType)' == 'Metro' ">
+      <PropertyGroup>
+        <AppContainerApplication Condition=" '$(AppContainerApplication)' == '' ">true</AppContainerApplication>
+        <ApplicationType Condition=" '$(ApplicationType)' == '' ">Windows Store</ApplicationType>
+        <ApplicationTypeRevision Condition=" '$(ApplicationTypeRevision)' == '' ">10.0</ApplicationTypeRevision>
+        <CompileAsWinRT Condition=" '$(CompileAsWinRT)' == '' And '$(ConfigurationType)' == 'StaticLibrary' ">false</CompileAsWinRT>
+        <EnableDotNetNativeCompatibleProfile Condition=" '$(EnableDotNetNativeCompatibleProfile)' == '' And '$(ConfigurationType)' == 'Application' ">true</EnableDotNetNativeCompatibleProfile>
+        <GenerateManifest Condition=" '$(GenerateManifest)' == '' And '$(ConfigurationType)' != 'Application' ">false</GenerateManifest>
+        <GenerateWindowsMetadata Condition=" '$(GenerateWindowsMetadata)' == '' And '$(ConfigurationType)' == 'Application' ">true</GenerateWindowsMetadata>
+        <GenerateWindowsMetadata Condition=" '$(GenerateWindowsMetadata)' == '' ">false</GenerateWindowsMetadata>
+        <WindowsTargetPlatformMinVersion Condition=" '$(WindowsTargetPlatformMinVersion)' == '' ">10.0.19041.0</WindowsTargetPlatformMinVersion>
+        <WindowsTargetPlatformVersion Condition=" '$(WindowsTargetPlatformVersion)' == '' ">10.0.19041.0</WindowsTargetPlatformVersion>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <AppContainerApplication Condition=" '$(AppContainerApplication)' == '' ">false</AppContainerApplication>
+        <WindowsTargetPlatformVersion Condition=" '$(WindowsTargetPlatformVersion)' == '' ">10.0.19041.0</WindowsTargetPlatformVersion>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Condition=" '$(AppType)' == 'Metro' " Include="Debug|ARM">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Condition=" '$(AppType)' == 'Metro' " Include="Release|ARM">
+      <Configuration>Release</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+
+  <!-- Debug-only properties, possibly used by Cpp.props -->
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' " Label="Configuration">
+    <LinkIncremental>true</LinkIncremental>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+  </PropertyGroup>
+
+  <!-- Release-only properties, possibly used by Cpp.props -->
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' " Label="Configuration">
+    <LinkIncremental>false</LinkIncremental>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <UseDotNetNativeToolchain Condition=" '$(UseDotNetNativeToolchain)' == '' And '$(AppType)' == 'Metro' And '$(ConfigurationType)' == 'Application' ">true</UseDotNetNativeToolchain>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <PropertyGroup>
+    <IgnoreImportLibrary>false</IgnoreImportLibrary>
+  </PropertyGroup>
+
+  <ItemDefinitionGroup>
+    <!-- Compiler options -->
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(GeneratedFilesDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition=" '$(AppType)' == 'Desktop' ">$(DXSDK_DIR)Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <FunctionLevelLinking Condition=" '$(Configuration)' != 'Debug' ">true</FunctionLevelLinking>
+      <IntrinsicFunctions Condition=" '$(Configuration)' != 'Debug' ">true</IntrinsicFunctions>
+      <Optimization Condition=" '$(Configuration)' != 'Debug' ">Full</Optimization>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PreprocessorDefinitions Condition=" '$(AppType)' == 'Metro' ">WINVER=0x0A00;_WIN32_WINNT=0x0A00;_METRO_APP;METRO_APP=1;DISABLE_XAML_GENERATED_MAIN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition=" '$(AppType)' == 'Desktop' ">WINVER=0x0602;_WIN32_WINNT=0x0602;WIN32;METRO_APP=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition=" '$(ConfigurationType)' == 'DynamicLibrary' And '$(AppType)' == 'Metro' ">_WINRT_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition=" '$(ConfigurationType)' == 'DynamicLibrary' ">_WINDOWS;_WINDLL;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition=" '$(ConfigurationType)' == 'StaticLibrary' ">_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition=" '$(ConfigurationType)' == 'Application' ">_WINDOWS;_WINEXE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition=" '$(Configuration)' == 'Debug' ">DEBUG=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition=" '$(Configuration)' != 'Debug' ">NDEBUG;DEBUG=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <BasicRuntimeChecks Condition=" '$(Configuration)' == 'Debug' ">EnableFastChecks</BasicRuntimeChecks>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+    <!-- Shader compiler options -->
+    <FXC>
+      <TreatWarningAsError>true</TreatWarningAsError>
+    </FXC>
+    <!-- Librarian options -->
+    <Lib>
+      <AdditionalOptions>/ignore:4264</AdditionalOptions>
+      <TreatLibWarningAsErrors>true</TreatLibWarningAsErrors>
+    </Lib>
+    <!-- Typelib options -->
+    <Midl>
+      <DefaultCharType>Signed</DefaultCharType>
+      <GenerateClientFiles>None</GenerateClientFiles>
+      <GenerateServerFiles>None</GenerateServerFiles>
+      <GenerateTypeLibrary>true</GenerateTypeLibrary>
+      <OutputDirectory>$(GeneratedFilesDir)</OutputDirectory>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TargetEnvironment Condition=" '$(Platform)' == 'x64' ">X64</TargetEnvironment>
+      <TypeLibraryName>$(GeneratedFilesDir)\%(FileName).tlb</TypeLibraryName>
+      <WarnAsError>true</WarnAsError>
+      <WarningLevel>3</WarningLevel>
+    </Midl>
+    <Midl Condition=" '$(AppType)' == 'Metro' ">
+      <PrependWithABINamepsace></PrependWithABINamepsace>
+      <PreprocessorDefinitions></PreprocessorDefinitions>
+      <EnableWindowsRuntime>false</EnableWindowsRuntime>
+      <AdditionalMetadataDirectories></AdditionalMetadataDirectories>
+      <MetadataFileName></MetadataFileName>
+    </Midl>
+    <!-- Resources -->
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(GeneratedFilesDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <!-- Linker options -->
+    <Link>
+      <DataExecutionPrevention>true</DataExecutionPrevention>
+      <EnableCOMDATFolding Condition=" '$(Configuration)' != 'Debug' ">true</EnableCOMDATFolding>
+      <GenerateDebugInformation Condition=" '$(Configuration)' != 'Debug' ">true</GenerateDebugInformation>
+      <GenerateWindowsMetadata>$(GenerateWindowsMetadata)</GenerateWindowsMetadata>
+      <LargeAddressAware>true</LargeAddressAware>
+      <LinkTimeCodeGeneration Condition=" '$(Configuration)' != 'Debug' ">UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <OptimizeReferences Condition=" '$(Configuration)' != 'Debug' ">true</OptimizeReferences>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
+      <SubSystem>Windows</SubSystem>
+      <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
+    </Link>
+  </ItemDefinitionGroup>
+</Project>

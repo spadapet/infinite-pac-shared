@@ -1,0 +1,85 @@
+{
+  "LineArt.vs_4_0":
+  {
+    "res:type": "shader",
+    "data":
+    {
+      "res:transform": "shader",
+      "file": "2d.hlsl",
+      "target": "vs_4_0",
+      "entry": "LineArtVS"
+    }
+  },
+
+  "LineArt.ps_4_0":
+  {
+    "res:type": "shader",
+    "data":
+    {
+      "res:transform": "shader",
+      "file": "2d.hlsl",
+      "target": "ps_4_0",
+      "entry": "LineArtPS"
+    }
+  },
+
+  "Sprite.vs_4_0":
+  {
+    "res:type": "shader",
+    "data":
+    {
+      "res:transform": "shader",
+      "file": "2d.hlsl",
+      "target": "vs_4_0",
+      "entry": "SpriteVS"
+    }
+  },
+
+  "Sprite.ps_4_0":
+  {
+    "res:type": "shader",
+    "data":
+    {
+      "res:transform": "shader",
+      "file": "2d.hlsl",
+      "target": "ps_4_0",
+      "entry": "SpritePS"
+    }
+  },
+
+  "SpriteAlpha.ps_4_0":
+  {
+    "res:type": "shader",
+    "data":
+    {
+      "res:transform": "shader",
+      "file": "2d.hlsl",
+      "target": "ps_4_0",
+      "entry": "SpriteAlphaPS"
+    }
+  },
+
+  "MultiSprite.vs_4_0":
+  {
+    "res:type": "shader",
+    "data":
+    {
+      "res:transform": "shader",
+      "file": "2d.hlsl",
+      "target": "vs_4_0",
+      "entry": "MultiSpriteVS"
+    }
+  },
+
+  "MultiSprite.ps_4_0":
+  {
+    "res:type": "shader",
+    "data":
+    {
+      "res:transform": "shader",
+      "file": "2d.hlsl",
+      "target": "ps_4_0",
+      "entry": "MultiSpritePS"
+    }
+  }
+}

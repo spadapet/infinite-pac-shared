@@ -1,0 +1,226 @@
+{
+  "res:values":
+  {
+    "waterBackgroundColor": [ 0.063, 0.063, 0.149, 1 ],
+
+    "black": [ 0, 0, 0, 1 ],
+    "white": [ 1, 1, 1, 1 ],
+    "transparent": [ 0, 0, 0, 0 ],
+    "light-blue3": [ 0.349, 0.486, 0.812, 1 ],
+
+    "light-blue2": [ 0.427, 0.761, 0.788, 1 ],
+    "dark-blue2": [ 0.165, 0.294, 0.843, 1 ],
+
+    "light-pink2": [ 0.820, 0.667, 0.600, 1 ],
+    "dark-red": [ 0.678, 0.137, 0.137, 1 ],
+
+    "light-green": [ 0.506, 0.773, 0.478, 1 ],
+    "dark-blue": [ 0.188, 0.204, 0.431, 1 ],
+
+    "light-yellow": [ 1, 0.933, 0.2, 1 ],
+    "dark-orange": [0.820, 0.486, 0.173, 1 ],
+
+    "light-blue": [ 0.161, 0.816, 0.816, 1 ],
+    "dark-purple2": [ 0.506, 0.149, 0.753, 1 ],
+
+    "light-pink": [ 1, 0.804, 0.953, 1 ],
+    "dark-pink": [ 0.820, 0.278, 0.286, 1 ],
+
+    "dark-green": [ 0.208, 0.400, 0.145, 1 ],
+
+    "light-orange": [ 1, 0.573, 0.2, 1 ],
+    "dark-purple": [ 0.271, 0.141, 0.208, 1 ],
+
+    "mr-color-0-0": "res:light-blue2",
+    "mr-color-0-1": "res:dark-blue2",
+    "mr-color-1-0": "res:light-pink2",
+    "mr-color-1-1": "res:dark-red",
+    "mr-color-2-0": "res:light-green",
+    "mr-color-2-1": "res:dark-blue",
+    "mr-color-3-0": "res:light-yellow",
+    "mr-color-3-1": "res:dark-orange",
+
+    "ms-color-0-0": "res:light-blue",
+    "ms-color-0-1": "res:dark-purple2",
+    "ms-color-1-0": "res:light-pink",
+    "ms-color-1-1": "res:dark-pink",
+    "ms-color-2-0": "res:light-green",
+    "ms-color-2-1": "res:dark-green",
+    "ms-color-3-0": "res:light-orange",
+    "ms-color-3-1": "res:dark-purple"
+  },
+
+  "Values":
+  {
+    "global":
+    {
+      "mr-maze-0-0":
+      {
+        "type": "mr",
+        "tiles": "mr-tiles-0",
+        "borderColor": "res:mr-color-0-0",
+        "fillColor": "res:mr-color-0-1",
+        "backgroundColor": "res:waterBackgroundColor"
+      },
+
+      "mr-maze-0-1":
+      {
+        "type": "mr",
+        "tiles": "mr-tiles-0",
+        "borderColor": "res:mr-color-0-1",
+        "fillColor": "res:mr-color-0-0",
+        "backgroundColor": "res:waterBackgroundColor"
+      },
+
+      "mr-maze-1-0":
+      {
+        "type": "mr",
+        "tiles": "mr-tiles-1",
+        "borderColor": "res:mr-color-1-0",
+        "fillColor": "res:mr-color-1-1",
+        "backgroundColor": "res:waterBackgroundColor"
+      },
+
+      "mr-maze-1-1":
+      {
+        "type": "mr",
+        "tiles": "mr-tiles-1",
+        "borderColor": "res:mr-color-1-1",
+        "fillColor": "res:mr-color-1-0",
+        "backgroundColor": "res:waterBackgroundColor"
+      },
+
+      "mr-maze-2-0":
+      {
+        "type": "mr",
+        "tiles": "mr-tiles-2",
+        "borderColor": "res:mr-color-2-0",
+        "fillColor": "res:mr-color-2-1",
+        "backgroundColor": "res:waterBackgroundColor"
+      },
+
+      "mr-maze-2-1":
+      {
+        "type": "mr",
+        "tiles": "mr-tiles-2",
+        "borderColor": "res:mr-color-2-1",
+        "fillColor": "res:mr-color-2-0",
+        "backgroundColor": "res:waterBackgroundColor"
+      },
+
+      "mr-maze-3-0":
+      {
+        "type": "mr",
+        "tiles": "mr-tiles-3",
+        "borderColor": "res:mr-color-3-0",
+        "fillColor": "res:mr-color-3-1",
+        "backgroundColor": "res:waterBackgroundColor"
+      },
+
+      "mr-maze-3-1":
+      {
+        "type": "mr",
+        "tiles": "mr-tiles-3",
+        "borderColor": "res:mr-color-3-1",
+        "fillColor": "res:mr-color-3-0",
+        "backgroundColor": "res:waterBackgroundColor"
+      },
+
+      "ms-maze-0-0":
+      {
+        "type": "ms",
+        "tiles": "ms-tiles-0",
+        "borderColor": "res:ms-color-0-0",
+        "fillColor": "res:ms-color-0-1",
+        "backgroundColor": "res:waterBackgroundColor"
+      },
+
+      "ms-maze-0-1":
+      {
+        "type": "ms",
+        "tiles": "ms-tiles-0",
+        "borderColor": "res:ms-color-0-1",
+        "fillColor": "res:ms-color-0-0",
+        "backgroundColor": "res:waterBackgroundColor"
+      },
+
+      "ms-maze-1-0":
+      {
+        "type": "ms",
+        "tiles": "ms-tiles-1",
+        "borderColor": "res:ms-color-1-0",
+        "fillColor": "res:ms-color-1-1",
+        "backgroundColor": "res:waterBackgroundColor"
+      },
+
+      "ms-maze-1-1":
+      {
+        "type": "ms",
+        "tiles": "ms-tiles-1",
+        "borderColor": "res:ms-color-1-1",
+        "fillColor": "res:ms-color-1-0",
+        "backgroundColor": "res:waterBackgroundColor"
+      },
+
+      "ms-maze-2-0":
+      {
+        "type": "ms",
+        "tiles": "ms-tiles-2",
+        "borderColor": "res:ms-color-2-0",
+        "fillColor": "res:ms-color-2-1",
+        "backgroundColor": "res:waterBackgroundColor"
+      },
+
+      "ms-maze-2-1":
+      {
+        "type": "ms",
+        "tiles": "ms-tiles-2",
+        "borderColor": "res:ms-color-2-1",
+        "fillColor": "res:ms-color-2-0",
+        "backgroundColor": "res:waterBackgroundColor"
+      },
+
+      "ms-maze-3-0":
+      {
+        "type": "ms",
+        "tiles": "ms-tiles-3",
+        "borderColor": "res:ms-color-3-0",
+        "fillColor": "res:ms-color-3-1",
+        "backgroundColor": "res:waterBackgroundColor"
+      },
+
+      "ms-maze-3-1":
+      {
+        "type": "ms",
+        "tiles": "ms-tiles-3",
+        "borderColor": "res:ms-color-3-1",
+        "fillColor": "res:ms-color-3-0",
+        "backgroundColor": "res:waterBackgroundColor"
+      },
+
+      "title-maze-front":
+      {
+        "tiles": "title-tiles-front",
+        "borderColor": "res:light-blue3",
+        "fillColor": "res:transparent",
+        "backgroundColor": "res:transparent"
+      },
+
+      "title-maze-back":
+      {
+        "tiles": "title-tiles-back",
+        "borderColor": "res:light-blue3",
+        "fillColor": "res:transparent",
+        "backgroundColor": "res:transparent"
+      },
+
+      "high-score-maze":
+      {
+        "tiles": "high-score-tiles",
+        "borderColor": "res:light-blue3",
+        "fillColor": "res:transparent",
+        "backgroundColor": "res:transparent"
+      }
+    }
+  }
+}

@@ -1,0 +1,233 @@
+{
+  "res:values":
+  {
+    "lives-easy": 3,
+    "lives-normal": 3,
+    "lives-hard": 3,
+    "firstLife-easy": 10000,
+    "firstLife-normal": 10000,
+    "firstLife-hard": 10000,
+    "maxFreeLives-easy": 3,
+    "maxFreeLives-normal": 2,
+    "maxFreeLives-hard": 2,
+    "repeatLives-easy": 10000,
+    "repeatLives-normal": 10000,
+    "repeatLives-hard": 20000,
+
+    "ghostModeSeconds-0": [ 7, 20, 7, 20, 5, 20, 5, 0 ],
+    "ghostModeSeconds-1": [ 7, 20, 7, 20, 5, 0, 0, 0 ],
+    "ghostDots-0": [ 0, 0, 30, 60 ],
+    "ghostDots-1": [ 0, 0, 0, 50 ],
+    "ghostDots-2": [ 0, 0, 0, 0 ],
+
+    "mr-mazes-order":
+    [
+      "mr-maze-0-0",
+      "mr-maze-1-0",
+      "mr-maze-1-1",
+      "mr-maze-2-0",
+      "mr-maze-2-1",
+      "mr-maze-3-0",
+      "mr-maze-3-1",
+      "mr-maze-0-1"
+    ],
+
+    "ms-mazes-order":
+    [
+      "ms-maze-0-0",
+      "ms-maze-1-0",
+      "ms-maze-1-1",
+      "ms-maze-2-0",
+      "ms-maze-2-1",
+      "ms-maze-3-0",
+      "ms-maze-3-1",
+      "ms-maze-0-1"
+    ],
+
+    "difficulties-easy":
+    [
+      {
+        "ghosts":                   [ 2,  2,  3,  3,  4,  4,  4,  4,  4,  4,  4,  4,  4 ],
+        "speedSubtract":            [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 ],
+        "speed":                    [ 50, 60, 70, 80, 90, 90, 90, 90, 90, 90, 90, 90, 90 ],
+        "speedAdd":                 [ 30, 25, 20, 15, 10, 10, 10, 10, 10, 10, 10, 10, 10 ],
+        "elroyDots":                [ 10, 15, 20, 25, 30, 35, 40, 40, 40, 40, 40, 40, 40 ],
+        "scaredSeconds":            [ 14, 12, 10, 8,  6,  6,  6,  6,  6,  6,  6,  6,  6 ],
+        "lastDotSecondsUntilGhost": [ 4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4 ],
+        "fruit":                    [ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12 ],
+        "ghostModeSeconds": "res:ghostModeSeconds-0",
+        "ghostDots": "res:ghostDots-0"
+      }
+    ],
+
+    "difficulties-normal":
+    [
+      {
+        "ghosts": 4,
+        "speed": 70,
+        "speedSubtract": 0,
+        "speedAdd": 15,
+        "elroyDots": 20,
+        "scaredSeconds": 10,
+        "ghostModeSeconds": "res:ghostModeSeconds-0",
+        "ghostDots": "res:ghostDots-0",
+        "lastDotSecondsUntilGhost": 4,
+        "fruit": 0
+      },
+      {
+        "ghosts": 4,
+        "speed": 80,
+        "speedSubtract": 0,
+        "speedAdd": 10,
+        "elroyDots": 30,
+        "scaredSeconds": 8,
+        "ghostModeSeconds": "res:ghostModeSeconds-0",
+        "ghostDots": "res:ghostDots-1",
+        "lastDotSecondsUntilGhost": 4,
+        "fruit": 1
+      },
+      {
+        "ghosts": [ 4, 4 ],
+        "speed": [ 90, 90 ],
+        "speedSubtract": [ 0, 0 ],
+        "speedAdd": [ 5, 10 ],
+        "elroyDots": [ 40, 40 ],
+        "scaredSeconds": [ 6, 4 ],
+        "ghostModeSeconds": "res:ghostModeSeconds-0",
+        "ghostDots": "res:ghostDots-2",
+        "lastDotSecondsUntilGhost": [ 4, 4 ],
+        "fruit": [ 2, 3 ]
+      },
+      {
+        "ghosts": [ 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 ],
+        "speed": [ 90, 95, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 110, 110, 110, 110, 120, 120, 120, 120, 120, 120, 120, 120, 120 ],
+        "speedSubtract": [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        "speedAdd": [ 10, 10, 10, 10, 20, 20, 20, 20, 30, 30, 30, 30, 30, 30, 30, 30, 40, 40, 40, 40, 50, 50, 50, 50, 50 ],
+        "elroyDots": [ 40, 50, 50, 50, 60, 60, 60, 80, 80, 80, 100, 100, 100, 100, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120 ],
+        "scaredSeconds": [ 10, 8, 7, 6, 5, 4, 10, 8, 6, 4, 8, 6, 5, 4, 3, 2, 8, 6, 4, 3, 2, 4, 2, 4, 2 ],
+        "ghostModeSeconds": "res:ghostModeSeconds-1",
+        "ghostDots": "res:ghostDots-2",
+        "lastDotSecondsUntilGhost": [ 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 ],
+        "fruit": [ 4, 5, 6, 7, 8, 9, 10, 11, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12 ]
+      }
+    ],
+
+    "difficulties-hard":
+    [
+      {
+        "ghosts": 4,
+        "speed": 80,
+        "speedSubtract": 0,
+        "speedAdd": 20,
+        "elroyDots": 20,
+        "scaredSeconds": 6,
+        "ghostModeSeconds": "res:ghostModeSeconds-0",
+        "ghostDots": "res:ghostDots-0",
+        "lastDotSecondsUntilGhost": 4,
+        "fruit": 0
+      },
+      {
+        "ghosts": 4,
+        "speed": 90,
+        "speedSubtract": 0,
+        "speedAdd": 10,
+        "elroyDots": 30,
+        "scaredSeconds": 5,
+        "ghostModeSeconds": "res:ghostModeSeconds-0",
+        "ghostDots": "res:ghostDots-1",
+        "lastDotSecondsUntilGhost": 4,
+        "fruit": 1
+      },
+      {
+        "ghosts": [ 4, 4 ],
+        "speed": [ 90, 90 ],
+        "speedSubtract": [ 0, 0 ],
+        "speedAdd": [ 10, 10 ],
+        "elroyDots": [ 40, 40 ],
+        "scaredSeconds": [ 4, 3 ],
+        "ghostModeSeconds": "res:ghostModeSeconds-0",
+        "ghostDots": "res:ghostDots-2",
+        "lastDotSecondsUntilGhost": [ 4, 4 ],
+        "fruit": [ 2, 3 ]
+      },
+      {
+        "ghosts": [ 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 ],
+        "speed": [ 90, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 110, 110, 110, 110, 120, 120, 120, 120, 120, 120, 120, 120, 120 ],
+        "speedSubtract": [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        "speedAdd": [ 20, 10, 10, 10, 20, 20, 20, 20, 30, 30, 30, 30, 30, 30, 30, 30, 40, 40, 40, 40, 50, 50, 50, 50, 50 ],
+        "elroyDots": [ 40, 50, 50, 50, 60, 60, 60, 80, 80, 80, 100, 100, 100, 100, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120 ],
+        "scaredSeconds": [ 2, 6, 5, 4, 3, 2, 6, 5, 4, 3, 2, 6, 5, 4, 3, 2, 6, 5, 4, 3, 2, 2, 1, 1, 0 ],
+        "ghostModeSeconds": "res:ghostModeSeconds-1",
+        "ghostDots": "res:ghostDots-2",
+        "lastDotSecondsUntilGhost": [ 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 ],
+        "fruit": [ 4, 5, 6, 7, 8, 9, 10, 11, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12 ]
+      }
+    ]
+  },
+
+  "Values":
+  {
+    "global":
+    {
+      "mr-mazes-easy":
+      {
+        "lives": "res:lives-easy",
+        "firstLife": "res:firstLife-easy",
+        "repeatLife": "res:repeatLives-easy",
+        "maxFreeLives": "res:maxFreeLives-easy",
+        "difficulties": "res:difficulties-easy",
+        "mazes": "res:mr-mazes-order"
+      },
+
+      "ms-mazes-easy":
+      {
+        "lives": "res:lives-easy",
+        "firstLife": "res:firstLife-easy",
+        "repeatLife": "res:repeatLives-easy",
+        "maxFreeLives": "res:maxFreeLives-easy",
+        "difficulties": "res:difficulties-easy",
+        "mazes": "res:ms-mazes-order"
+      },
+
+      "mr-mazes-normal":
+      {
+        "lives": "res:lives-normal",
+        "firstLife": "res:firstLife-normal",
+        "repeatLife": "res:repeatLives-normal",
+        "maxFreeLives": "res:maxFreeLives-normal",
+        "difficulties": "res:difficulties-normal",
+        "mazes": "res:mr-mazes-order"
+      },
+
+      "ms-mazes-normal":
+      {
+        "lives": "res:lives-normal",
+        "firstLife": "res:firstLife-normal",
+        "repeatLife": "res:repeatLives-normal",
+        "maxFreeLives": "res:maxFreeLives-normal",
+        "difficulties": "res:difficulties-normal",
+        "mazes": "res:ms-mazes-order"
+      },
+
+      "mr-mazes-hard":
+      {
+        "lives": "res:lives-hard",
+        "firstLife": "res:firstLife-hard",
+        "repeatLife": "res:repeatLives-hard",
+        "maxFreeLives": "res:maxFreeLives-hard",
+        "difficulties": "res:difficulties-hard",
+        "mazes": "res:mr-mazes-order"
+      },
+
+      "ms-mazes-hard":
+      {
+        "lives": "res:lives-hard",
+        "firstLife": "res:firstLife-hard",
+        "repeatLife": "res:repeatLives-hard",
+        "maxFreeLives": "res:maxFreeLives-hard",
+        "difficulties": "res:difficulties-hard",
+        "mazes": "res:ms-mazes-order"
+      }
+    }
+  }
+}

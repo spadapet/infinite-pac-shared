@@ -1,0 +1,441 @@
+{
+  "res:values":
+  {
+    "ghost-fps": 15,
+
+    "ghost-one-sprite-anim":
+    {
+      "res:type": "spriteanim",
+      "lastFrame": 1,
+      "fps": 1,
+
+      "parts":
+      [
+        {
+          "keys":
+          [
+            {
+              "frame": 0,
+              "scale": [ 4, 4 ],
+              "sprite": [ "res:sprite" ]
+            },
+            {
+              "frame": 1,
+              "scale": [ 4, 4 ],
+              "sprite": [ "res:sprite" ]
+            }
+          ]
+        }
+      ]
+    },
+
+    "ghost-four-sprite-anim":
+    {
+      "res:type": "spriteanim",
+      "lastFrame": 3,
+      "fps": "res:ghost-fps",
+
+      "parts":
+      [
+        {
+          "keys":
+          [
+            {
+              "frame": 0,
+              "scale": [ 4, 4 ],
+              "sprite": [ "res:sprite0" ]
+            },
+            {
+              "frame": 1,
+              "sprite": [ "res:sprite1" ]
+            },
+            {
+              "frame": 2,
+              "sprite": [ "res:sprite2" ]
+            },
+            {
+              "frame": 3,
+              "scale": [ 4, 4 ],
+              "sprite": [ "res:sprite3" ]
+            }
+          ]
+        }
+      ]
+    },
+
+    "ghost-five-sprite-anim":
+    {
+      "res:type": "spriteanim",
+      "lastFrame": 4,
+      "fps": "res:ghost-fps",
+
+      "parts":
+      [
+        {
+          "keys":
+          [
+            {
+              "frame": 0,
+              "scale": [ 4, 4 ],
+              "sprite": [ "res:sprite0" ]
+            },
+            {
+              "frame": 1,
+              "sprite": [ "res:sprite1" ]
+            },
+            {
+              "frame": 2,
+              "sprite": [ "res:sprite2" ]
+            },
+            {
+              "frame": 3,
+              "sprite": [ "res:sprite3" ]
+            },
+            {
+              "frame": 4,
+              "scale": [ 4, 4 ],
+              "sprite": [ "res:sprite4" ]
+            }
+          ]
+        }
+      ]
+    },
+
+    "ghost-six-sprite-anim":
+    {
+      "res:type": "spriteanim",
+      "lastFrame": 5,
+      "fps": "res:ghost-fps",
+
+      "parts":
+      [
+        {
+          "keys":
+          [
+            {
+              "frame": 0,
+              "scale": [ 4, 4 ],
+              "sprite": [ "res:sprite0" ]
+            },
+            {
+              "frame": 1,
+              "sprite": [ "res:sprite1" ]
+            },
+            {
+              "frame": 2,
+              "sprite": [ "res:sprite2" ]
+            },
+            {
+              "frame": 3,
+              "sprite": [ "res:sprite3" ]
+            },
+            {
+              "frame": 4,
+              "sprite": [ "res:sprite4" ]
+            },
+            {
+              "frame": 5,
+              "scale": [ 4, 4 ],
+              "sprite": [ "res:sprite5" ]
+            }
+          ]
+        }
+      ]
+    },
+
+    "ghost-3-anim":
+    {
+      "res:type": "spriteanim",
+      "lastFrame": 1,
+      "fps": 1,
+
+      "parts":
+      [
+        {
+          "keys":
+          [
+            {
+              "frame": 0,
+              "scale": [ 4, 4 ],
+              "rotate": 0,
+              "sprite": [ "res:arm-sprite" ]
+            },
+            {
+              "frame": 1,
+              "scale": [ 4, 4 ],
+              "rotate": -360,
+              "sprite": [ "res:arm-sprite" ]
+            }
+          ]
+        },
+        {
+          "keys":
+          [
+            {
+              "frame": 0,
+              "scale": [ 4, 4 ],
+              "rotate": -60,
+              "sprite": [ "res:arm-sprite" ]
+            },
+            {
+              "frame": 1,
+              "scale": [ 4, 4 ],
+              "rotate": -420,
+              "sprite": [ "res:arm-sprite" ]
+            }
+          ]
+        },
+        {
+          "keys":
+          [
+            {
+              "frame": 0,
+              "scale": [ 4, 4 ],
+              "rotate": -120,
+              "sprite": [ "res:arm-sprite" ]
+            },
+            {
+              "frame": 1,
+              "scale": [ 4, 4 ],
+              "rotate": -480,
+              "sprite": [ "res:arm-sprite" ]
+            }
+          ]
+        },
+        {
+          "keys":
+          [
+            {
+              "frame": 0,
+              "scale": [ 4, 4 ],
+              "sprite": [ "res:body-sprite" ]
+            },
+            {
+              "frame": 1,
+              "scale": [ 4, 4 ],
+              "sprite": [ "res:body-sprite" ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+
+  "ghost-1-move-anim":
+  {
+    "res:template": "ghost-five-sprite-anim",
+    "res:values":
+    {
+      "sprite0": "ref:char-sprites.ghost-1-move 0",
+      "sprite1": "ref:char-sprites.ghost-1-move 1",
+      "sprite2": "ref:char-sprites.ghost-1-move 2",
+      "sprite3": "ref:char-sprites.ghost-1-move 1",
+      "sprite4": "ref:char-sprites.ghost-1-move 0"
+    }
+  },
+  "ghost-1-scared-anim":
+  {
+    "res:template": "ghost-four-sprite-anim",
+    "res:values":
+    {
+      "sprite0": "ref:char-sprites.ghost-1-scared 0",
+      "sprite1": "ref:char-sprites.ghost-1-scared 1",
+      "sprite2": "ref:char-sprites.ghost-1-scared 2",
+      "sprite3": "ref:char-sprites.ghost-1-scared 0"
+    }
+  },
+  "ghost-1-flash-anim":
+  {
+    "res:template": "ghost-four-sprite-anim",
+    "res:values":
+    {
+      "sprite0": "ref:char-sprites.ghost-1-flash 0",
+      "sprite1": "ref:char-sprites.ghost-1-flash 1",
+      "sprite2": "ref:char-sprites.ghost-1-flash 2",
+      "sprite3": "ref:char-sprites.ghost-1-flash 0"
+    }
+  },
+  "ghost-1-eyes-anim":
+  {
+    "res:template": "ghost-five-sprite-anim",
+    "res:values":
+    {
+      "sprite0": "ref:char-sprites.ghost-1-eyes 0",
+      "sprite1": "ref:char-sprites.ghost-1-eyes 1",
+      "sprite2": "ref:char-sprites.ghost-1-eyes 2",
+      "sprite3": "ref:char-sprites.ghost-1-eyes 1",
+      "sprite4": "ref:char-sprites.ghost-1-eyes 0"
+    }
+  },
+  "ghost-1-pupils-anim":
+  {
+    "res:template": "ghost-five-sprite-anim",
+    "res:values":
+    {
+      "sprite0": "ref:char-sprites.ghost-1-pupils 0",
+      "sprite1": "ref:char-sprites.ghost-1-pupils 1",
+      "sprite2": "ref:char-sprites.ghost-1-pupils 2",
+      "sprite3": "ref:char-sprites.ghost-1-pupils 1",
+      "sprite4": "ref:char-sprites.ghost-1-pupils 0"
+    }
+  },
+
+  "ghost-2-move-anim":
+  {
+    "res:template": "ghost-six-sprite-anim",
+    "res:values":
+    {
+      "sprite0": "ref:char-sprites.ghost-2-move 0",
+      "sprite1": "ref:char-sprites.ghost-2-move 1",
+      "sprite2": "ref:char-sprites.ghost-2-move 2",
+      "sprite3": "ref:char-sprites.ghost-2-move 3",
+      "sprite4": "ref:char-sprites.ghost-2-move 4",
+      "sprite5": "ref:char-sprites.ghost-2-move 0"
+    }
+  },
+  "ghost-2-scared-anim":
+  {
+    "res:template": "ghost-six-sprite-anim",
+    "res:values":
+    {
+      "sprite0": "ref:char-sprites.ghost-2-scared 0",
+      "sprite1": "ref:char-sprites.ghost-2-scared 1",
+      "sprite2": "ref:char-sprites.ghost-2-scared 2",
+      "sprite3": "ref:char-sprites.ghost-2-scared 3",
+      "sprite4": "ref:char-sprites.ghost-2-scared 4",
+      "sprite5": "ref:char-sprites.ghost-2-scared 0"
+    }
+  },
+  "ghost-2-flash-anim":
+  {
+    "res:template": "ghost-six-sprite-anim",
+    "res:values":
+    {
+      "sprite0": "ref:char-sprites.ghost-2-flash 0",
+      "sprite1": "ref:char-sprites.ghost-2-flash 1",
+      "sprite2": "ref:char-sprites.ghost-2-flash 2",
+      "sprite3": "ref:char-sprites.ghost-2-flash 3",
+      "sprite4": "ref:char-sprites.ghost-2-flash 4",
+      "sprite5": "ref:char-sprites.ghost-2-flash 0"
+    }
+  },
+  "ghost-2-eyes-anim":
+  {
+    "res:template": "ghost-one-sprite-anim",
+    "res:values":
+    {
+      "sprite": "ref:char-sprites.ghost-2-eyes"
+    }
+  },
+  "ghost-2-pupils-anim":
+  {
+    "res:template": "ghost-one-sprite-anim",
+    "res:values":
+    {
+      "sprite": "ref:char-sprites.ghost-2-pupils"
+    }
+  },
+
+  "ghost-3-move-anim":
+  {
+    "res:template": "ghost-3-anim",
+    "res:values":
+    {
+      "body-sprite": "ref:char-sprites.ghost-3-move 0",
+      "arm-sprite": "ref:char-sprites.ghost-3-move 1"
+    }
+  },
+  "ghost-3-scared-anim":
+  {
+    "res:template": "ghost-3-anim",
+    "res:values":
+    {
+      "body-sprite": "ref:char-sprites.ghost-3-scared 0",
+      "arm-sprite": "ref:char-sprites.ghost-3-scared 1"
+    }
+  },
+  "ghost-3-flash-anim":
+  {
+    "res:template": "ghost-3-anim",
+    "res:values":
+    {
+      "body-sprite": "ref:char-sprites.ghost-3-flash 0",
+      "arm-sprite": "ref:char-sprites.ghost-3-flash 1"
+    }
+  },
+  "ghost-3-eyes-anim":
+  {
+    "res:template": "ghost-one-sprite-anim",
+    "res:values":
+    {
+      "sprite": "ref:char-sprites.ghost-3-eyes"
+    }
+  },
+  "ghost-3-pupils-anim":
+  {
+    "res:template": "ghost-one-sprite-anim",
+    "res:values":
+    {
+      "sprite": "ref:char-sprites.ghost-3-pupils"
+    }
+  },
+
+  "ghost-4-move-anim":
+  {
+    "res:template": "ghost-five-sprite-anim",
+    "res:values":
+    {
+      "sprite0": "ref:char-sprites.ghost-4-move 0",
+      "sprite1": "ref:char-sprites.ghost-4-move 1",
+      "sprite2": "ref:char-sprites.ghost-4-move 2",
+      "sprite3": "ref:char-sprites.ghost-4-move 1",
+      "sprite4": "ref:char-sprites.ghost-4-move 0"
+    }
+  },
+  "ghost-4-scared-anim":
+  {
+    "res:template": "ghost-four-sprite-anim",
+    "res:values":
+    {
+      "sprite0": "ref:char-sprites.ghost-4-scared 0",
+      "sprite1": "ref:char-sprites.ghost-4-scared 1",
+      "sprite2": "ref:char-sprites.ghost-4-scared 2",
+      "sprite3": "ref:char-sprites.ghost-4-scared 0"
+    }
+  },
+  "ghost-4-flash-anim":
+  {
+    "res:template": "ghost-four-sprite-anim",
+    "res:values":
+    {
+      "sprite0": "ref:char-sprites.ghost-4-flash 0",
+      "sprite1": "ref:char-sprites.ghost-4-flash 1",
+      "sprite2": "ref:char-sprites.ghost-4-flash 2",
+      "sprite3": "ref:char-sprites.ghost-4-flash 0"
+    }
+  },
+  "ghost-4-eyes-anim":
+  {
+    "res:template": "ghost-five-sprite-anim",
+    "res:values":
+    {
+      "sprite0": "ref:char-sprites.ghost-4-eyes 0",
+      "sprite1": "ref:char-sprites.ghost-4-eyes 1",
+      "sprite2": "ref:char-sprites.ghost-4-eyes 2",
+      "sprite3": "ref:char-sprites.ghost-4-eyes 1",
+      "sprite4": "ref:char-sprites.ghost-4-eyes 0"
+    }
+  },
+  "ghost-4-pupils-anim":
+  {
+    "res:template": "ghost-five-sprite-anim",
+    "res:values":
+    {
+      "sprite0": "ref:char-sprites.ghost-4-pupils 0",
+      "sprite1": "ref:char-sprites.ghost-4-pupils 1",
+      "sprite2": "ref:char-sprites.ghost-4-pupils 2",
+      "sprite3": "ref:char-sprites.ghost-4-pupils 1",
+      "sprite4": "ref:char-sprites.ghost-4-pupils 0"
+    }
+  }
+}

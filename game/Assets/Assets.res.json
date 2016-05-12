@@ -1,0 +1,104 @@
+{
+  "controls":
+  {
+    "res:type": "input",
+    "data":
+    {
+      "res:transform": "input",
+      "events":
+      {
+        "up":
+        [
+          { "action": [ "up" ] },
+          { "action": [ "w" ] },
+          { "action": [ "joy-lup" ] },
+          { "action": [ "joy-dup" ] }
+        ],
+        "down":
+        [
+          { "action": [ "down" ] },
+          { "action": [ "s" ] },
+          { "action": [ "joy-ldown" ] },
+          { "action": [ "joy-ddown" ] }
+        ],
+        "left":
+        [
+          { "action": [ "left" ] },
+          { "action": [ "a" ] },
+          { "action": [ "joy-lleft" ] },
+          { "action": [ "joy-dleft" ] }
+        ],
+        "right":
+        [
+          { "action": [ "right" ] },
+          { "action": [ "d" ] },
+          { "action": [ "joy-lright" ] },
+          { "action": [ "joy-dright" ] }
+        ],
+        "action":
+        [
+          { "action": [ "return" ] },
+          { "action": [ "space" ] },
+          { "action": [ "joy-a" ] }
+        ],
+        "cancel":
+        [
+          { "action": [ "escape" ] }
+        ],
+        "pause":
+        [
+          { "action": [ "p" ] }
+        ],
+        "start":
+        [
+          { "action": [ "joy-start" ] }
+        ],
+        "pauseAdvance":
+        [
+          { "action": [ "1" ] }
+        ],
+        "click":
+        [
+          { "action": [ "mouse-left" ] }
+        ]
+      },
+      "values":
+      {
+        "up":
+        [
+          { "action": "up" },
+          { "action": "w" },
+          { "action": "joy-lup" },
+          { "action": "joy-dup" }
+        ],
+        "down":
+        [
+          { "action": "down" },
+          { "action": "s" },
+          { "action": "joy-ldown" },
+          { "action": "joy-ddown" }
+        ],
+        "left":
+        [
+          { "action": "left" },
+          { "action": "a" },
+          { "action": "joy-lleft" },
+          { "action": "joy-dleft" }
+        ],
+        "right":
+        [
+          { "action": "right" },
+          { "action": "d" },
+          { "action": "joy-lright" },
+          { "action": "joy-dright" }
+        ],
+        "action":
+        [
+          { "action": "return" },
+          { "action": "space" },
+          { "action": "joy-a" }
+        ]
+      }
+    }
+  }
+}

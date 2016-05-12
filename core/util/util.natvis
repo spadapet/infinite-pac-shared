@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+
+    <Type Name="ff::String">
+        <DisplayString>{{{_str->_data,su}}}</DisplayString>
+        <Expand>
+            <Item Name="[string]">_str->_data,su</Item>
+            <Item Name="[size]">_str->_size</Item>
+            <Item Name="[alloc]">_str->_alloc</Item>
+            <Item Name="[refs]">_str->_refs</Item>
+        </Expand>
+    </Type>
+    
+    <Type Name="ff::PointType&lt;*&gt;">
+        <DisplayString>{{x={x}, y={y}}}</DisplayString>
+        <Expand>
+            <Item Name="x">x</Item>
+            <Item Name="y">y</Item>
+        </Expand>
+    </Type>
+
+    <Type Name="ff::RectType&lt;*&gt;">
+        <DisplayString>{{({left}, {top}), ({right}, {bottom})}}</DisplayString>
+        <Expand>
+            <Item Name="left">left</Item>
+            <Item Name="top">top</Item>
+            <Item Name="right">right</Item>
+            <Item Name="bottom">bottom</Item>
+        </Expand>
+    </Type>
+
+    <Type Name="ff::Vector&lt;*&gt;">
+        <DisplayString>{{size={_size}}}</DisplayString>
+        <Expand>
+            <Item Name="[size]">_size</Item>
+            <Item Name="[alloc]">_alloc</Item>
+            <ArrayItems>
+                <Size>_size</Size>
+                <ValuePointer>_data</ValuePointer>
+            </ArrayItems>
+        </Expand>
+    </Type>
+
+    <Type Name="ff::Set&lt;*&gt;::SEntry">
+        <DisplayString>{{{*m_pKey}}}</DisplayString>
+        <Expand>
+            <Item Name="[key]">*m_pKey</Item>
+        </Expand>
+    </Type>
+
+    <Type Name="ff::Set&lt;ff::KeyValue&lt;*&gt;&gt;::SEntry">
+        <DisplayString>{{{m_pKey->_key} -> {m_pKey->_val}}}</DisplayString>
+        <Expand>
+            <Item Name="[key]">m_pKey->_key</Item>
+            <Item Name="[value]">m_pKey->_val</Item>
+        </Expand>
+    </Type>
+
+    <Type Name="ff::KeyValue&lt;*&gt;">
+        <DisplayString>{{{_key} -> {_val}}}</DisplayString>
+        <Expand>
+            <Item Name="[key]">_key</Item>
+            <Item Name="[value]">_val</Item>
+        </Expand>
+    </Type>
+
+    <Type Name="ff::Map&lt;*&gt;">
+        <DisplayString>{{size={_set._size}, buckets={_set._buckets._size}}}</DisplayString>
+        <Expand>
+            <Item Name="[size]">_set._size</Item>
+            <Synthetic Name="[buckets]">
+                <DisplayString>{_set._buckets._size}</DisplayString>
+                <Expand>
+                    <ArrayItems>
+                        <Size>_set._buckets._size</Size>
+                        <ValuePointer>_set._buckets._data</ValuePointer>
+                    </ArrayItems>
+                </Expand>
+            </Synthetic>
+        </Expand>
+    </Type>
+
+    <Type Name="ff::PoolAllocator&lt;*&gt;">
+        <DisplayString>{{alloc={_curAlloc}}}</DisplayString>
+        <Expand>
+            <Item Name="[alloc]">_curAlloc</Item>
+            <Item Name="[free]">_freeAlloc</Item>
+            <Item Name="[items]">_allAlloc</Item>
+        </Expand>
+    </Type>
+
+    <Type Name="ff::ComPtr&lt;*&gt;">
+        <DisplayString>{{obj={_obj}}}</DisplayString>
+    </Type>
+
+    <Type Name="ff::SmartPtr&lt;*&gt;">
+        <DisplayString>{{obj={_obj}}}</DisplayString>
+    </Type>
+
+</AutoVisualizer>

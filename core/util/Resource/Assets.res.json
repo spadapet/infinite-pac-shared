@@ -1,0 +1,34 @@
+{
+  "SmallMonoFont":
+  {
+    "res:type": "font",
+    "data":
+    {
+      "res:transform": "font",
+      "font": "Consolas",
+      "size": 24,
+      "aa": false,
+      "weight":  400
+    }
+  },
+
+  "FpsDisplayInput":
+  {
+    "res:type": "input",
+    "data":
+    {
+      "res:transform": "input",
+      "events":
+      {
+        "toggleNumbers":
+        [
+          { "action": [ "f8" ] }
+        ],
+        "toggleCharts":
+        [
+          { "action": [ "shift", "f8" ] }
+        ]
+      }
+    }
+  }
+}

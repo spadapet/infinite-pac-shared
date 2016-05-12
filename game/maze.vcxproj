@@ -1,0 +1,360 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{ae160895-de42-4cfb-a236-70abdd80cfbb}</ProjectGuid>
+    <AppType>Metro</AppType>
+    <ConfigurationType>Application</ConfigurationType>
+    <ProjectName>Maze</ProjectName>
+    <RootNamespace>Maze</RootNamespace>
+    <PackageCertificateThumbprint>0EA7AF474FF4AD58E60A167337D2C17C45C61613</PackageCertificateThumbprint>
+    <PackageCertificateKeyFile>TemporaryKey.pfx</PackageCertificateKeyFile>
+    <AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
+    <AppxBundle>Always</AppxBundle>
+    <AppxBundlePlatforms>x86|x64</AppxBundlePlatforms>
+  </PropertyGroup>
+  <Import Project="..\msbuild\cpp.props" />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\core\util</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="AboutControl.xaml.cpp">
+      <DependentUpon>AboutControl.xaml</DependentUpon>
+    </ClCompile>
+    <ClCompile Include="Core\Actors.cpp" />
+    <ClCompile Include="Core\Audio.cpp" />
+    <ClCompile Include="Core\Difficulty.cpp" />
+    <ClCompile Include="Core\GhostBrains.cpp" />
+    <ClCompile Include="Core\GlobalResources.cpp" />
+    <ClCompile Include="Core\Helpers.cpp" />
+    <ClCompile Include="Core\Maze.cpp" />
+    <ClCompile Include="Core\Mazes.cpp" />
+    <ClCompile Include="Core\PlayingGame.cpp" />
+    <ClCompile Include="Core\PlayingMaze.cpp" />
+    <ClCompile Include="Core\RenderMaze.cpp" />
+    <ClCompile Include="Core\RenderText.cpp" />
+    <ClCompile Include="Core\Stats.cpp" />
+    <ClCompile Include="Core\Tiles.cpp" />
+    <ClCompile Include="FailurePage.xaml.cpp">
+      <DependentUpon>FailurePage.xaml</DependentUpon>
+    </ClCompile>
+    <ClCompile Include="States\HighScoreScreen.cpp" />
+    <ClCompile Include="States\PacApplication.cpp" />
+    <ClCompile Include="States\TitleScreen.cpp" />
+    <ClInclude Include="AboutControl.xaml.h">
+      <DependentUpon>AboutControl.xaml</DependentUpon>
+    </ClInclude>
+    <ClInclude Include="App.xaml.h">
+      <DependentUpon>App.xaml</DependentUpon>
+    </ClInclude>
+    <ClInclude Include="Core\Actors.h" />
+    <ClInclude Include="Core\Audio.h" />
+    <ClInclude Include="Core\Difficulty.h" />
+    <ClInclude Include="Core\GhostBrains.h" />
+    <ClInclude Include="Core\GlobalResources.h" />
+    <ClInclude Include="Core\Helpers.h" />
+    <ClInclude Include="Core\Maze.h" />
+    <ClInclude Include="Core\Mazes.h" />
+    <ClInclude Include="Core\PlayingGame.h" />
+    <ClInclude Include="Core\PlayingMaze.h" />
+    <ClInclude Include="Core\RenderMaze.h" />
+    <ClInclude Include="Core\RenderText.h" />
+    <ClInclude Include="Core\Stats.h" />
+    <ClInclude Include="Core\Tiles.h" />
+    <ClInclude Include="FailurePage.xaml.h">
+      <DependentUpon>FailurePage.xaml</DependentUpon>
+    </ClInclude>
+    <ClInclude Include="MainPage.xaml.h">
+      <DependentUpon>MainPage.xaml</DependentUpon>
+    </ClInclude>
+    <ClInclude Include="pch.h" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="App.xaml.cpp">
+      <DependentUpon>App.xaml</DependentUpon>
+    </ClCompile>
+    <ClCompile Include="MainPage.xaml.cpp">
+      <DependentUpon>MainPage.xaml</DependentUpon>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader>Create</PrecompiledHeader>
+    </ClCompile>
+    <ApplicationDefinition Include="App.xaml">
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <ClInclude Include="States\HighScoreScreen.h" />
+    <ClInclude Include="States\PacApplication.h" />
+    <ClInclude Include="States\TitleScreen.h" />
+    <Image Include="Assets\SplashScreen.scale-125.png" />
+    <Image Include="Assets\SplashScreen.scale-150.png" />
+    <Image Include="Assets\SplashScreen.scale-200.png" />
+    <Image Include="Assets\SplashScreen.scale-400.png" />
+    <Image Include="Assets\StoreLogo.scale-125.png" />
+    <Image Include="Assets\StoreLogo.scale-150.png" />
+    <Image Include="Assets\StoreLogo.scale-200.png" />
+    <Image Include="Assets\StoreLogo.scale-400.png" />
+    <Image Include="Assets\Wide310x150Logo.scale-100.png" />
+    <Image Include="Assets\Wide310x150Logo.scale-125.png" />
+    <Image Include="Assets\Wide310x150Logo.scale-150.png" />
+    <Image Include="Assets\Wide310x150Logo.scale-200.png" />
+    <Image Include="Assets\Wide310x150Logo.scale-400.png" />
+    <Image Include="Assets\WideLogo.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Page Include="AboutControl.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="FailurePage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="MainPage.xaml" />
+    <AppxManifest Include="Package.appxmanifest">
+      <SubType>Designer</SubType>
+    </AppxManifest>
+    <None Include="Assets\font-small.png">
+      <DeploymentContent>false</DeploymentContent>
+    </None>
+    <None Include="Assets\font.png">
+      <DeploymentContent>false</DeploymentContent>
+    </None>
+    <None Include="Assets\fruit.png">
+      <DeploymentContent>false</DeploymentContent>
+    </None>
+    <Image Include="Assets\AboutFace.png" />
+    <Image Include="Assets\bubble.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\dot.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\edges-bg.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\edges-orig.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\edges.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\ghost-1-eyes.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\ghost-1-flash.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\ghost-1-move.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\ghost-1-pupils.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\ghost-1-scared.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\ghost-2-eyes.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\ghost-2-flash.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\ghost-2-move.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\ghost-2-pupils.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\ghost-2-scared.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\ghost-3-eyes.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\ghost-3-flash.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\ghost-3-move.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\ghost-3-pupils.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\ghost-3-scared.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\ghost-4-eyes.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\ghost-4-flash.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\ghost-4-move.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\ghost-4-pupils.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\ghost-4-scared.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\move-arrow.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\mr-dead.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\mr-move.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\mr-power.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\ms-dead.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\ms-move.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\ms-power.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\power-aura.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\power.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\SplashScreen.scale-100.png" />
+    <Image Include="Assets\Square150x150Logo.scale-100.png" />
+    <Image Include="Assets\Square150x150Logo.scale-125.png" />
+    <Image Include="Assets\Square150x150Logo.scale-150.png" />
+    <Image Include="Assets\Square150x150Logo.scale-200.png" />
+    <Image Include="Assets\Square150x150Logo.scale-400.png" />
+    <Image Include="Assets\Square310x310Logo.scale-100.png" />
+    <Image Include="Assets\Square310x310Logo.scale-125.png" />
+    <Image Include="Assets\Square310x310Logo.scale-150.png" />
+    <Image Include="Assets\Square310x310Logo.scale-200.png" />
+    <Image Include="Assets\Square310x310Logo.scale-400.png" />
+    <Image Include="Assets\Square44x44Logo.scale-100.png" />
+    <Image Include="Assets\Square44x44Logo.scale-125.png" />
+    <Image Include="Assets\Square44x44Logo.scale-150.png" />
+    <Image Include="Assets\Square44x44Logo.scale-200.png" />
+    <Image Include="Assets\Square44x44Logo.scale-400.png" />
+    <Image Include="Assets\Square44x44Logo.targetsize-16.png" />
+    <Image Include="Assets\Square44x44Logo.targetsize-16_altform-unplated.png" />
+    <Image Include="Assets\Square44x44Logo.targetsize-20.png" />
+    <Image Include="Assets\Square44x44Logo.targetsize-20_altform-unplated.png" />
+    <Image Include="Assets\Square44x44Logo.targetsize-24.png" />
+    <Image Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
+    <Image Include="Assets\Square44x44Logo.targetsize-256.png" />
+    <Image Include="Assets\Square44x44Logo.targetsize-256_altform-unplated.png" />
+    <Image Include="Assets\Square44x44Logo.targetsize-30.png" />
+    <Image Include="Assets\Square44x44Logo.targetsize-30_altform-unplated.png" />
+    <Image Include="Assets\Square44x44Logo.targetsize-32.png" />
+    <Image Include="Assets\Square44x44Logo.targetsize-32_altform-unplated.png" />
+    <Image Include="Assets\Square44x44Logo.targetsize-36.png" />
+    <Image Include="Assets\Square44x44Logo.targetsize-36_altform-unplated.png" />
+    <Image Include="Assets\Square44x44Logo.targetsize-40.png" />
+    <Image Include="Assets\Square44x44Logo.targetsize-40_altform-unplated.png" />
+    <Image Include="Assets\Square44x44Logo.targetsize-48.png" />
+    <Image Include="Assets\Square44x44Logo.targetsize-48_altform-unplated.png" />
+    <Image Include="Assets\Square44x44Logo.targetsize-60.png" />
+    <Image Include="Assets\Square44x44Logo.targetsize-60_altform-unplated.png" />
+    <Image Include="Assets\Square44x44Logo.targetsize-64.png" />
+    <Image Include="Assets\Square44x44Logo.targetsize-64_altform-unplated.png" />
+    <Image Include="Assets\Square44x44Logo.targetsize-72.png" />
+    <Image Include="Assets\Square44x44Logo.targetsize-72_altform-unplated.png" />
+    <Image Include="Assets\Square44x44Logo.targetsize-80.png" />
+    <Image Include="Assets\Square44x44Logo.targetsize-80_altform-unplated.png" />
+    <Image Include="Assets\Square44x44Logo.targetsize-96.png" />
+    <Image Include="Assets\Square44x44Logo.targetsize-96_altform-unplated.png" />
+    <Image Include="Assets\Square71x71Logo.scale-100.png" />
+    <Image Include="Assets\Square71x71Logo.scale-125.png" />
+    <Image Include="Assets\Square71x71Logo.scale-150.png" />
+    <Image Include="Assets\Square71x71Logo.scale-200.png" />
+    <Image Include="Assets\Square71x71Logo.scale-400.png" />
+    <Image Include="Assets\SquareLogo.png">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="Assets\StoreLogo.scale-100.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\core\util\util-metro.vcxproj">
+      <Project>{eff8144d-f91e-4bbd-b09b-d6db6b3a5512}</Project>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\Assets.res.json" />
+    <None Include="Assets\Assets.Anim.res.json" />
+    <None Include="Assets\Assets.Audio.res.json" />
+    <None Include="Assets\Assets.GhostAnim.res.json" />
+    <None Include="Assets\Assets.Sprites.res.json" />
+    <ResJson Include="Assets\Assets.res.json" />
+    <ResJson Include="Assets\Assets.Anim.res.json" />
+    <ResJson Include="Assets\Assets.Audio.res.json" />
+    <ResJson Include="Assets\Assets.GhostAnim.res.json" />
+    <ResJson Include="Assets\Assets.Sprites.res.json" />
+    <None Include="Assets\Values.Tiles.res.json" />
+    <None Include="Assets\Values.Maze.res.json" />
+    <None Include="Assets\Values.Mazes.res.json" />
+    <ResJson Include="Assets\Values.Tiles.res.json" />
+    <ResJson Include="Assets\Values.Maze.res.json" />
+    <ResJson Include="Assets\Values.Mazes.res.json" />
+    <None Include="TemporaryKey.pfx" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\mr-fruit-bounce.wav">
+      <DeploymentContent>false</DeploymentContent>
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\mr-bg-1.wav">
+      <DeploymentContent>false</DeploymentContent>
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\mr-bg-eaten.wav">
+      <DeploymentContent>false</DeploymentContent>
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\mr-bg-scared.wav">
+      <DeploymentContent>false</DeploymentContent>
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\mr-die.wav">
+      <DeploymentContent>false</DeploymentContent>
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\mr-eat-dot-1.wav">
+      <DeploymentContent>false</DeploymentContent>
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\mr-eat-dot-2.wav">
+      <DeploymentContent>false</DeploymentContent>
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\mr-eat-ghost.wav">
+      <DeploymentContent>false</DeploymentContent>
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\mr-free-life.wav">
+      <DeploymentContent>false</DeploymentContent>
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\mr-fruit.wav">
+      <DeploymentContent>false</DeploymentContent>
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="Assets\mr-intro.wav">
+      <DeploymentContent>false</DeploymentContent>
+    </Media>
+    <Media Include="Assets\mr-level-win.wav">
+      <DeploymentContent>false</DeploymentContent>
+    </Media>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="StoreManifest.xml" />
+  </ItemGroup>
+  <Import Project="$(DevRoot)\msbuild\cpp.targets" />
+</Project>

@@ -1,0 +1,463 @@
+{
+  "res:values":
+  {
+    "char-anim":
+    {
+      "res:type": "spriteanim",
+      "lastFrame": 10,
+      "fps": 45,
+
+      "parts":
+      [
+        {
+          "keys":
+          [
+            {
+              "frame": 0,
+              "sprite":
+              [
+                "res:sprite0"
+              ],
+              "scale":
+              [
+                4,
+                4
+              ]
+            },
+            {
+              "frame": 1,
+              "sprite":
+              [
+                "res:sprite1"
+              ]
+            },
+            {
+              "frame": 2,
+              "sprite":
+              [
+                "res:sprite2"
+              ]
+            },
+            {
+              "frame": 3,
+              "sprite":
+              [
+                "res:sprite3"
+              ]
+            },
+            {
+              "frame": 4,
+              "sprite":
+              [
+                "res:sprite4"
+              ]
+            },
+            {
+              "frame": 5,
+              "sprite":
+              [
+                "res:sprite3"
+              ]
+            },
+            {
+              "frame": 6,
+              "sprite":
+              [
+                "res:sprite2"
+              ]
+            },
+            {
+              "frame": 7,
+              "sprite":
+              [
+                "res:sprite1"
+              ]
+            },
+            {
+              "frame": 8,
+              "sprite":
+              [
+                "res:sprite0"
+              ]
+            },
+            {
+              "frame": 10,
+              "scale":
+              [
+                4,
+                4
+              ]
+            }
+          ]
+        }
+      ]
+    },
+
+    "death-anim":
+    {
+      "res:type": "spriteanim",
+      "lastFrame": 11,
+      "fps": 1,
+
+      "parts":
+      [
+        {
+          "keys":
+          [
+            {
+              "frame": 0,
+              "rotate": 0,
+              "scale": [ 4, 4 ],
+              "sprite": [ "res:sprite" ]
+            },
+            {
+              "frame": 11,
+              "rotate": -720,
+              "scale": [ 4, 4 ],
+              "sprite": [ "res:sprite" ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+
+  "mr-char-anim":
+  {
+    "res:template": "char-anim",
+    "res:values":
+    {
+      "sprite0": "ref:char-sprites.mr-move 0",
+      "sprite1": "ref:char-sprites.mr-move 1",
+      "sprite2": "ref:char-sprites.mr-move 2",
+      "sprite3": "ref:char-sprites.mr-move 3",
+      "sprite4": "ref:char-sprites.mr-move 4"
+    }
+  },
+
+  "ms-char-anim":
+  {
+    "res:template": "char-anim",
+    "res:values":
+    {
+      "sprite0": "ref:char-sprites.ms-move 0",
+      "sprite1": "ref:char-sprites.ms-move 1",
+      "sprite2": "ref:char-sprites.ms-move 2",
+      "sprite3": "ref:char-sprites.ms-move 3",
+      "sprite4": "ref:char-sprites.ms-move 4"
+    }
+  },
+
+  "mr-death-anim":
+  {
+    "res:template": "death-anim",
+    "res:values":
+    {
+      "sprite": "ref:char-sprites.mr-dead"
+    }
+  },
+
+  "ms-death-anim":
+  {
+    "res:template": "death-anim",
+    "res:values":
+    {
+      "sprite": "ref:char-sprites.ms-dead"
+    }
+  },
+
+  "mr-power-anim":
+  {
+    "res:template": "char-anim",
+    "res:values":
+    {
+      "sprite0": "ref:char-sprites.mr-power 0",
+      "sprite1": "ref:char-sprites.mr-power 1",
+      "sprite2": "ref:char-sprites.mr-power 2",
+      "sprite3": "ref:char-sprites.mr-power 3",
+      "sprite4": "ref:char-sprites.mr-power 4"
+    }
+  },
+
+  "ms-power-anim":
+  {
+    "res:template": "char-anim",
+    "res:values":
+    {
+      "sprite0": "ref:char-sprites.ms-power 0",
+      "sprite1": "ref:char-sprites.ms-power 1",
+      "sprite2": "ref:char-sprites.ms-power 2",
+      "sprite3": "ref:char-sprites.ms-power 3",
+      "sprite4": "ref:char-sprites.ms-power 4"
+    }
+  },
+
+  "dot-anim":
+  {
+    "res:type": "spriteanim",
+    "lastFrame": 4,
+    "fps": 1.5,
+
+    "parts":
+    [
+      {
+        "keys":
+        [
+          {
+            "frame": 0,
+            "scale": [ 4, 4 ],
+            "offset": [ 0, 0 ],
+            "color": [ [ 1, 1, 1, 1 ], [ 1, 1, 1, 0 ] ],
+            "sprite": [ "ref:char-sprites.dot 0", "ref:char-sprites.dot 1" ]
+          },
+          {
+            "frame": 1,
+            "offset": [ 0, -1 ],
+            "color": [ [ 1, 1, 1, 1 ], [ 1, 1, 1, 0 ] ]
+          },
+          {
+            "frame": 2,
+            "offset": [ 0, 0 ],
+            "color": [ [ 1, 1, 1, 0 ], [ 1, 1, 1, 1 ] ],
+            "sprite": [ "ref:char-sprites.dot 0", "ref:char-sprites.dot 1" ]
+          },
+          {
+            "frame": 3,
+            "offset": [ 0, 1 ],
+            "color": [ [ 1, 1, 1, 1 ], [ 1, 1, 1, 0 ] ]
+          },
+          {
+            "frame": 4,
+            "scale": [ 4, 4 ],
+            "offset": [ 0, 0 ],
+            "color": [ [ 1, 1, 1, 1 ], [ 1, 1, 1, 0 ] ],
+            "sprite": [ "ref:char-sprites.dot 0", "ref:char-sprites.dot 1" ]
+          }
+        ]
+      }
+    ]
+  },
+
+  "power-anim":
+  {
+    "res:type": "spriteanim",
+    "lastFrame": 2,
+    "fps": 2,
+
+    "parts":
+    [
+      {
+        "keys":
+        [
+          {
+            "frame": 0,
+            "scale": [ 3, 3 ],
+            "rotate": 0,
+            "sprite": [ "ref:char-sprites.power 0", "ref:char-sprites.power 1" ],
+            "color": [ [ 1, 1, 1, 1 ], [ 1, 1, 1, 0 ] ]
+          },
+          {
+            "frame": 1,
+            "scale": [ 4, 4 ],
+            "rotate": -180,
+            "sprite": [ "ref:char-sprites.power 0", "ref:char-sprites.power 1" ],
+            "color": [ [ 1, 1, 1, 1 ], [ 1, 1, 1, 0.75 ] ]
+          },
+          {
+            "frame": 2,
+            "scale": [ 3, 3 ],
+            "rotate": -360,
+            "sprite": [ "ref:char-sprites.power 0", "ref:char-sprites.power 1" ],
+            "color": [ [ 1, 1, 1, 1 ], [ 1, 1, 1, 0 ] ]
+          }
+        ]
+      }
+    ]
+  },
+
+  "bubble-1-anim":
+  {
+    "res:type": "spriteanim",
+    "lastFrame": 5,
+    "fps": 4,
+
+    "parts":
+    [
+      {
+        "keys":
+        [
+          {
+            "frame": 0,
+            "scale": [ 0.125, 0.125 ],
+            "sprite": [ "ref:char-sprites.bubble" ],
+            "color": [ [ 1, 1, 1, 0.75 ] ],
+            "offset": [ 0, 0 ]
+          },
+          {
+            "frame": 1,
+            "offset": [ 2, -4 ]
+          },
+          {
+            "frame": 2,
+            "offset": [ -2, -8 ]
+          },
+          {
+            "frame": 3,
+            "offset": [ 2, -12 ]
+          },
+          {
+            "frame": 4,
+            "offset": [ -1, -16 ]
+          },
+          {
+            "frame": 5,
+            "scale": [ 0.2, 0.2 ],
+            "sprite": [ "ref:char-sprites.bubble" ],
+            "color": [ [ 1, 1, 1, 0.125 ] ],
+            "offset": [ 0, -20 ]
+          }
+        ]
+      }
+    ]
+  },
+
+  "bubble-2-anim":
+  {
+    "res:type": "spriteanim",
+    "lastFrame": 5,
+    "fps": 4,
+
+    "parts":
+    [
+      {
+        "keys":
+        [
+          {
+            "frame": 0,
+            "scale": [ 0.125, 0.125 ],
+            "sprite": [ "ref:char-sprites.bubble" ],
+            "color": [ [ 1, 1, 1, 0.75 ] ],
+            "offset": [ 0, 0 ]
+          },
+          {
+            "frame": 1,
+            "offset": [ 2, -3 ]
+          },
+          {
+            "frame": 2,
+            "offset": [ -2, -6 ]
+          },
+          {
+            "frame": 3,
+            "offset": [ 2, -9 ]
+          },
+          {
+            "frame": 4,
+            "offset": [ -1, -12 ]
+          },
+          {
+            "frame": 5,
+            "scale": [ 0.2, 0.2 ],
+            "sprite": [ "ref:char-sprites.bubble" ],
+            "color": [ [ 1, 1, 1, 0.125 ] ],
+            "offset": [ 0, -15 ]
+          }
+        ]
+      }
+    ]
+  },
+
+  "bubble-3-anim":
+  {
+    "res:type": "spriteanim",
+    "lastFrame": 5,
+    "fps": 4,
+
+    "parts":
+    [
+      {
+        "keys":
+        [
+          {
+            "frame": 0,
+            "scale": [ 0.125, 0.125 ],
+            "sprite": [ "ref:char-sprites.bubble" ],
+            "color": [ [ 1, 1, 1, 0.75 ] ],
+            "offset": [ 0, 0 ]
+          },
+          {
+            "frame": 1,
+            "offset": [ -1, -4 ]
+          },
+          {
+            "frame": 2,
+            "offset": [ 1, -8 ]
+          },
+          {
+            "frame": 3,
+            "offset": [ -1, -12 ]
+          },
+          {
+            "frame": 4,
+            "offset": [ 0, -15 ]
+          },
+          {
+            "frame": 5,
+            "scale": [ 0.2, 0.2 ],
+            "sprite": [ "ref:char-sprites.bubble" ],
+            "color": [ [ 1, 1, 1, 0.125 ] ],
+            "offset": [ 0, -18 ]
+          }
+        ]
+      }
+    ]
+  },
+
+  "power-aura-anim":
+  {
+    "res:type": "spriteanim",
+    "lastFrame": 2,
+    "fps": 3,
+
+    "parts":
+    [
+      {
+        "keys":
+        [
+          {
+            "frame": 0,
+            "scale": [ 4, 4 ],
+            "sprite": [ "ref:char-sprites.power-aura" ],
+            "color": [ [ 1, 1, 1, 0.25 ] ],
+            "rotate": 0
+          },
+          {
+            "frame": 1,
+            "scale": [ 6, 6 ],
+            "color": [ [ 1, 1, 1, 0.625 ] ],
+            "rotate": -90
+          },
+          {
+            "frame": 2,
+            "scale": [ 4, 4 ],
+            "color": [ [ 1, 1, 1, 0.25 ] ],
+            "rotate": -180
+          },
+          {
+            "frame": 3,
+            "scale": [ 6, 6 ],
+            "color": [ [ 1, 1, 1, 0.625 ] ],
+            "rotate": -270
+          },
+          {
+            "frame": 4,
+            "scale": [ 4, 4 ],
+            "sprite": [ "ref:char-sprites.power-aura" ],
+            "color": [ [ 1, 1, 1, 0.25 ] ],
+            "rotate": -360
+          }
+        ]
+      }
+    ]
+  }
+}

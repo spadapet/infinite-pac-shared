@@ -1,0 +1,6 @@
+EXPORTS
+	DllGetModule PRIVATE
+	MetroDllCanUnloadNow PRIVATE
+	MetroDllGetClassObject PRIVATE
+	MetroDllRegisterServer PRIVATE
+	MetroDllUnregisterServer PRIVATE

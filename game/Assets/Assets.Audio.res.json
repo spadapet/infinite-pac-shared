@@ -1,0 +1,201 @@
+{
+  "mr-intro-wave":
+  {
+    "res:type": "wave",
+    "data":
+    {
+      "res:transform": "wave",
+      "file": "mr-intro.wav"
+    }
+  },
+  "mr-intro":
+  {
+    "res:type": "effect",
+    "wave": "ref:mr-intro-wave",
+    "volume": 0.5
+  },
+  "mr-bg-wave":
+  {
+    "res:type": "wave",
+    "data":
+    {
+      "res:transform": "wave",
+      "file": "mr-bg-1.wav"
+    }
+  },
+  "mr-bg-1":
+  {
+    "res:type": "effect",
+    "wave": "ref:mr-bg-wave",
+    "loopCount": -1,
+    "volume": 0.2
+  },
+  "mr-bg-2":
+  {
+    "res:type": "effect",
+    "wave": "ref:mr-bg-wave",
+    "loopCount": -1,
+    "volume": 0.2,
+    "freq": 1.125
+  },
+  "mr-bg-3":
+  {
+    "res:type": "effect",
+    "wave": "ref:mr-bg-wave",
+    "loopCount": -1,
+    "volume": 0.2,
+    "freq": 1.25
+  },
+  "mr-bg-4":
+  {
+    "res:type": "effect",
+    "wave": "ref:mr-bg-wave",
+    "loopCount": -1,
+    "volume": 0.2,
+    "freq": 1.375
+  },
+  "mr-eat-ghost-wave":
+  {
+    "res:type": "wave",
+    "data":
+    {
+      "res:transform": "wave",
+      "file": "mr-eat-ghost.wav"
+    }
+  },
+  "mr-eat-ghost":
+  {
+    "res:type": "effect",
+    "wave": "ref:mr-eat-ghost-wave"
+  },
+  "mr-eat-fruit-wave":
+  {
+    "res:type": "wave",
+    "data":
+    {
+      "res:transform": "wave",
+      "file": "mr-fruit.wav"
+    }
+  },
+  "mr-eat-fruit":
+  {
+    "res:type": "effect",
+    "wave": "ref:mr-eat-fruit-wave"
+  },
+  "mr-fruit-bounce-wave":
+  {
+    "res:type": "wave",
+    "data":
+    {
+      "res:transform": "wave",
+      "file": "mr-fruit-bounce.wav"
+    }
+  },
+  "mr-fruit-bounce":
+  {
+    "res:type": "effect",
+    "wave": "ref:mr-fruit-bounce-wave",
+    "volume": 0.2
+  },
+  "mr-bg-scared-wave":
+  {
+    "res:type": "wave",
+    "data":
+    {
+      "res:transform": "wave",
+      "file": "mr-bg-scared.wav"
+    }
+  },
+  "mr-bg-scared":
+  {
+    "res:type": "effect",
+    "wave": "ref:mr-bg-scared-wave",
+    "loopCount": -1
+  },
+  "mr-bg-eaten-wave":
+  {
+    "res:type": "wave",
+    "data":
+    {
+      "res:transform": "wave",
+      "file": "mr-bg-eaten.wav"
+    }
+  },
+  "mr-bg-eaten":
+  {
+    "res:type": "effect",
+    "wave": "ref:mr-bg-eaten-wave",
+    "loopCount": -1
+  },
+  "mr-eat-dot-1-wave":
+  {
+    "res:type": "wave",
+    "data":
+    {
+      "res:transform": "wave",
+      "file": "mr-eat-dot-1.wav"
+    }
+  },
+  "mr-eat-dot-1":
+  {
+    "res:type": "effect",
+    "wave": "ref:mr-eat-dot-1-wave"
+  },
+  "mr-eat-dot-2-wave":
+  {
+    "res:type": "wave",
+    "data":
+    {
+      "res:transform": "wave",
+      "file": "mr-eat-dot-2.wav"
+    }
+  },
+  "mr-eat-dot-2":
+  {
+    "res:type": "effect",
+    "wave": "ref:mr-eat-dot-2-wave"
+  },
+  "mr-die-wave":
+  {
+    "res:type": "wave",
+    "data":
+    {
+      "res:transform": "wave",
+      "file": "mr-die.wav"
+    }
+  },
+  "mr-die":
+  {
+    "res:type": "effect",
+    "wave": "ref:mr-die-wave",
+    "volume": 0.25
+  },
+  "mr-free-life-wave":
+  {
+    "res:type": "wave",
+    "data":
+    {
+      "res:transform": "wave",
+      "file": "mr-free-life.wav"
+    }
+  },
+  "mr-free-life":
+  {
+    "res:type": "effect",
+    "wave": "ref:mr-free-life-wave"
+  },
+  "mr-level-win-wave":
+  {
+    "res:type": "wave",
+    "data":
+    {
+      "res:transform": "wave",
+      "file": "mr-level-win.wav"
+    }
+  },
+  "mr-level-win":
+  {
+    "res:type": "effect",
+    "wave": "ref:mr-level-win-wave"
+  }
+}

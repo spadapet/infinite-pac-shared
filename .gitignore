@@ -1,0 +1,18 @@
+# root dirs
+/out/
+
+# sub dirs
+.vs/
+bin/
+obj/
+
+# files
+*.ipch
+*.log
+*.opendb
+*.opensdf
+*.sdf
+*.suo
+*.user
+*.vspscc
+

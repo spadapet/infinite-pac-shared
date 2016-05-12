@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <AppType>Metro</AppType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ProjectName>util.zlib</ProjectName>
+    <ProjectGuid>{49F8C1B7-6D04-44B7-82BA-A813D826B2F1}</ProjectGuid>
+  </PropertyGroup>
+  <Import Project="..\..\msbuild\cpp.props" />
+  <ItemGroup>
+    <ClCompile Include="trees.cpp" />
+    <ClCompile Include="uncompr.cpp" />
+    <ClCompile Include="zutil.cpp" />
+    <ClInclude Include="crc32.h" />
+    <ClInclude Include="deflate.h" />
+    <ClInclude Include="gzguts.h" />
+    <ClInclude Include="inffast.h" />
+    <ClInclude Include="inffixed.h" />
+    <ClInclude Include="inflate.h" />
+    <ClInclude Include="inftrees.h" />
+    <ClInclude Include="pch.h" />
+    <ClCompile Include="adler32.cpp" />
+    <ClCompile Include="compress.cpp" />
+    <ClCompile Include="crc32.cpp" />
+    <ClCompile Include="deflate.cpp" />
+    <ClCompile Include="infback.cpp" />
+    <ClCompile Include="inffast.cpp" />
+    <ClCompile Include="inflate.cpp" />
+    <ClCompile Include="inftrees.cpp" />
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader>Create</PrecompiledHeader>
+    </ClCompile>
+    <ClInclude Include="trees.h" />
+    <ClInclude Include="zconf.h" />
+    <ClInclude Include="zlib.h" />
+    <ClInclude Include="zutil.h" />
+  </ItemGroup>
+  <Import Project="$(DevRoot)\msbuild\cpp.targets" />
+</Project>
