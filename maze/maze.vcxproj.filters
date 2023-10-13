@@ -1,0 +1,162 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="splash_screen.cpp" />
+    <ClCompile Include="core\Difficulty.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\Stats.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\Actors.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\Audio.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\GhostBrains.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\GlobalResources.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\Helpers.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\Maze.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\Mazes.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\PlayingGame.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\PlayingMaze.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\RenderMaze.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\RenderText.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\Tiles.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="states\HighScoreScreen.cpp">
+      <Filter>states</Filter>
+    </ClCompile>
+    <ClCompile Include="states\PacApplication.cpp">
+      <Filter>states</Filter>
+    </ClCompile>
+    <ClCompile Include="states\TitleScreen.cpp">
+      <Filter>states</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="splash_screen.h" />
+    <ClInclude Include="core\Difficulty.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\Stats.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\Actors.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\Audio.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\GhostBrains.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\GlobalResources.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\Helpers.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\Maze.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\Mazes.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\PlayingGame.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\PlayingMaze.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\RenderMaze.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\RenderText.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\Tiles.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="states\HighScoreScreen.h">
+      <Filter>states</Filter>
+    </ClInclude>
+    <ClInclude Include="states\PacApplication.h">
+      <Filter>states</Filter>
+    </ClInclude>
+    <ClInclude Include="states\TitleScreen.h">
+      <Filter>states</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="app.manifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="resource.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="states">
+      <UniqueIdentifier>{6547ec93-a6fb-4419-abbb-5e1144ef0bc4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assets">
+      <UniqueIdentifier>{b0668d8d-c1dc-42c1-8622-0f52d8d9c4a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core">
+      <UniqueIdentifier>{0f4d1387-acbe-47a6-bd61-76cf2b721dce}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\main.ico">
+      <Filter>assets</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResJson Include="assets\Assets.res.json">
+      <Filter>assets</Filter>
+    </ResJson>
+    <ResJson Include="assets\Values.Maze.res.json">
+      <Filter>assets</Filter>
+    </ResJson>
+    <ResJson Include="assets\Values.Mazes.res.json">
+      <Filter>assets</Filter>
+    </ResJson>
+    <ResJson Include="assets\Values.Tiles.res.json">
+      <Filter>assets</Filter>
+    </ResJson>
+    <ResJson Include="assets\Assets.Audio.res.json">
+      <Filter>assets</Filter>
+    </ResJson>
+    <ResJson Include="assets\Assets.Anim.res.json">
+      <Filter>assets</Filter>
+    </ResJson>
+    <ResJson Include="assets\Assets.GhostAnim.res.json">
+      <Filter>assets</Filter>
+    </ResJson>
+    <ResJson Include="assets\Assets.Sprites.res.json">
+      <Filter>assets</Filter>
+    </ResJson>
+  </ItemGroup>
+</Project>

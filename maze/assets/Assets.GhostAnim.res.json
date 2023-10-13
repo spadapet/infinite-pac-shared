@@ -1,0 +1,423 @@
+{
+  "res:namespace": "assets::maze::ghost_anim",
+
+  "res:values":
+  {
+    "ghost-fps": 15,
+
+    "ghost-one-sprite-anim":
+    {
+      "res:type": "animation",
+      "length": 1,
+      "fps": 1,
+      "loop": true,
+
+      "visuals": [ { "visual": "sprite", "scale": "scale" } ],
+
+      "keys":
+      {
+        "sprite":
+        {
+          "values":
+          [
+            { "frame": 0, "value": "res:sprite" },
+            { "frame": 1, "value": "res:sprite" }
+          ]
+        },
+        "scale":
+        {
+          "values":
+          [
+            { "frame": 0, "value": [ 4, 4 ] },
+            { "frame": 1, "value": [ 4, 4 ] }
+          ]
+        }
+      }
+    },
+
+    "ghost-four-sprite-anim":
+    {
+      "res:type": "animation",
+      "length": 3,
+      "fps": "res:ghost-fps",
+      "loop": true,
+
+      "visuals": [ { "visual": "sprite", "scale": "scale" } ],
+
+      "keys":
+      {
+        "sprite":
+        {
+          "values":
+          [
+            { "frame": 0, "value": "res:sprite0" },
+            { "frame": 1, "value": "res:sprite1" },
+            { "frame": 2, "value": "res:sprite2" },
+            { "frame": 3, "value": "res:sprite3" }
+          ]
+        },
+        "scale":
+        {
+          "values":
+          [
+            { "frame": 0, "value": [ 4, 4 ] },
+            { "frame": 3, "value": [ 4, 4 ] }
+          ]
+        }
+      }
+    },
+
+    "ghost-five-sprite-anim":
+    {
+      "res:type": "animation",
+      "length": 4,
+      "fps": "res:ghost-fps",
+      "loop": true,
+
+      "visuals": [ { "visual": "sprite", "scale": "scale" } ],
+
+      "keys":
+      {
+        "sprite":
+        {
+          "values":
+          [
+            { "frame": 0, "value": "res:sprite0" },
+            { "frame": 1, "value": "res:sprite1" },
+            { "frame": 2, "value": "res:sprite2" },
+            { "frame": 3, "value": "res:sprite3" },
+            { "frame": 4, "value": "res:sprite4" }
+          ]
+        },
+        "scale":
+        {
+          "values":
+          [
+            { "frame": 0, "value": [ 4, 4 ] },
+            { "frame": 4, "value": [ 4, 4 ] }
+          ]
+        }
+      }
+    },
+
+    "ghost-six-sprite-anim":
+    {
+      "res:type": "animation",
+      "length": 5,
+      "fps": "res:ghost-fps",
+      "loop": true,
+
+      "visuals": [ { "visual": "sprite", "scale": "scale" } ],
+
+      "keys":
+      {
+        "sprite":
+        {
+          "values":
+          [
+            { "frame": 0, "value": "res:sprite0" },
+            { "frame": 1, "value": "res:sprite1" },
+            { "frame": 2, "value": "res:sprite2" },
+            { "frame": 3, "value": "res:sprite3" },
+            { "frame": 4, "value": "res:sprite4" },
+            { "frame": 5, "value": "res:sprite5" }
+          ]
+        },
+        "scale":
+        {
+          "values":
+          [
+            { "frame": 0, "value": [ 4, 4 ] },
+            { "frame": 5, "value": [ 4, 4 ] }
+          ]
+        }
+      }
+    },
+
+    "ghost-3-anim":
+    {
+      "res:type": "animation",
+      "length": 1,
+      "fps": 1,
+      "loop": true,
+
+      "visuals":
+      [
+        { "visual": "arm-sprite", "rotate": "rotate0", "scale": "scale" },
+        { "visual": "arm-sprite", "rotate": "rotate1", "scale": "scale" },
+        { "visual": "arm-sprite", "rotate": "rotate2", "scale": "scale" },
+        { "visual": "body-sprite", "scale": "scale" }
+      ],
+
+      "keys":
+      {
+        "arm-sprite":
+        {
+          "values":
+          [
+            { "frame": 0, "value": "res:arm-sprite" },
+            { "frame": 1, "value": "res:arm-sprite" }
+          ]
+        },
+        "body-sprite":
+        {
+          "values":
+          [
+            { "frame": 0, "value": "res:body-sprite" },
+            { "frame": 1, "value": "res:body-sprite" }
+          ]
+        },
+        "rotate0":
+        {
+          "values":
+          [
+            { "frame": 0, "value": 0 },
+            { "frame": 1, "value": -360 }
+          ]
+        },
+        "rotate1":
+        {
+          "values":
+          [
+            { "frame": 0, "value": -60 },
+            { "frame": 1, "value": -420 }
+          ]
+        },
+        "rotate2":
+        {
+          "values":
+          [
+            { "frame": 0, "value": -120 },
+            { "frame": 1, "value": -480 }
+          ]
+        },
+        "scale":
+        {
+          "values":
+          [
+            { "frame": 0, "value": [ 4, 4 ] },
+            { "frame": 1, "value": [ 4, 4 ] }
+          ]
+        }
+      }
+    }
+  },
+
+  "ghost-1-move-anim":
+  {
+    "res:template": "ghost-five-sprite-anim",
+    "res:values":
+    {
+      "sprite0": "ref:char-sprites.ghost-1-move[0]",
+      "sprite1": "ref:char-sprites.ghost-1-move[1]",
+      "sprite2": "ref:char-sprites.ghost-1-move[2]",
+      "sprite3": "ref:char-sprites.ghost-1-move[1]",
+      "sprite4": "ref:char-sprites.ghost-1-move[0]"
+    }
+  },
+  "ghost-1-scared-anim":
+  {
+    "res:template": "ghost-four-sprite-anim",
+    "res:values":
+    {
+      "sprite0": "ref:char-sprites.ghost-1-scared[0]",
+      "sprite1": "ref:char-sprites.ghost-1-scared[1]",
+      "sprite2": "ref:char-sprites.ghost-1-scared[2]",
+      "sprite3": "ref:char-sprites.ghost-1-scared[0]"
+    }
+  },
+  "ghost-1-flash-anim":
+  {
+    "res:template": "ghost-four-sprite-anim",
+    "res:values":
+    {
+      "sprite0": "ref:char-sprites.ghost-1-flash[0]",
+      "sprite1": "ref:char-sprites.ghost-1-flash[1]",
+      "sprite2": "ref:char-sprites.ghost-1-flash[2]",
+      "sprite3": "ref:char-sprites.ghost-1-flash[0]"
+    }
+  },
+  "ghost-1-eyes-anim":
+  {
+    "res:template": "ghost-five-sprite-anim",
+    "res:values":
+    {
+      "sprite0": "ref:char-sprites.ghost-1-eyes[0]",
+      "sprite1": "ref:char-sprites.ghost-1-eyes[1]",
+      "sprite2": "ref:char-sprites.ghost-1-eyes[2]",
+      "sprite3": "ref:char-sprites.ghost-1-eyes[1]",
+      "sprite4": "ref:char-sprites.ghost-1-eyes[0]"
+    }
+  },
+  "ghost-1-pupils-anim":
+  {
+    "res:template": "ghost-five-sprite-anim",
+    "res:values":
+    {
+      "sprite0": "ref:char-sprites.ghost-1-pupils[0]",
+      "sprite1": "ref:char-sprites.ghost-1-pupils[1]",
+      "sprite2": "ref:char-sprites.ghost-1-pupils[2]",
+      "sprite3": "ref:char-sprites.ghost-1-pupils[1]",
+      "sprite4": "ref:char-sprites.ghost-1-pupils[0]"
+    }
+  },
+
+  "ghost-2-move-anim":
+  {
+    "res:template": "ghost-six-sprite-anim",
+    "res:values":
+    {
+      "sprite0": "ref:char-sprites.ghost-2-move[0]",
+      "sprite1": "ref:char-sprites.ghost-2-move[1]",
+      "sprite2": "ref:char-sprites.ghost-2-move[2]",
+      "sprite3": "ref:char-sprites.ghost-2-move[3]",
+      "sprite4": "ref:char-sprites.ghost-2-move[4]",
+      "sprite5": "ref:char-sprites.ghost-2-move[0]"
+    }
+  },
+  "ghost-2-scared-anim":
+  {
+    "res:template": "ghost-six-sprite-anim",
+    "res:values":
+    {
+      "sprite0": "ref:char-sprites.ghost-2-scared[0]",
+      "sprite1": "ref:char-sprites.ghost-2-scared[1]",
+      "sprite2": "ref:char-sprites.ghost-2-scared[2]",
+      "sprite3": "ref:char-sprites.ghost-2-scared[3]",
+      "sprite4": "ref:char-sprites.ghost-2-scared[4]",
+      "sprite5": "ref:char-sprites.ghost-2-scared[0]"
+    }
+  },
+  "ghost-2-flash-anim":
+  {
+    "res:template": "ghost-six-sprite-anim",
+    "res:values":
+    {
+      "sprite0": "ref:char-sprites.ghost-2-flash[0]",
+      "sprite1": "ref:char-sprites.ghost-2-flash[1]",
+      "sprite2": "ref:char-sprites.ghost-2-flash[2]",
+      "sprite3": "ref:char-sprites.ghost-2-flash[3]",
+      "sprite4": "ref:char-sprites.ghost-2-flash[4]",
+      "sprite5": "ref:char-sprites.ghost-2-flash[0]"
+    }
+  },
+  "ghost-2-eyes-anim":
+  {
+    "res:template": "ghost-one-sprite-anim",
+    "res:values":
+    {
+      "sprite": "ref:char-sprites.ghost-2-eyes"
+    }
+  },
+  "ghost-2-pupils-anim":
+  {
+    "res:template": "ghost-one-sprite-anim",
+    "res:values":
+    {
+      "sprite": "ref:char-sprites.ghost-2-pupils"
+    }
+  },
+
+  "ghost-3-move-anim":
+  {
+    "res:template": "ghost-3-anim",
+    "res:values":
+    {
+      "body-sprite": "ref:char-sprites.ghost-3-move[0]",
+      "arm-sprite": "ref:char-sprites.ghost-3-move[1]"
+    }
+  },
+  "ghost-3-scared-anim":
+  {
+    "res:template": "ghost-3-anim",
+    "res:values":
+    {
+      "body-sprite": "ref:char-sprites.ghost-3-scared[0]",
+      "arm-sprite": "ref:char-sprites.ghost-3-scared[1]"
+    }
+  },
+  "ghost-3-flash-anim":
+  {
+    "res:template": "ghost-3-anim",
+    "res:values":
+    {
+      "body-sprite": "ref:char-sprites.ghost-3-flash[0]",
+      "arm-sprite": "ref:char-sprites.ghost-3-flash[1]"
+    }
+  },
+  "ghost-3-eyes-anim":
+  {
+    "res:template": "ghost-one-sprite-anim",
+    "res:values":
+    {
+      "sprite": "ref:char-sprites.ghost-3-eyes"
+    }
+  },
+  "ghost-3-pupils-anim":
+  {
+    "res:template": "ghost-one-sprite-anim",
+    "res:values":
+    {
+      "sprite": "ref:char-sprites.ghost-3-pupils"
+    }
+  },
+
+  "ghost-4-move-anim":
+  {
+    "res:template": "ghost-five-sprite-anim",
+    "res:values":
+    {
+      "sprite0": "ref:char-sprites.ghost-4-move[0]",
+      "sprite1": "ref:char-sprites.ghost-4-move[1]",
+      "sprite2": "ref:char-sprites.ghost-4-move[2]",
+      "sprite3": "ref:char-sprites.ghost-4-move[1]",
+      "sprite4": "ref:char-sprites.ghost-4-move[0]"
+    }
+  },
+  "ghost-4-scared-anim":
+  {
+    "res:template": "ghost-four-sprite-anim",
+    "res:values":
+    {
+      "sprite0": "ref:char-sprites.ghost-4-scared[0]",
+      "sprite1": "ref:char-sprites.ghost-4-scared[1]",
+      "sprite2": "ref:char-sprites.ghost-4-scared[2]",
+      "sprite3": "ref:char-sprites.ghost-4-scared[0]"
+    }
+  },
+  "ghost-4-flash-anim":
+  {
+    "res:template": "ghost-four-sprite-anim",
+    "res:values":
+    {
+      "sprite0": "ref:char-sprites.ghost-4-flash[0]",
+      "sprite1": "ref:char-sprites.ghost-4-flash[1]",
+      "sprite2": "ref:char-sprites.ghost-4-flash[2]",
+      "sprite3": "ref:char-sprites.ghost-4-flash[0]"
+    }
+  },
+  "ghost-4-eyes-anim":
+  {
+    "res:template": "ghost-five-sprite-anim",
+    "res:values":
+    {
+      "sprite0": "ref:char-sprites.ghost-4-eyes[0]",
+      "sprite1": "ref:char-sprites.ghost-4-eyes[1]",
+      "sprite2": "ref:char-sprites.ghost-4-eyes[2]",
+      "sprite3": "ref:char-sprites.ghost-4-eyes[1]",
+      "sprite4": "ref:char-sprites.ghost-4-eyes[0]"
+    }
+  },
+  "ghost-4-pupils-anim":
+  {
+    "res:template": "ghost-five-sprite-anim",
+    "res:values":
+    {
+      "sprite0": "ref:char-sprites.ghost-4-pupils[0]",
+      "sprite1": "ref:char-sprites.ghost-4-pupils[1]",
+      "sprite2": "ref:char-sprites.ghost-4-pupils[2]",
+      "sprite3": "ref:char-sprites.ghost-4-pupils[1]",
+      "sprite4": "ref:char-sprites.ghost-4-pupils[0]"
+    }
+  }
+}

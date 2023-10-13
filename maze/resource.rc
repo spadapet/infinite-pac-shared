@@ -1,0 +1,48 @@
+#include <windows.h>
+#pragma code_page(1252)
+#define GAME_COMPANY "Peter Spada"
+#define GAME_NAME "Infinite Pac Shared"
+#define GAME_VERSION "2.0.0.0"
+
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+
+VS_VERSION_INFO VERSIONINFO
+    FILEVERSION 1,0,0,0
+    PRODUCTVERSION 1,0,0,0
+    FILEFLAGSMASK 0x17L
+#ifdef _DEBUG
+    FILEFLAGS 0x1L
+#else
+    FILEFLAGS 0x0L
+#endif
+    FILEOS 0x40004L
+    FILETYPE 0x2L
+    FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "CompanyName", GAME_COMPANY 
+            VALUE "FileDescription", GAME_NAME
+            VALUE "FileVersion", GAME_VERSION
+            VALUE "GUID", "{16ee8a5d-429f-4ee9-8b43-fe682d832d89}"
+            VALUE "InternalName", GAME_NAME
+            VALUE "LegalCopyright", "Copyright (C) 2025"
+            VALUE "OriginalFilename", "maze.exe"
+            VALUE "ProductName", GAME_NAME
+            VALUE "ProductVersion", GAME_VERSION
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+1 ICON "assets\\main.ico"
+
+100 SPLASH "assets\\SplashScreen.scale-100.dib"
+125 SPLASH "assets\\SplashScreen.scale-125.dib"
+150 SPLASH "assets\\SplashScreen.scale-150.dib"
+200 SPLASH "assets\\SplashScreen.scale-200.dib"

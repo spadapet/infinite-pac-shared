@@ -1,0 +1,456 @@
+{
+  "res:namespace": "assets::maze::anim",
+
+  "res:values":
+  {
+    "char-anim":
+    {
+      "res:type": "animation",
+      "length": 10,
+      "fps": 45,
+      "loop": true,
+
+      "visuals": [ { "visual": "sprite", "scale": "scale" } ],
+
+      "keys":
+      {
+        "sprite":
+        {
+          "length": 10,
+          "values":
+          [
+            { "frame": 0, "value": "res:sprite0" },
+            { "frame": 1, "value": "res:sprite1" },
+            { "frame": 2, "value": "res:sprite2" },
+            { "frame": 3, "value": "res:sprite3" },
+            { "frame": 4, "value": "res:sprite4" },
+            { "frame": 5, "value": "res:sprite3" },
+            { "frame": 6, "value": "res:sprite2" },
+            { "frame": 7, "value": "res:sprite1" },
+            { "frame": 8, "value": "res:sprite0" }
+          ]
+        },
+        "scale":
+        {
+          "values":
+          [
+            { "frame": 0, "value": [ 4, 4 ] },
+            { "frame": 10, "value": [ 4, 4 ] }
+          ]
+        }
+      }
+    },
+
+    "death-anim":
+    {
+      "res:type": "animation",
+      "length": 11,
+      "fps": 1,
+      "loop": true,
+
+      "visuals": [ { "visual": "sprite", "rotate": "rotate", "scale": "scale" } ],
+
+      "keys":
+      {
+        "sprite":
+        {
+          "values":
+          [
+            { "frame": 0, "value": "res:sprite" },
+            { "frame": 11, "value": "res:sprite" }
+          ]
+        },
+        "rotate":
+        {
+          "values":
+          [
+            { "frame": 0, "value": 0 },
+            { "frame": 11, "value": -720 }
+          ]
+        },
+        "scale":
+        {
+          "values":
+          [
+            { "frame": 0, "value": [ 4, 4 ] },
+            { "frame": 11, "value": [ 4, 4 ] }
+          ]
+        }
+      }
+    }
+  },
+
+  "mr-char-anim":
+  {
+    "res:template": "char-anim",
+    "res:values":
+    {
+      "sprite0": "ref:char-sprites.mr-move[0]",
+      "sprite1": "ref:char-sprites.mr-move[1]",
+      "sprite2": "ref:char-sprites.mr-move[2]",
+      "sprite3": "ref:char-sprites.mr-move[3]",
+      "sprite4": "ref:char-sprites.mr-move[4]"
+    }
+  },
+
+  "ms-char-anim":
+  {
+    "res:template": "char-anim",
+    "res:values":
+    {
+      "sprite0": "ref:char-sprites.ms-move[0]",
+      "sprite1": "ref:char-sprites.ms-move[1]",
+      "sprite2": "ref:char-sprites.ms-move[2]",
+      "sprite3": "ref:char-sprites.ms-move[3]",
+      "sprite4": "ref:char-sprites.ms-move[4]"
+    }
+  },
+
+  "mr-death-anim":
+  {
+    "res:template": "death-anim",
+    "res:values":
+    {
+      "sprite": "ref:char-sprites.mr-dead"
+    }
+  },
+
+  "ms-death-anim":
+  {
+    "res:template": "death-anim",
+    "res:values":
+    {
+      "sprite": "ref:char-sprites.ms-dead"
+    }
+  },
+
+  "mr-power-anim":
+  {
+    "res:template": "char-anim",
+    "res:values":
+    {
+      "sprite0": "ref:char-sprites.mr-power[0]",
+      "sprite1": "ref:char-sprites.mr-power[1]",
+      "sprite2": "ref:char-sprites.mr-power[2]",
+      "sprite3": "ref:char-sprites.mr-power[3]",
+      "sprite4": "ref:char-sprites.mr-power[4]"
+    }
+  },
+
+  "ms-power-anim":
+  {
+    "res:template": "char-anim",
+    "res:values":
+    {
+      "sprite0": "ref:char-sprites.ms-power[0]",
+      "sprite1": "ref:char-sprites.ms-power[1]",
+      "sprite2": "ref:char-sprites.ms-power[2]",
+      "sprite3": "ref:char-sprites.ms-power[3]",
+      "sprite4": "ref:char-sprites.ms-power[4]"
+    }
+  },
+
+  "dot-anim":
+  {
+    "res:type": "animation",
+    "length": 4,
+    "fps": 1.5,
+    "loop": true,
+
+    "visuals": [ { "method": "spline", "visual": "sprite", "position": "position", "scale": "scale", "color": "color" } ],
+
+    "keys":
+    {
+      "sprite":
+      {
+        "values":
+        [
+          { "frame": 0, "value": "ref:char-sprites.dot[1]" },
+          { "frame": 2, "value": "ref:char-sprites.dot[1]" },
+          { "frame": 4, "value": "ref:char-sprites.dot[1]" }
+        ]
+      },
+      "position":
+      {
+        "values":
+        [
+          { "frame": 0, "value": [ 0, 0 ] },
+          { "frame": 1, "value": [ 0, -4 ] },
+          { "frame": 2, "value": [ 0, 0 ] },
+          { "frame": 3, "value": [ 0, 4 ] },
+          { "frame": 4, "value": [ 0, 0 ] }
+        ]
+      },
+      "scale":
+      {
+        "values":
+        [
+          { "frame": 0, "value": [ 4, 4 ] },
+          { "frame": 4, "value": [ 4, 4 ] }
+        ]
+      },
+      "color":
+      {
+        "values":
+        [
+          { "frame": 0, "value": [ 1, 1, 1, 1 ] },
+          { "frame": 1, "value": [ 1, 1, 1, 1 ] },
+          { "frame": 2, "value": [ 0.625, 0.625, 0.625, 1 ] },
+          { "frame": 3, "value": [ 1, 1, 1, 1 ] },
+          { "frame": 4, "value": [ 1, 1, 1, 1 ] }
+        ]
+      }
+    }
+  },
+
+  "power-anim":
+  {
+    "res:type": "animation",
+    "length": 2,
+    "fps": 2,
+    "loop": true,
+
+    "visuals": [ { "visual": "sprite", "rotate": "rotate", "scale": "scale", "color": "color" } ],
+
+    "keys":
+    {
+      "sprite":
+      {
+        "values":
+        [
+          { "frame": 0, "value": [ "ref:char-sprites.power[0]", "ref:char-sprites.power[1]" ] },
+          { "frame": 2, "value": [ "ref:char-sprites.power[0]", "ref:char-sprites.power[1]" ] }
+        ]
+      },
+      "rotate":
+      {
+        "values":
+        [
+          { "frame": 0, "value": 0 },
+          { "frame": 1, "value": -180 },
+          { "frame": 2, "value": -360 }
+        ]
+      },
+      "scale":
+      {
+        "values":
+        [
+          { "frame": 0, "value": [ 3, 3 ] },
+          { "frame": 1, "value": [ 4, 4 ] },
+          { "frame": 2, "value": [ 3, 3 ] }
+        ]
+      },
+      "color":
+      {
+        "values":
+        [
+          { "frame": 0, "value": [ [ 1, 1, 1, 1 ], [ 1, 1, 1, 0 ] ] },
+          { "frame": 1, "value": [ [ 1, 1, 1, 1 ], [ 1, 1, 1, 0.75 ] ] },
+          { "frame": 2, "value": [ [ 1, 1, 1, 0 ], [ 1, 1, 1, 0 ] ] }
+        ]
+      }
+    }
+  },
+
+  "bubble-1-anim":
+  {
+    "res:type": "animation",
+    "length": 5,
+    "fps": 4,
+
+    "visuals": [ { "method": "spline", "visual": "sprite", "position": "position", "scale": "scale", "color": "color" } ],
+
+    "keys":
+    {
+      "sprite":
+      {
+        "values":
+        [
+          { "frame": 0, "value": [ "ref:char-sprites.bubble" ] },
+          { "frame": 5, "value": [ "ref:char-sprites.bubble" ] }
+        ]
+      },
+      "position":
+      {
+        "values":
+        [
+          { "frame": 0, "value": [ 0, 0 ] },
+          { "frame": 1, "value": [ 2, -4 ] },
+          { "frame": 2, "value": [ -2, -8 ] },
+          { "frame": 3, "value": [ 2, -12 ] },
+          { "frame": 4, "value": [ -1, -16 ] },
+          { "frame": 5, "value": [ 0, -20 ] }
+        ]
+      },
+      "scale":
+      {
+        "values":
+        [
+          { "frame": 0, "value": [ 0.125, 0.125 ] },
+          { "frame": 5, "value": [ 0.2, 0.2 ] }
+        ]
+      },
+      "color":
+      {
+        "values":
+        [
+          { "frame": 0, "value": [ 1, 1, 1, 0.75 ] },
+          { "frame": 5, "value": [ 1, 1, 1, 0.125 ] }
+        ]
+      }
+    }
+  },
+
+  "bubble-2-anim":
+  {
+    "res:type": "animation",
+    "length": 5,
+    "fps": 4,
+
+    "visuals": [ { "method": "spline", "visual": "sprite", "position": "position", "scale": "scale", "color": "color" } ],
+
+    "keys":
+    {
+      "sprite":
+      {
+        "values":
+        [
+          { "frame": 0, "value": [ "ref:char-sprites.bubble" ] },
+          { "frame": 5, "value": [ "ref:char-sprites.bubble" ] }
+        ]
+      },
+      "position":
+      {
+        "values":
+        [
+          { "frame": 0, "value": [ 0, 0 ] },
+          { "frame": 1, "value": [ 2, -3 ] },
+          { "frame": 2, "value": [ -2, -6 ] },
+          { "frame": 3, "value": [ 2, -9 ] },
+          { "frame": 4, "value": [ -1, -12 ] },
+          { "frame": 5, "value": [ 0, -15 ] }
+        ]
+      },
+      "scale":
+      {
+        "values":
+        [
+          { "frame": 0, "value": [ 0.125, 0.125 ] },
+          { "frame": 5, "value": [ 0.2, 0.2 ] }
+        ]
+      },
+      "color":
+      {
+        "values":
+        [
+          { "frame": 0, "value": [ 1, 1, 1, 0.75 ] },
+          { "frame": 5, "value": [ 1, 1, 1, 0.125 ] }
+        ]
+      }
+    }
+  },
+
+  "bubble-3-anim":
+  {
+    "res:type": "animation",
+    "length": 5,
+    "fps": 4,
+
+    "visuals": [ { "method": "spline", "visual": "sprite", "position": "position", "scale": "scale", "color": "color" } ],
+
+    "keys":
+    {
+      "sprite":
+      {
+        "values":
+        [
+          { "frame": 0, "value": [ "ref:char-sprites.bubble" ] },
+          { "frame": 5, "value": [ "ref:char-sprites.bubble" ] }
+        ]
+      },
+      "position":
+      {
+        "values":
+        [
+          { "frame": 0, "value": [ 0, 0 ] },
+          { "frame": 1, "value": [ -1, -4 ] },
+          { "frame": 2, "value": [ 1, -8] },
+          { "frame": 3, "value": [ -1, -12 ] },
+          { "frame": 4, "value": [ 0, -15 ] },
+          { "frame": 5, "value": [ 0, -18 ] }
+        ]
+      },
+      "scale":
+      {
+        "values":
+        [
+          { "frame": 0, "value": [ 0.125, 0.125 ] },
+          { "frame": 5, "value": [ 0.2, 0.2 ] }
+        ]
+      },
+      "color":
+      {
+        "values":
+        [
+          { "frame": 0, "value": [ 1, 1, 1, 0.75 ] },
+          { "frame": 5, "value": [ 1, 1, 1, 0.125 ] }
+        ]
+      }
+    }
+  },
+
+  "power-aura-anim":
+  {
+    "res:type": "animation",
+    "length": 4,
+    "fps": 3,
+    "loop": true,
+
+    "visuals": [ { "visual": "sprite", "rotate": "rotate", "scale": "scale", "color": "color" } ],
+
+    "keys":
+    {
+      "sprite":
+      {
+        "values":
+        [
+          { "frame": 0, "value": [ "ref:char-sprites.power-aura" ] },
+          { "frame": 4, "value": [ "ref:char-sprites.power-aura" ] }
+        ]
+      },
+      "rotate":
+      {
+        "values":
+        [
+          { "frame": 0, "value": 0 },
+          { "frame": 1, "value": -90 },
+          { "frame": 2, "value": -180 },
+          { "frame": 3, "value": -270 },
+          { "frame": 4, "value": -360 }
+        ]
+      },
+      "scale":
+      {
+        "values":
+        [
+          { "frame": 0, "value": [ 4, 4 ] },
+          { "frame": 1, "value": [ 6, 6 ] },
+          { "frame": 2, "value": [ 4, 4 ] },
+          { "frame": 3, "value": [ 6, 6 ] },
+          { "frame": 4, "value": [ 4, 4 ] }
+        ]
+      },
+      "color":
+      {
+        "values":
+        [
+          { "frame": 0, "value": [ 1, 1, 1, 0.25 ] },
+          { "frame": 1, "value": [ 1, 1, 1, 0.625 ] },
+          { "frame": 2, "value": [ 1, 1, 1, 0.25 ] },
+          { "frame": 3, "value": [ 1, 1, 1, 0.625 ] },
+          { "frame": 4, "value": [ 1, 1, 1, 0.25 ] }
+        ]
+      }
+    }
+  }
+}

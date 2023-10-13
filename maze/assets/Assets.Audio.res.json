@@ -1,0 +1,155 @@
+{
+  "res:namespace": "assets::maze::audio",
+
+  "mr-intro-wave":
+  {
+    "res:type": "file",
+    "file": "file:mr-intro.wav"
+  },
+  "mr-intro":
+  {
+    "res:type": "effect",
+    "file": "ref:mr-intro-wave",
+    "volume": 0.5
+  },
+  "mr-bg-wave":
+  {
+    "res:type": "file",
+    "file": "file:mr-bg-1.wav"
+  },
+  "mr-bg-1":
+  {
+    "res:type": "effect",
+    "file": "ref:mr-bg-wave",
+    "loop_count": -1,
+    "volume": 0.2
+  },
+  "mr-bg-2":
+  {
+    "res:type": "effect",
+    "file": "ref:mr-bg-wave",
+    "loop_count": -1,
+    "volume": 0.2,
+    "speed": 1.125
+  },
+  "mr-bg-3":
+  {
+    "res:type": "effect",
+    "file": "ref:mr-bg-wave",
+    "loop_count": -1,
+    "volume": 0.2,
+    "speed": 1.25
+  },
+  "mr-bg-4":
+  {
+    "res:type": "effect",
+    "file": "ref:mr-bg-wave",
+    "loop_count": -1,
+    "volume": 0.2,
+    "speed": 1.375
+  },
+  "mr-eat-ghost-wave":
+  {
+    "res:type": "file",
+    "file": "file:mr-eat-ghost.wav"
+  },
+  "mr-eat-ghost":
+  {
+    "res:type": "effect",
+    "file": "ref:mr-eat-ghost-wave"
+  },
+  "mr-eat-fruit-wave":
+  {
+    "res:type": "file",
+    "file": "file:mr-fruit.wav"
+  },
+  "mr-eat-fruit":
+  {
+    "res:type": "effect",
+    "file": "ref:mr-eat-fruit-wave"
+  },
+  "mr-fruit-bounce-wave":
+  {
+    "res:type": "file",
+    "file": "file:mr-fruit-bounce.wav"
+  },
+  "mr-fruit-bounce":
+  {
+    "res:type": "effect",
+    "file": "ref:mr-fruit-bounce-wave",
+    "volume": 0.2
+  },
+  "mr-bg-scared-wave":
+  {
+    "res:type": "file",
+    "file": "file:mr-bg-scared.wav"
+  },
+  "mr-bg-scared":
+  {
+    "res:type": "effect",
+    "file": "ref:mr-bg-scared-wave",
+    "loop_count": -1
+  },
+  "mr-bg-eaten-wave":
+  {
+    "res:type": "file",
+    "file": "file:mr-bg-eaten.wav"
+  },
+  "mr-bg-eaten":
+  {
+    "res:type": "effect",
+    "file": "ref:mr-bg-eaten-wave",
+    "loop_count": -1
+  },
+  "mr-eat-dot-1-wave":
+  {
+    "res:type": "file",
+    "file": "file:mr-eat-dot-1.wav"
+  },
+  "mr-eat-dot-1":
+  {
+    "res:type": "effect",
+    "file": "ref:mr-eat-dot-1-wave"
+  },
+  "mr-eat-dot-2-wave":
+  {
+    "res:type": "file",
+    "file": "file:mr-eat-dot-2.wav"
+  },
+  "mr-eat-dot-2":
+  {
+    "res:type": "effect",
+    "file": "ref:mr-eat-dot-2-wave"
+  },
+  "mr-die-wave":
+  {
+    "res:type": "file",
+    "file": "file:mr-die.wav"
+  },
+  "mr-die":
+  {
+    "res:type": "effect",
+    "file": "ref:mr-die-wave",
+    "volume": 0.25
+  },
+  "mr-free-life-wave":
+  {
+    "res:type": "file",
+    "file": "file:mr-free-life.wav"
+  },
+  "mr-free-life":
+  {
+    "res:type": "effect",
+    "file": "ref:mr-free-life-wave"
+  },
+  "mr-level-win-wave":
+  {
+    "res:type": "file",
+    "file": "file:mr-level-win.wav"
+  },
+  "mr-level-win":
+  {
+    "res:type": "effect",
+    "file": "ref:mr-level-win-wave"
+  }
+}

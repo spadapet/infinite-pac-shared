@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Condition=" $([MSBuild]::GetDirectoryNameOfFileAbove('$(MSBuildThisFileDirectory)..', 'directory.build.props')) != '' " Project="$([MSBuild]::EnsureTrailingSlash($([MSBuild]::GetDirectoryNameOfFileAbove('$(MSBuildThisFileDirectory)..', 'directory.build.props'))))directory.build.props" />
+  <PropertyGroup>
+    <DevRoot Condition=" '$(DevRoot)' == '' ">$(MSBuildThisFileDirectory)</DevRoot>
+  </PropertyGroup>
+  <Import Project="ff_game_library\build\project.props" Condition=" '$(SharedProjectPropsImported)' == '' " />
+</Project>

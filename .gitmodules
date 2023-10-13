@@ -1,0 +1,4 @@
+[submodule "ff_game_library"]
+	path = ff_game_library
+	url = https://github.com/spadapet/ff_game_library.git
+	branch = main

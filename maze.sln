@@ -1,0 +1,110 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31516.353
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "maze", "maze\maze.vcxproj", "{C3A0AF9F-5AF7-471E-AE92-14032A8A9A94}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{E1ABBA80-AB79-45AC-B565-C7E91FCA9339}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		ff_game_library\build\base.props = ff_game_library\build\base.props
+		ff_game_library\build\cpp.props = ff_game_library\build\cpp.props
+		ff_game_library\build\cpp.targets = ff_game_library\build\cpp.targets
+		ff_game_library\build\cpp.xml = ff_game_library\build\cpp.xml
+		ff_game_library\build\cs.props = ff_game_library\build\cs.props
+		directory.build.props = directory.build.props
+		directory.build.targets = directory.build.targets
+		ff_game_library\build\project.props = ff_game_library\build\project.props
+		README.md = README.md
+		ff_game_library\build\wap.props = ff_game_library\build\wap.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "library", "library", "{BE94EA9E-D7CF-46D8-9AA4-50097F83A5F0}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ff.vendor.zlib", "ff_game_library\vendor\ff.vendor.zlib.vcxproj", "{D9B0464D-0E8C-48F0-98C8-FBD8BEF12BDC}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ff.vendor.libpng", "ff_game_library\vendor\ff.vendor.libpng.vcxproj", "{7023AADB-413D-4C4E-B8A7-481484C943BA}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ff.vendor.imgui", "ff_game_library\vendor\ff.vendor.imgui.vcxproj", "{B89FF916-A65C-48BB-B134-B68FFB38C3A6}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ff.vendor.directxtex", "ff_game_library\vendor\ff.vendor.directxtex.vcxproj", "{5F0B3FD1-44D5-4524-8F61-E22098986A43}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ff.base", "ff_game_library\source\ff.base\ff.base.vcxproj", "{F89161F3-74E5-4B6B-9A53-6B97B83D1700}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ff.dx", "ff_game_library\source\ff.dx\ff.dx.vcxproj", "{0580ED07-BB8F-472A-94FC-E0EE4A79421D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ff.application", "ff_game_library\source\ff.application\ff.application.vcxproj", "{376073E9-EA4D-4513-941C-906CA968C6C3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Profile|x64 = Profile|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C3A0AF9F-5AF7-471E-AE92-14032A8A9A94}.Debug|x64.ActiveCfg = Debug|x64
+		{C3A0AF9F-5AF7-471E-AE92-14032A8A9A94}.Debug|x64.Build.0 = Debug|x64
+		{C3A0AF9F-5AF7-471E-AE92-14032A8A9A94}.Profile|x64.ActiveCfg = Profile|x64
+		{C3A0AF9F-5AF7-471E-AE92-14032A8A9A94}.Profile|x64.Build.0 = Profile|x64
+		{C3A0AF9F-5AF7-471E-AE92-14032A8A9A94}.Release|x64.ActiveCfg = Release|x64
+		{C3A0AF9F-5AF7-471E-AE92-14032A8A9A94}.Release|x64.Build.0 = Release|x64
+		{D9B0464D-0E8C-48F0-98C8-FBD8BEF12BDC}.Debug|x64.ActiveCfg = Debug|x64
+		{D9B0464D-0E8C-48F0-98C8-FBD8BEF12BDC}.Debug|x64.Build.0 = Debug|x64
+		{D9B0464D-0E8C-48F0-98C8-FBD8BEF12BDC}.Profile|x64.ActiveCfg = Profile|x64
+		{D9B0464D-0E8C-48F0-98C8-FBD8BEF12BDC}.Profile|x64.Build.0 = Profile|x64
+		{D9B0464D-0E8C-48F0-98C8-FBD8BEF12BDC}.Release|x64.ActiveCfg = Release|x64
+		{D9B0464D-0E8C-48F0-98C8-FBD8BEF12BDC}.Release|x64.Build.0 = Release|x64
+		{7023AADB-413D-4C4E-B8A7-481484C943BA}.Debug|x64.ActiveCfg = Debug|x64
+		{7023AADB-413D-4C4E-B8A7-481484C943BA}.Debug|x64.Build.0 = Debug|x64
+		{7023AADB-413D-4C4E-B8A7-481484C943BA}.Profile|x64.ActiveCfg = Profile|x64
+		{7023AADB-413D-4C4E-B8A7-481484C943BA}.Profile|x64.Build.0 = Profile|x64
+		{7023AADB-413D-4C4E-B8A7-481484C943BA}.Release|x64.ActiveCfg = Release|x64
+		{7023AADB-413D-4C4E-B8A7-481484C943BA}.Release|x64.Build.0 = Release|x64
+		{B89FF916-A65C-48BB-B134-B68FFB38C3A6}.Debug|x64.ActiveCfg = Debug|x64
+		{B89FF916-A65C-48BB-B134-B68FFB38C3A6}.Debug|x64.Build.0 = Debug|x64
+		{B89FF916-A65C-48BB-B134-B68FFB38C3A6}.Profile|x64.ActiveCfg = Profile|x64
+		{B89FF916-A65C-48BB-B134-B68FFB38C3A6}.Profile|x64.Build.0 = Profile|x64
+		{B89FF916-A65C-48BB-B134-B68FFB38C3A6}.Release|x64.ActiveCfg = Release|x64
+		{B89FF916-A65C-48BB-B134-B68FFB38C3A6}.Release|x64.Build.0 = Release|x64
+		{5F0B3FD1-44D5-4524-8F61-E22098986A43}.Debug|x64.ActiveCfg = Debug|x64
+		{5F0B3FD1-44D5-4524-8F61-E22098986A43}.Debug|x64.Build.0 = Debug|x64
+		{5F0B3FD1-44D5-4524-8F61-E22098986A43}.Profile|x64.ActiveCfg = Profile|x64
+		{5F0B3FD1-44D5-4524-8F61-E22098986A43}.Profile|x64.Build.0 = Profile|x64
+		{5F0B3FD1-44D5-4524-8F61-E22098986A43}.Release|x64.ActiveCfg = Release|x64
+		{5F0B3FD1-44D5-4524-8F61-E22098986A43}.Release|x64.Build.0 = Release|x64
+		{F89161F3-74E5-4B6B-9A53-6B97B83D1700}.Debug|x64.ActiveCfg = Debug|x64
+		{F89161F3-74E5-4B6B-9A53-6B97B83D1700}.Debug|x64.Build.0 = Debug|x64
+		{F89161F3-74E5-4B6B-9A53-6B97B83D1700}.Profile|x64.ActiveCfg = Profile|x64
+		{F89161F3-74E5-4B6B-9A53-6B97B83D1700}.Profile|x64.Build.0 = Profile|x64
+		{F89161F3-74E5-4B6B-9A53-6B97B83D1700}.Release|x64.ActiveCfg = Release|x64
+		{F89161F3-74E5-4B6B-9A53-6B97B83D1700}.Release|x64.Build.0 = Release|x64
+		{0580ED07-BB8F-472A-94FC-E0EE4A79421D}.Debug|x64.ActiveCfg = Debug|x64
+		{0580ED07-BB8F-472A-94FC-E0EE4A79421D}.Debug|x64.Build.0 = Debug|x64
+		{0580ED07-BB8F-472A-94FC-E0EE4A79421D}.Profile|x64.ActiveCfg = Profile|x64
+		{0580ED07-BB8F-472A-94FC-E0EE4A79421D}.Profile|x64.Build.0 = Profile|x64
+		{0580ED07-BB8F-472A-94FC-E0EE4A79421D}.Release|x64.ActiveCfg = Release|x64
+		{0580ED07-BB8F-472A-94FC-E0EE4A79421D}.Release|x64.Build.0 = Release|x64
+		{376073E9-EA4D-4513-941C-906CA968C6C3}.Debug|x64.ActiveCfg = Debug|x64
+		{376073E9-EA4D-4513-941C-906CA968C6C3}.Debug|x64.Build.0 = Debug|x64
+		{376073E9-EA4D-4513-941C-906CA968C6C3}.Profile|x64.ActiveCfg = Profile|x64
+		{376073E9-EA4D-4513-941C-906CA968C6C3}.Profile|x64.Build.0 = Profile|x64
+		{376073E9-EA4D-4513-941C-906CA968C6C3}.Release|x64.ActiveCfg = Release|x64
+		{376073E9-EA4D-4513-941C-906CA968C6C3}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{D9B0464D-0E8C-48F0-98C8-FBD8BEF12BDC} = {BE94EA9E-D7CF-46D8-9AA4-50097F83A5F0}
+		{7023AADB-413D-4C4E-B8A7-481484C943BA} = {BE94EA9E-D7CF-46D8-9AA4-50097F83A5F0}
+		{B89FF916-A65C-48BB-B134-B68FFB38C3A6} = {BE94EA9E-D7CF-46D8-9AA4-50097F83A5F0}
+		{5F0B3FD1-44D5-4524-8F61-E22098986A43} = {BE94EA9E-D7CF-46D8-9AA4-50097F83A5F0}
+		{F89161F3-74E5-4B6B-9A53-6B97B83D1700} = {BE94EA9E-D7CF-46D8-9AA4-50097F83A5F0}
+		{0580ED07-BB8F-472A-94FC-E0EE4A79421D} = {BE94EA9E-D7CF-46D8-9AA4-50097F83A5F0}
+		{376073E9-EA4D-4513-941C-906CA968C6C3} = {BE94EA9E-D7CF-46D8-9AA4-50097F83A5F0}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9C2C9693-764C-4050-BD33-0675E8192367}
+	EndGlobalSection
+EndGlobal

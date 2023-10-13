@@ -1,0 +1,1743 @@
+{
+  "res:namespace": "assets::maze::sprites",
+
+  "char-sprites":
+  {
+    "res:type": "sprites",
+    "format": "rgba32",
+    "mips": 1,
+    "sprites":
+    {
+      "mr-move":
+      {
+        "file": "file:mr-move.png",
+        "pos": [ 0, 0 ],
+        "size": [ 32, 32 ],
+        "handle": [ 16, 16 ],
+        "repeat": 5
+      },
+
+      "ms-move":
+      {
+        "file": "file:ms-move.png",
+        "pos": [ 0, 0 ],
+        "size": [ 32, 32 ],
+        "handle": [ 16, 16 ],
+        "repeat": 5
+      },
+
+      "mr-power":
+      {
+        "file": "file:mr-power.png",
+        "pos": [ 0, 0 ],
+        "size": [ 32, 32 ],
+        "handle": [ 16, 16 ],
+        "repeat": 5
+      },
+
+      "ms-power":
+      {
+        "file": "file:ms-power.png",
+        "pos": [ 0, 0 ],
+        "size": [ 32, 32 ],
+        "handle": [ 16, 16 ],
+        "repeat": 5
+      },
+
+      "mr-dead":
+      {
+        "file": "file:mr-dead.png",
+        "pos": [ 0, 0 ],
+        "size": [ 32, 32 ],
+        "handle": [ 16, 16 ]
+      },
+
+      "ms-dead":
+      {
+        "file": "file:ms-dead.png",
+        "pos": [ 0, 0 ],
+        "size": [ 32, 32 ],
+        "handle": [ 16, 16 ]
+      },
+
+      "power-aura":
+      {
+        "file": "file:power-aura.png",
+        "pos": [ 0, 0 ],
+        "size": [ 48, 48 ],
+        "handle": [ 24, 24 ]
+      },
+
+      "ghost-1-move":
+      {
+        "file": "file:ghost-1-move.png",
+        "pos": [ 0, 0 ],
+        "size": [ 32, 32 ],
+        "handle": [ 16, 16 ],
+        "repeat": 3
+      },
+
+      "ghost-1-scared":
+      {
+        "file": "file:ghost-1-scared.png",
+        "pos": [ 0, 0 ],
+        "size": [ 32, 32 ],
+        "handle": [ 16, 16 ],
+        "repeat": 3
+      },
+
+      "ghost-1-flash":
+      {
+        "file": "file:ghost-1-flash.png",
+        "pos": [ 0, 0 ],
+        "size": [ 32, 32 ],
+        "handle": [ 16, 16 ],
+        "repeat": 3
+      },
+
+      "ghost-1-eyes":
+      {
+        "file": "file:ghost-1-eyes.png",
+        "pos": [ 0, 0 ],
+        "size": [ 32, 32 ],
+        "handle": [ 16, 16 ],
+        "repeat": 3
+      },
+
+      "ghost-1-pupils":
+      {
+        "file": "file:ghost-1-pupils.png",
+        "pos": [ 0, 0 ],
+        "size": [ 32, 32 ],
+        "handle": [ 16, 16 ],
+        "repeat": 3
+      },
+
+      "ghost-2-move":
+      {
+        "file": "file:ghost-2-move.png",
+        "pos": [ 0, 0 ],
+        "size": [ 32, 32 ],
+        "handle": [ 16, 16 ],
+        "repeat": 5
+      },
+
+      "ghost-2-scared":
+      {
+        "file": "file:ghost-2-scared.png",
+        "pos": [ 0, 0 ],
+        "size": [ 32, 32 ],
+        "handle": [ 16, 16 ],
+        "repeat": 5
+      },
+
+      "ghost-2-flash":
+      {
+        "file": "file:ghost-2-flash.png",
+        "pos": [ 0, 0 ],
+        "size": [ 32, 32 ],
+        "handle": [ 16, 16 ],
+        "repeat": 5
+      },
+
+      "ghost-2-eyes":
+      {
+        "file": "file:ghost-2-eyes.png",
+        "pos": [ 0, 0 ],
+        "size": [ 32, 32 ],
+        "handle": [ 16, 16 ]
+      },
+
+      "ghost-2-pupils":
+      {
+        "file": "file:ghost-2-pupils.png",
+        "pos": [ 0, 0 ],
+        "size": [ 32, 32 ],
+        "handle": [ 16, 16 ]
+      },
+
+      "ghost-3-move":
+      {
+        "file": "file:ghost-3-move.png",
+        "pos": [ 0, 0 ],
+        "size": [ 32, 32 ],
+        "handle": [ 16, 16 ],
+        "repeat": 2
+      },
+
+      "ghost-3-scared":
+      {
+        "file": "file:ghost-3-scared.png",
+        "pos": [ 0, 0 ],
+        "size": [ 32, 32 ],
+        "handle": [ 16, 16 ],
+        "repeat": 2
+      },
+
+      "ghost-3-flash":
+      {
+        "file": "file:ghost-3-flash.png",
+        "pos": [ 0, 0 ],
+        "size": [ 32, 32 ],
+        "handle": [ 16, 16 ],
+        "repeat": 2
+      },
+
+      "ghost-3-eyes":
+      {
+        "file": "file:ghost-3-eyes.png",
+        "pos": [ 0, 0 ],
+        "size": [ 32, 32 ],
+        "handle": [ 16, 16 ]
+      },
+
+      "ghost-3-pupils":
+      {
+        "file": "file:ghost-3-pupils.png",
+        "pos": [ 0, 0 ],
+        "size": [ 32, 32 ],
+        "handle": [ 16, 16 ]
+      },
+
+      "ghost-4-move":
+      {
+        "file": "file:ghost-4-move.png",
+        "pos": [ 0, 0 ],
+        "size": [ 32, 32 ],
+        "handle": [ 16, 16 ],
+        "repeat": 3
+      },
+
+      "ghost-4-scared":
+      {
+        "file": "file:ghost-4-scared.png",
+        "pos": [ 0, 0 ],
+        "size": [ 32, 32 ],
+        "handle": [ 16, 16 ],
+        "repeat": 3
+      },
+
+      "ghost-4-flash":
+      {
+        "file": "file:ghost-4-flash.png",
+        "pos": [ 0, 0 ],
+        "size": [ 32, 32 ],
+        "handle": [ 16, 16 ],
+        "repeat": 3
+      },
+
+      "ghost-4-eyes":
+      {
+        "file": "file:ghost-4-eyes.png",
+        "pos": [ 0, 0 ],
+        "size": [ 32, 32 ],
+        "handle": [ 16, 16 ],
+        "repeat": 3
+      },
+
+      "ghost-4-pupils":
+      {
+        "file": "file:ghost-4-pupils.png",
+        "pos": [ 0, 0 ],
+        "size": [ 32, 32 ],
+        "handle": [ 16, 16 ],
+        "repeat": 3
+      },
+
+      "dot":
+      {
+        "file": "file:dot.png",
+        "pos": [ 0, 0 ],
+        "size": [ 32, 32 ],
+        "handle": [ 16, 16 ],
+        "repeat": 2
+      },
+
+      "power":
+      {
+        "file": "file:power.png",
+        "pos": [ 0, 0 ],
+        "size": [ 32, 32 ],
+        "handle": [ 16, 14 ],
+        "repeat": 2
+      },
+
+      "bubble":
+      {
+        "file": "file:bubble.png",
+        "pos": [ 0, 0 ],
+        "size": [ 32, 32 ],
+        "handle": [ 16, 14 ]
+      },
+
+      "fruit":
+      {
+        "file": "file:fruit.png",
+        "pos": [ 0, 0 ],
+        "size": [ 32, 32 ],
+        "handle": [ 16, 16 ],
+        "scale": [ 4, 4 ],
+        "repeat": 13
+      },
+
+      "move-arrow":
+      {
+        "file": "file:move-arrow.png",
+        "pos": [ 0, 0 ],
+        "size": [ 50, 32 ],
+        "handle": [ 16, 16 ],
+        "scale": [ 0.5, 0.5 ]
+      }
+    }
+  },
+
+  "wall-border-sprites":
+  {
+    "res:type": "sprites",
+    "format": "rgba32",
+    "mips": 1,
+    "optimize": false,
+    "sprites":
+    {
+      "00":
+      {
+        "file": "file:edges.png",
+        "pos": [ 20, 20 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+
+      "01":
+      {
+        "file": "file:edges.png",
+        "pos": [ 2, 20 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "02":
+      {
+        "file": "file:edges.png",
+        "pos": [ 20, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "03":
+      {
+        "file": "file:edges.png",
+        "pos": [ 2, 20 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 0 ],
+        "scale": [ -4, 4 ]
+      },
+      "04":
+      {
+        "file": "file:edges.png",
+        "pos": [ 20, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 16 ],
+        "scale": [ 4, -4 ]
+      },
+
+      "05":
+      {
+        "file": "file:edges.png",
+        "pos": [ 2, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "06":
+      {
+        "file": "file:edges.png",
+        "pos": [ 2, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 0 ],
+        "scale": [ -4, 4 ]
+      },
+      "07":
+      {
+        "file": "file:edges.png",
+        "pos": [ 2, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 16 ],
+        "scale": [ -4, -4 ]
+      },
+      "08":
+      {
+        "file": "file:edges.png",
+        "pos": [ 2, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 16 ],
+        "scale": [ 4, -4 ]
+      },
+
+      "09":
+      {
+        "file": "file:edges.png",
+        "pos": [ 38, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "10":
+      {
+        "file": "file:edges.png",
+        "pos": [ 38, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 0 ],
+        "scale": [ -4, 4 ]
+      },
+      "11":
+      {
+        "file": "file:edges.png",
+        "pos": [ 38, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 16 ],
+        "scale": [ -4, -4 ]
+      },
+      "12":
+      {
+        "file": "file:edges.png",
+        "pos": [ 38, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 16 ],
+        "scale": [ 4, -4 ]
+      },
+
+      "13":
+      {
+        "file": "file:edges.png",
+        "pos": [ 2, 58 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "14":
+      {
+        "file": "file:edges.png",
+        "pos": [ 20, 40 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "15":
+      {
+        "file": "file:edges.png",
+        "pos": [ 2, 58 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 0 ],
+        "scale": [ -4, 4 ]
+      },
+      "16":
+      {
+        "file": "file:edges.png",
+        "pos": [ 20, 40 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 16 ],
+        "scale": [ 4, -4 ]
+      },
+
+      "17":
+      {
+        "file": "file:edges.png",
+        "pos": [ 2, 40 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "18":
+      {
+        "file": "file:edges.png",
+        "pos": [ 2, 40 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 0 ],
+        "scale": [ -4, 4 ]
+      },
+      "19":
+      {
+        "file": "file:edges.png",
+        "pos": [ 2, 40 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 16 ],
+        "scale": [ -4, -4 ]
+      },
+      "20":
+      {
+        "file": "file:edges.png",
+        "pos": [ 2, 40 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 16 ],
+        "scale": [ 4, -4 ]
+      },
+
+      "21":
+      {
+        "file": "file:edges.png",
+        "pos": [ 20, 58 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+
+      "22":
+      {
+        "file": "file:edges.png",
+        "pos": [ 38, 40 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "23":
+      {
+        "file": "file:edges.png",
+        "pos": [ 38, 40 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 0 ],
+        "scale": [ -4, 4 ]
+      },
+      "24":
+      {
+        "file": "file:edges.png",
+        "pos": [ 38, 40 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 16 ],
+        "scale": [ -4, -4 ]
+      },
+      "25":
+      {
+        "file": "file:edges.png",
+        "pos": [ 38, 40 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 16 ],
+        "scale": [ 4, -4 ]
+      },
+
+      "26":
+      {
+        "file": "file:edges.png",
+        "pos": [ 2, 76 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "27":
+      {
+        "file": "file:edges.png",
+        "pos": [ 2, 76 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 0 ],
+        "scale": [ -4, 4 ]
+      },
+      "28":
+      {
+        "file": "file:edges.png",
+        "pos": [ 2, 76 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 16 ],
+        "scale": [ -4, -4 ]
+      },
+      "29":
+      {
+        "file": "file:edges.png",
+        "pos": [ 2, 76 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 16 ],
+        "scale": [ 4, -4 ]
+      },
+
+      "30":
+      {
+        "file": "file:edges.png",
+        "pos": [ 40, 78 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "31":
+      {
+        "file": "file:edges.png",
+        "pos": [ 40, 78 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 0 ],
+        "scale": [ -4, 4 ]
+      },
+      "32":
+      {
+        "file": "file:edges.png",
+        "pos": [ 40, 78 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 16 ],
+        "scale": [ -4, -4 ]
+      },
+      "33":
+      {
+        "file": "file:edges.png",
+        "pos": [ 40, 78 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 16 ],
+        "scale": [ 4, -4 ]
+      },
+
+      "34":
+      {
+        "file": "file:edges.png",
+        "pos": [ 22, 78 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "35":
+      {
+        "file": "file:edges.png",
+        "pos": [ 22, 78 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 0 ],
+        "scale": [ -4, 4 ]
+      },
+      "36":
+      {
+        "file": "file:edges.png",
+        "pos": [ 22, 78 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 16 ],
+        "scale": [ -4, -4 ]
+      },
+      "37":
+      {
+        "file": "file:edges.png",
+        "pos": [ 22, 78 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 16 ],
+        "scale": [ 4, -4 ]
+      },
+
+      "38":
+      {
+        "file": "file:edges.png",
+        "pos": [ 20, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "39":
+      {
+        "file": "file:edges.png",
+        "pos": [ 20, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 0 ],
+        "scale": [ -4, 4 ]
+      },
+      "40":
+      {
+        "file": "file:edges.png",
+        "pos": [ 20, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 16 ],
+        "scale": [ 4, -4 ]
+      },
+      "41":
+      {
+        "file": "file:edges.png",
+        "pos": [ 20, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 16 ],
+        "scale": [ -4, -4 ]
+      },
+
+      "42":
+      {
+        "file": "file:edges.png",
+        "pos": [ 2, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "43":
+      {
+        "file": "file:edges.png",
+        "pos": [ 2, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 0 ],
+        "scale": [ -4, 4 ]
+      },
+      "44":
+      {
+        "file": "file:edges.png",
+        "pos": [ 2, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 16 ],
+        "scale": [ 4, -4 ]
+      },
+      "45":
+      {
+        "file": "file:edges.png",
+        "pos": [ 2, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 16 ],
+        "scale": [ -4, -4 ]
+      }
+    }
+  },
+
+  "wall-fill-sprites":
+  {
+    "res:type": "sprites",
+    "format": "rgba32",
+    "mips": 1,
+    "optimize": false,
+    "sprites":
+    {
+      "00":
+      {
+        "file": "file:edges.png",
+        "pos": [ 80, 20 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+
+      "01":
+      {
+        "file": "file:edges.png",
+        "pos": [ 62, 20 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "02":
+      {
+        "file": "file:edges.png",
+        "pos": [ 80, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "03":
+      {
+        "file": "file:edges.png",
+        "pos": [ 62, 20 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 0 ],
+        "scale": [ -4, 4 ]
+      },
+      "04":
+      {
+        "file": "file:edges.png",
+        "pos": [ 80, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 16 ],
+        "scale": [ 4, -4 ]
+      },
+
+      "05":
+      {
+        "file": "file:edges.png",
+        "pos": [ 62, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "06":
+      {
+        "file": "file:edges.png",
+        "pos": [ 62, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 0 ],
+        "scale": [ -4, 4 ]
+      },
+      "07":
+      {
+        "file": "file:edges.png",
+        "pos": [ 62, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 16 ],
+        "scale": [ -4, -4 ]
+      },
+      "08":
+      {
+        "file": "file:edges.png",
+        "pos": [ 62, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 16 ],
+        "scale": [ 4, -4 ]
+      },
+
+      "09":
+      {
+        "file": "file:edges.png",
+        "pos": [ 98, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "10":
+      {
+        "file": "file:edges.png",
+        "pos": [ 98, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 0 ],
+        "scale": [ -4, 4 ]
+      },
+      "11":
+      {
+        "file": "file:edges.png",
+        "pos": [ 98, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 16 ],
+        "scale": [ -4, -4 ]
+      },
+      "12":
+      {
+        "file": "file:edges.png",
+        "pos": [ 98, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 16 ],
+        "scale": [ 4, -4 ]
+      },
+
+      "13":
+      {
+        "file": "file:edges.png",
+        "pos": [ 62, 58 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "14":
+      {
+        "file": "file:edges.png",
+        "pos": [ 80, 40 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "15":
+      {
+        "file": "file:edges.png",
+        "pos": [ 62, 58 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 0 ],
+        "scale": [ -4, 4 ]
+      },
+      "16":
+      {
+        "file": "file:edges.png",
+        "pos": [ 80, 40 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 16 ],
+        "scale": [ 4, -4 ]
+      },
+
+      "17":
+      {
+        "file": "file:edges.png",
+        "pos": [ 62, 40 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "18":
+      {
+        "file": "file:edges.png",
+        "pos": [ 62, 40 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 0 ],
+        "scale": [ -4, 4 ]
+      },
+      "19":
+      {
+        "file": "file:edges.png",
+        "pos": [ 62, 40 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 16 ],
+        "scale": [ -4, -4 ]
+      },
+      "20":
+      {
+        "file": "file:edges.png",
+        "pos": [ 62, 40 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 16 ],
+        "scale": [ 4, -4 ]
+      },
+
+      "21":
+      {
+        "file": "file:edges.png",
+        "pos": [ 80, 58 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+
+      "22":
+      {
+        "file": "file:edges.png",
+        "pos": [ 98, 40 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "23":
+      {
+        "file": "file:edges.png",
+        "pos": [ 98, 40 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 0 ],
+        "scale": [ -4, 4 ]
+      },
+      "24":
+      {
+        "file": "file:edges.png",
+        "pos": [ 98, 40 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 16 ],
+        "scale": [ -4, -4 ]
+      },
+      "25":
+      {
+        "file": "file:edges.png",
+        "pos": [ 98, 40 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 16 ],
+        "scale": [ 4, -4 ]
+      },
+
+      "26":
+      {
+        "file": "file:edges.png",
+        "pos": [ 62, 76 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "27":
+      {
+        "file": "file:edges.png",
+        "pos": [ 62, 76 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 0 ],
+        "scale": [ -4, 4 ]
+      },
+      "28":
+      {
+        "file": "file:edges.png",
+        "pos": [ 62, 76 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 16 ],
+        "scale": [ -4, -4 ]
+      },
+      "29":
+      {
+        "file": "file:edges.png",
+        "pos": [ 62, 76 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 16 ],
+        "scale": [ 4, -4 ]
+      },
+
+      "30":
+      {
+        "file": "file:edges.png",
+        "pos": [ 100, 78 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "31":
+      {
+        "file": "file:edges.png",
+        "pos": [ 100, 78 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 0 ],
+        "scale": [ -4, 4 ]
+      },
+      "32":
+      {
+        "file": "file:edges.png",
+        "pos": [ 100, 78 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 16 ],
+        "scale": [ -4, -4 ]
+      },
+      "33":
+      {
+        "file": "file:edges.png",
+        "pos": [ 100, 78 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 16 ],
+        "scale": [ 4, -4 ]
+      },
+
+      "34":
+      {
+        "file": "file:edges.png",
+        "pos": [ 82, 78 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "35":
+      {
+        "file": "file:edges.png",
+        "pos": [ 82, 78 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 0 ],
+        "scale": [ -4, 4 ]
+      },
+      "36":
+      {
+        "file": "file:edges.png",
+        "pos": [ 82, 78 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 16 ],
+        "scale": [ -4, -4 ]
+      },
+      "37":
+      {
+        "file": "file:edges.png",
+        "pos": [ 82, 78 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 16 ],
+        "scale": [ 4, -4 ]
+      },
+
+      "38":
+      {
+        "file": "file:edges.png",
+        "pos": [ 80, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "39":
+      {
+        "file": "file:edges.png",
+        "pos": [ 80, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 0 ],
+        "scale": [ -4, 4 ]
+      },
+      "40":
+      {
+        "file": "file:edges.png",
+        "pos": [ 80, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 16 ],
+        "scale": [ 4, -4 ]
+      },
+      "41":
+      {
+        "file": "file:edges.png",
+        "pos": [ 80, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 16 ],
+        "scale": [ -4, -4 ]
+      },
+
+      "42":
+      {
+        "file": "file:edges.png",
+        "pos": [ 62, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "43":
+      {
+        "file": "file:edges.png",
+        "pos": [ 62, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 0 ],
+        "scale": [ -4, 4 ]
+      },
+      "44":
+      {
+        "file": "file:edges.png",
+        "pos": [ 62, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 16 ],
+        "scale": [ 4, -4 ]
+      },
+      "45":
+      {
+        "file": "file:edges.png",
+        "pos": [ 62, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 16 ],
+        "scale": [ -4, -4 ]
+      }
+    }
+  },
+
+  "wall-bg-sprites":
+  {
+    "res:type": "sprites",
+    "format": "rgba32",
+    "mips": 1,
+    "optimize": false,
+    "sprites":
+    {
+      "00":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 20, 20 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+
+      "01":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 2, 20 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "02":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 20, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "03":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 2, 20 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 0 ],
+        "scale": [ -4, 4 ]
+      },
+      "04":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 20, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 16 ],
+        "scale": [ 4, -4 ]
+      },
+
+      "05":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 2, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "06":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 2, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 0 ],
+        "scale": [ -4, 4 ]
+      },
+      "07":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 2, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 16 ],
+        "scale": [ -4, -4 ]
+      },
+      "08":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 2, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 16 ],
+        "scale": [ 4, -4 ]
+      },
+
+      "09":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 38, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "10":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 38, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 0 ],
+        "scale": [ -4, 4 ]
+      },
+      "11":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 38, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 16 ],
+        "scale": [ -4, -4 ]
+      },
+      "12":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 38, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 16 ],
+        "scale": [ 4, -4 ]
+      },
+
+      "13":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 2, 58 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "14":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 20, 40 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "15":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 2, 58 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 0 ],
+        "scale": [ -4, 4 ]
+      },
+      "16":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 20, 40 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 16 ],
+        "scale": [ 4, -4 ]
+      },
+
+      "17":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 2, 40 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "18":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 2, 40 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 0 ],
+        "scale": [ -4, 4 ]
+      },
+      "19":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 2, 40 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 16 ],
+        "scale": [ -4, -4 ]
+      },
+      "20":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 2, 40 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 16 ],
+        "scale": [ 4, -4 ]
+      },
+
+      "21":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 20, 58 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+
+      "22":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 38, 40 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "23":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 38, 40 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 0 ],
+        "scale": [ -4, 4 ]
+      },
+      "24":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 38, 40 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 16 ],
+        "scale": [ -4, -4 ]
+      },
+      "25":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 38, 40 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 16 ],
+        "scale": [ 4, -4 ]
+      },
+
+      "26":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 2, 76 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "27":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 2, 76 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 0 ],
+        "scale": [ -4, 4 ]
+      },
+      "28":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 2, 76 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 16 ],
+        "scale": [ -4, -4 ]
+      },
+      "29":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 2, 76 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 16 ],
+        "scale": [ 4, -4 ]
+      },
+
+      "30":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 40, 78 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "31":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 40, 78 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 0 ],
+        "scale": [ -4, 4 ]
+      },
+      "32":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 40, 78 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 16 ],
+        "scale": [ -4, -4 ]
+      },
+      "33":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 40, 78 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 16 ],
+        "scale": [ 4, -4 ]
+      },
+
+      "34":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 22, 78 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "35":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 22, 78 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 0 ],
+        "scale": [ -4, 4 ]
+      },
+      "36":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 22, 78 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 16 ],
+        "scale": [ -4, -4 ]
+      },
+      "37":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 22, 78 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 16 ],
+        "scale": [ 4, -4 ]
+      },
+
+      "38":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 20, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "39":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 20, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 0 ],
+        "scale": [ -4, 4 ]
+      },
+      "40":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 20, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 16 ],
+        "scale": [ 4, -4 ]
+      },
+      "41":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 20, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 16 ],
+        "scale": [ -4, -4 ]
+      },
+
+      "42":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 2, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 0 ],
+        "scale": [ 4, 4 ]
+      },
+      "43":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 2, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 0 ],
+        "scale": [ -4, 4 ]
+      },
+      "44":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 2, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 0, 16 ],
+        "scale": [ 4, -4 ]
+      },
+      "45":
+      {
+        "file": "file:edges-bg.png",
+        "pos": [ 2, 2 ],
+        "size": [ 16, 16 ],
+        "handle": [ 16, 16 ],
+        "scale": [ -4, -4 ]
+      }
+    }
+  },
+
+  "font-sprites":
+  {
+    "res:type": "sprites",
+    "format": "rgba32",
+    "mips": 1,
+    "optimize": false,
+    "sprites":
+    {
+      "0":
+      {
+        "file": "file:font.png",
+        "pos": [ 8, 8, 72, 72 ]
+      },
+      "1":
+      {
+        "file": "file:font.png",
+        "pos": [ 80, 8, 144, 72 ]
+      },
+      "2":
+      {
+        "file": "file:font.png",
+        "pos": [ 152, 8, 216, 72 ]
+      },
+      "3":
+      {
+        "file": "file:font.png",
+        "pos": [ 224, 8, 288, 72 ]
+      },
+      "4":
+      {
+        "file": "file:font.png",
+        "pos": [ 296, 8, 360, 72 ]
+      },
+      "5":
+      {
+        "file": "file:font.png",
+        "pos": [ 368, 8, 432, 72 ]
+      },
+      "6":
+      {
+        "file": "file:font.png",
+        "pos": [ 440, 8, 504, 72 ]
+      },
+      "7":
+      {
+        "file": "file:font.png",
+        "pos": [ 8, 80, 72, 144 ]
+      },
+      "8":
+      {
+        "file": "file:font.png",
+        "pos": [ 80, 80, 144, 144 ]
+      },
+      "9":
+      {
+        "file": "file:font.png",
+        "pos": [ 152, 80, 216, 144 ]
+      },
+      "a":
+      {
+        "file": "file:font.png",
+        "pos": [ 224, 80, 288, 144 ]
+      },
+      "b":
+      {
+        "file": "file:font.png",
+        "pos": [ 296, 80, 360, 144 ]
+      },
+      "c":
+      {
+        "file": "file:font.png",
+        "pos": [ 368, 80, 432, 144 ]
+      },
+      "d":
+      {
+        "file": "file:font.png",
+        "pos": [ 440, 80, 504, 144 ]
+      },
+      "e":
+      {
+        "file": "file:font.png",
+        "pos": [ 8, 152, 72, 216 ]
+      },
+      "f":
+      {
+        "file": "file:font.png",
+        "pos": [ 80, 152, 144, 216 ]
+      },
+      "g":
+      {
+        "file": "file:font.png",
+        "pos": [ 152, 152, 216, 216 ]
+      },
+      "h":
+      {
+        "file": "file:font.png",
+        "pos": [ 224, 152, 288, 216 ]
+      },
+      "i":
+      {
+        "file": "file:font.png",
+        "pos": [ 296, 152, 360, 216 ]
+      },
+      "j":
+      {
+        "file": "file:font.png",
+        "pos": [ 368, 152, 432, 216 ]
+      },
+      "k":
+      {
+        "file": "file:font.png",
+        "pos": [ 440, 152, 504, 216 ]
+      },
+      "l":
+      {
+        "file": "file:font.png",
+        "pos": [ 8, 224, 72, 288 ]
+      },
+      "m":
+      {
+        "file": "file:font.png",
+        "pos": [ 80, 224, 144, 288 ]
+      },
+      "n":
+      {
+        "file": "file:font.png",
+        "pos": [ 152, 224, 216, 288 ]
+      },
+      "o":
+      {
+        "file": "file:font.png",
+        "pos": [ 224, 224, 288, 288 ]
+      },
+      "p":
+      {
+        "file": "file:font.png",
+        "pos": [ 296, 224, 360, 288 ]
+      },
+      "q":
+      {
+        "file": "file:font.png",
+        "pos": [ 368, 224, 432, 288 ]
+      },
+      "r":
+      {
+        "file": "file:font.png",
+        "pos": [ 440, 224, 504, 288 ]
+      },
+      "s":
+      {
+        "file": "file:font.png",
+        "pos": [ 8, 296, 72, 360 ]
+      },
+      "t":
+      {
+        "file": "file:font.png",
+        "pos": [ 80, 296, 144, 360 ]
+      },
+      "u":
+      {
+        "file": "file:font.png",
+        "pos": [ 152, 296, 216, 360 ]
+      },
+      "v":
+      {
+        "file": "file:font.png",
+        "pos": [ 224, 296, 288, 360 ]
+      },
+      "w":
+      {
+        "file": "file:font.png",
+        "pos": [ 296, 296, 360, 360 ]
+      },
+      "x":
+      {
+        "file": "file:font.png",
+        "pos": [ 368, 296, 432, 360 ]
+      },
+      "y":
+      {
+        "file": "file:font.png",
+        "pos": [ 440, 296, 504, 360 ]
+      },
+      "z":
+      {
+        "file": "file:font.png",
+        "pos": [ 8, 368, 72, 432 ]
+      },
+      "!":
+      {
+        "file": "file:font.png",
+        "pos": [ 80, 368, 144, 432 ]
+      },
+      ".":
+      {
+        "file": "file:font.png",
+        "pos": [ 152, 368, 216, 432 ]
+      },
+      "\"":
+      {
+        "file": "file:font.png",
+        "pos": [ 224, 368, 288, 432 ]
+      },
+      ":":
+      {
+        "file": "file:font.png",
+        "pos": [ 296, 368, 360, 432 ]
+      },
+      "-":
+      {
+        "file": "file:font.png",
+        "pos": [ 368, 368, 432, 432 ]
+      }
+    }
+  },
+
+  "small-font-sprites":
+  {
+    "res:type": "sprites",
+    "format": "rgba32",
+    "mips": 1,
+    "optimize": false,
+    "sprites":
+    {
+      "0":
+      {
+        "file": "file:font-small.png",
+        "pos": [ 16, 8, 48, 64 ]
+      },
+      "1":
+      {
+        "file": "file:font-small.png",
+        "pos": [ 88, 8, 96, 64 ]
+      },
+      "2":
+      {
+        "file": "file:font-small.png",
+        "pos": [ 104, 8, 144, 64 ]
+      },
+      "3":
+      {
+        "file": "file:font-small.png",
+        "pos": [ 152, 8, 192, 64 ]
+      },
+      "4":
+      {
+        "file": "file:font-small.png",
+        "pos": [ 200, 8, 240, 64 ]
+      },
+      "5":
+      {
+        "file": "file:font-small.png",
+        "pos": [ 8, 72, 48, 128 ]
+      },
+      "6":
+      {
+        "file": "file:font-small.png",
+        "pos": [ 56, 72, 96, 128 ]
+      },
+      "7":
+      {
+        "file": "file:font-small.png",
+        "pos": [ 104, 72, 144, 128 ]
+      },
+      "8":
+      {
+        "file": "file:font-small.png",
+        "pos": [ 152, 72, 192, 128 ]
+      },
+      "9":
+      {
+        "file": "file:font-small.png",
+        "pos": [ 200, 72, 240, 128 ]
+      }
+    }
+  }
+}

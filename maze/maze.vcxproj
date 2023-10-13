@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <ConfigurationType>Application</ConfigurationType>
+    <ProjectGuid>{C3A0AF9F-5AF7-471E-AE92-14032A8A9A94}</ProjectGuid>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.default.props" />
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ItemGroup>
+    <ClCompile Include="core\Actors.cpp" />
+    <ClCompile Include="core\Audio.cpp" />
+    <ClCompile Include="core\Difficulty.cpp" />
+    <ClCompile Include="core\GhostBrains.cpp" />
+    <ClCompile Include="core\GlobalResources.cpp" />
+    <ClCompile Include="core\Helpers.cpp" />
+    <ClCompile Include="core\Maze.cpp" />
+    <ClCompile Include="core\Mazes.cpp" />
+    <ClCompile Include="core\PlayingGame.cpp" />
+    <ClCompile Include="core\PlayingMaze.cpp" />
+    <ClCompile Include="core\RenderMaze.cpp" />
+    <ClCompile Include="core\RenderText.cpp" />
+    <ClCompile Include="core\Stats.cpp" />
+    <ClCompile Include="core\Tiles.cpp" />
+    <ClCompile Include="splash_screen.cpp" />
+    <ClCompile Include="states\HighScoreScreen.cpp" />
+    <ClCompile Include="states\PacApplication.cpp" />
+    <ClCompile Include="states\TitleScreen.cpp" />
+    <ClInclude Include="core\Actors.h" />
+    <ClInclude Include="core\Audio.h" />
+    <ClInclude Include="core\Difficulty.h" />
+    <ClInclude Include="core\GhostBrains.h" />
+    <ClInclude Include="core\GlobalResources.h" />
+    <ClInclude Include="core\Helpers.h" />
+    <ClInclude Include="core\Maze.h" />
+    <ClInclude Include="core\Mazes.h" />
+    <ClInclude Include="core\PlayingGame.h" />
+    <ClInclude Include="core\PlayingMaze.h" />
+    <ClInclude Include="core\RenderMaze.h" />
+    <ClInclude Include="core\RenderText.h" />
+    <ClInclude Include="core\Stats.h" />
+    <ClInclude Include="core\Tiles.h" />
+    <ClInclude Include="pch.h" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader>Create</PrecompiledHeader>
+    </ClCompile>
+    <ClInclude Include="splash_screen.h" />
+    <ClInclude Include="states\HighScoreScreen.h" />
+    <ClInclude Include="states\PacApplication.h" />
+    <ClInclude Include="states\TitleScreen.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ff_game_library\source\ff.application\ff.application.vcxproj">
+      <Project>{376073e9-ea4d-4513-941c-906ca968c6c3}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\ff_game_library\source\ff.dx\ff.dx.vcxproj">
+      <Project>{0580ed07-bb8f-472a-94fc-e0ee4a79421d}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="app.manifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="resource.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\main.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResJson Include="assets\Assets.res.json">
+      <Content>True</Content>
+    </ResJson>
+    <ResJson Include="assets\Values.Maze.res.json">
+      <Content>true</Content>
+    </ResJson>
+    <ResJson Include="assets\Values.Mazes.res.json">
+      <Content>true</Content>
+    </ResJson>
+    <ResJson Include="assets\Values.Tiles.res.json">
+      <Content>true</Content>
+    </ResJson>
+    <ResJson Include="assets\Assets.Audio.res.json">
+      <Content>true</Content>
+    </ResJson>
+    <ResJson Include="assets\Assets.Sprites.res.json">
+      <Content>true</Content>
+    </ResJson>
+    <ResJson Include="assets\Assets.Anim.res.json">
+      <Content>true</Content>
+    </ResJson>
+    <ResJson Include="assets\Assets.GhostAnim.res.json">
+      <Content>true</Content>
+    </ResJson>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>

@@ -1,0 +1,29 @@
+{
+  "res:namespace": "assets::maze",
+
+  "controls":
+  {
+    "res:type": "input",
+    "events":
+    {
+      "up": [ "up", "w", "gamepad_left_up", "gamepad_dpad_up" ],
+      "down": [ "down", "s", "gamepad_left_down", "gamepad_dpad_down" ],
+      "left": [ "left", "a", "gamepad_left_left", "gamepad_dpad_left" ],
+      "right": [ "right", "d", "gamepad_left_right", "gamepad_dpad_right" ],
+      "action": [ "return", "space", "gamepad_a" ],
+      "cancel": [ "escape" ],
+      "pause": [ "p" ],
+      "start": [ "gamepad_start" ],
+      "pauseAdvance": [ "1" ],
+      "click": [ "mouse_left" ]
+    },
+    "values":
+    {
+      "up": [ "up", "w", "gamepad_left_up", "gamepad_dpad_up" ],
+      "down": [ "down", "s", "gamepad_left_down", "gamepad_dpad_down" ],
+      "left": [ "left", "a", "gamepad_left_left", "gamepad_dpad_left" ],
+      "right": [ "right", "d", "gamepad_left_right", "gamepad_dpad_right" ],
+      "action": [ "return", "space", "gamepad_a" ]
+    }
+  }
+}

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Condition=" $([MSBuild]::GetDirectoryNameOfFileAbove('$(MSBuildThisFileDirectory)..', 'directory.build.targets')) != '' " Project="$([MSBuild]::EnsureTrailingSlash($([MSBuild]::GetDirectoryNameOfFileAbove('$(MSBuildThisFileDirectory)..', 'directory.build.targets'))))directory.build.targets" />
+  <Import Condition=" '$(SharedCppTargetsImported)' == '' And '$(MSBuildProjectExtension)' == '.vcxproj' " Project="ff_game_library\build\cpp.targets" />
+</Project>
