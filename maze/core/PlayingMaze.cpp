@@ -1284,7 +1284,9 @@ void PlayingMaze::OnPacEatDot(PacActor& pac, bool bPower)
     }
     else
     {
-        PlayEffect(!_dotEffect ? EFFECT_EAT_DOT1 : EFFECT_EAT_DOT2);
+        PlayEffect(!_dotEffect
+            ? (bPower ? EFFECT_EAT_POWER1 : EFFECT_EAT_DOT1)
+            : (bPower ? EFFECT_EAT_POWER2 : EFFECT_EAT_DOT2));
         _dotEffect = _dotEffect ? 0 : 1;
     }
 

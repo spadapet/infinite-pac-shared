@@ -22,6 +22,7 @@ private:
     void PlayBG(AudioEffect effect);
     bool IsBG(AudioEffect effect) const;
     bool IsEnabled() const;
+    bool IsVibrateEnabled() const;
 
     ff::auto_resource<ff::audio_effect_base> _effects[EFFECT_COUNT];
     AudioEffect _curBG;
@@ -51,17 +52,48 @@ void SoundEffects::Play(AudioEffect effect)
 {
     check_ret(IsEnabled());
 
-    if (effect >= 0 && effect < _countof(_effects))
+    if (IsEnabled() && effect >= 0 && effect < _countof(_effects))
     {
         if (IsBG(effect))
         {
             PlayBG(effect);
         }
-        else
+        else if (_effects[effect].object())
         {
-            ff::audio_effect_base* effectObj = _effects[effect].object().get();
-            effectObj->stop();
-            effectObj->play();
+            _effects[effect]->stop();
+            _effects[effect]->play();
+        }
+    }
+
+    if (IsVibrateEnabled())
+    {
+        switch (effect)
+        {
+            case EFFECT_DYING:
+                ff::input::gamepad(0).vibrate(0.375, 0, 1.25);
+                break;
+
+            case EFFECT_EAT_GHOST:
+                ff::input::gamepad(0).vibrate(0.75, 0, 0.75);
+                break;
+
+            case EFFECT_EAT_FRUIT:
+            case EFFECT_EAT_POWER1:
+            case EFFECT_EAT_POWER2:
+                ff::input::gamepad(0).vibrate(0, 1, 0.5);
+                break;
+
+            case EFFECT_FRUIT_BOUNCE:
+                ff::input::gamepad(0).vibrate(0.5, 0, 0.1);
+                break;
+
+            case EFFECT_EAT_DOT1:
+                ff::input::gamepad(0).vibrate(0, 0.5, 0.1);
+                break;
+
+            case EFFECT_EAT_DOT2:
+                // No vibrate, every other dot is enough shaking
+                break;
         }
     }
 }
@@ -74,9 +106,9 @@ void SoundEffects::Stop(AudioEffect effect)
         {
             StopBG();
         }
-        else
+        else if (_effects[effect].object())
         {
-            _effects[effect].object()->stop();
+            _effects[effect]->stop();
         }
     }
 }
@@ -135,4 +167,11 @@ bool SoundEffects::IsEnabled() const
     const ff::dict& options = PacApplication::Get()->GetOptions();
     bool soundOn = options.get<bool>(PacApplication::OPTION_SOUND_ON, PacApplication::DEFAULT_SOUND_ON);
     return soundOn;
+}
+
+bool SoundEffects::IsVibrateEnabled() const
+{
+    const ff::dict& options = PacApplication::Get()->GetOptions();
+    bool vibrateOn = options.get<bool>(PacApplication::OPTION_VIBRATE_ON, PacApplication::DEFAULT_VIBRATE_ON);
+    return vibrateOn;
 }

@@ -53,6 +53,8 @@ ff::auto_resource<ff::audio_effect_base> GetGlobalEffect(CharType type, AudioEff
         case EFFECT_BACKGROUND_EYES: name += "bg-eaten"; break;
         case EFFECT_EAT_DOT1: name += "eat-dot-1"; break;
         case EFFECT_EAT_DOT2: name += "eat-dot-2"; break;
+        case EFFECT_EAT_POWER1: name += "eat-dot-1"; break;
+        case EFFECT_EAT_POWER2: name += "eat-dot-2"; break;
         case EFFECT_EAT_GHOST: name += "eat-ghost"; break;
         case EFFECT_EAT_FRUIT: name += "eat-fruit"; break;
         case EFFECT_FRUIT_BOUNCE: name += "fruit-bounce"; break;

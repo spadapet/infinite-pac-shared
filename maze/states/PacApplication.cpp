@@ -13,6 +13,7 @@ std::string_view PacApplication::OPTION_PAC_DIFF("OPTION_PAC_DIFFICULTY");
 std::string_view PacApplication::OPTION_PAC_MAZES("OPTION_PAC_MAZES");
 std::string_view PacApplication::OPTION_PAC_PLAYERS("OPTION_PAC_PLAYERS");
 std::string_view PacApplication::OPTION_SOUND_ON("OPTION_SOUND_ON");
+std::string_view PacApplication::OPTION_VIBRATE_ON("OPTION_VIBRATE_ON");
 std::string_view PacApplication::OPTION_FULL_SCREEN("OPTION_FULL_SCREEN");
 
 static const double TOUCH_DEAD_ZONE = 20;
@@ -477,7 +478,7 @@ void PacApplication::RenderPacPressing(ff::dxgi::draw_base& draw)
         {
             rotation = ff::math::radians_to_degrees<float>((float)std::atan2(-_touchOffset.y, _touchOffset.x));
             scale = (float)std::min(4.0, (_touchLen - TOUCH_DEAD_ZONE) / 80.0 + 0.75);
-            opacity = (float)ff::math::clamp(1.25 / scale, 0.25, 1.0);
+            opacity = (float)std::clamp(1.25 / scale, 0.25, 1.0);
         }
     }
     else
