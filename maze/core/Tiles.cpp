@@ -54,7 +54,12 @@ static std::shared_ptr<Tiles> CreateTilesFromString(const char* szTiles, ff::poi
 
 std::shared_ptr<Tiles> CreateTilesFromResource(std::string_view name)
 {
-    ff::auto_resource<ff::resource_values> values_tiles("values_tiles");
+    static std::shared_ptr<ff::resource_values> values_tiles;
+    if (!values_tiles)
+    {
+        values_tiles = ff::auto_resource<ff::resource_values>("values_tiles").object();
+    }
+
     ff::value_ptr rawValue = values_tiles->get_resource_value(name);
     assert_ret_val(rawValue, nullptr);
 

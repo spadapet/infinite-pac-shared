@@ -53,6 +53,8 @@ ff::auto_resource<ff::audio_effect_base> GetGlobalEffect(CharType type, AudioEff
         case EFFECT_BACKGROUND_EYES: name += "bg-eaten"; break;
         case EFFECT_EAT_DOT1: name += "eat-dot-1"; break;
         case EFFECT_EAT_DOT2: name += "eat-dot-2"; break;
+        case EFFECT_EAT_POWER1: name += "eat-dot-1"; break;
+        case EFFECT_EAT_POWER2: name += "eat-dot-2"; break;
         case EFFECT_EAT_GHOST: name += "eat-ghost"; break;
         case EFFECT_EAT_FRUIT: name += "eat-fruit"; break;
         case EFFECT_FRUIT_BOUNCE: name += "fruit-bounce"; break;
@@ -139,7 +141,11 @@ size_t GetEventClick()
 
 std::shared_ptr<ff::input_event_provider> GetGlobalInputMapping()
 {
-    ff::auto_resource<ff::input_mapping> inputRes("controls");
+    static std::shared_ptr<ff::input_mapping> input_mapping;
+    if (!input_mapping)
+    {
+        input_mapping = ff::auto_resource<ff::input_mapping>("controls").object();
+    }
 
     std::vector<ff::input_vk const*> devices;
     devices.push_back(&ff::input::keyboard());
@@ -150,5 +156,5 @@ std::shared_ptr<ff::input_event_provider> GetGlobalInputMapping()
         devices.push_back(&ff::input::gamepad(i));
     }
 
-    return std::make_shared<ff::input_event_provider>(*inputRes.object(), std::move(devices));
+    return std::make_shared<ff::input_event_provider>(*input_mapping, std::move(devices));
 }

@@ -37,7 +37,7 @@ static LRESULT CALLBACK splash_screen_proc(HWND hwnd, UINT msg, WPARAM wp, LPARA
     switch (msg)
     {
         case WM_ACTIVATE:
-            if (WA_INACTIVE)
+            if (wp == WA_INACTIVE)
             {
                 ::PostMessage(hwnd, WM_CLOSE, 0, 0);
             }

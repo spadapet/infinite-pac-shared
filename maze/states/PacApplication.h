@@ -24,18 +24,21 @@ public:
     ff::rect_float GetRenderRect() const;
     ff::rect_float GetLevelRect() const;
 
+    void PauseGame();
     void SetInputEvent(size_t id);
 
     static std::string_view OPTION_PAC_DIFF;
     static std::string_view OPTION_PAC_MAZES;
     static std::string_view OPTION_PAC_PLAYERS;
     static std::string_view OPTION_SOUND_ON;
+    static std::string_view OPTION_VIBRATE_ON;
     static std::string_view OPTION_FULL_SCREEN;
 
     static const int DEFAULT_PAC_DIFF = 1;
     static const int DEFAULT_PAC_MAZES = 0;
     static const int DEFAULT_PAC_PLAYERS = 1;
     static const bool DEFAULT_SOUND_ON = true;
+    static const bool DEFAULT_VIBRATE_ON = true;
     static const bool DEFAULT_FULL_SCREEN = false;
 
     // State

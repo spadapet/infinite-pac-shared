@@ -13,6 +13,7 @@ std::string_view PacApplication::OPTION_PAC_DIFF("OPTION_PAC_DIFFICULTY");
 std::string_view PacApplication::OPTION_PAC_MAZES("OPTION_PAC_MAZES");
 std::string_view PacApplication::OPTION_PAC_PLAYERS("OPTION_PAC_PLAYERS");
 std::string_view PacApplication::OPTION_SOUND_ON("OPTION_SOUND_ON");
+std::string_view PacApplication::OPTION_VIBRATE_ON("OPTION_VIBRATE_ON");
 std::string_view PacApplication::OPTION_FULL_SCREEN("OPTION_FULL_SCREEN");
 
 static const double TOUCH_DEAD_ZONE = 20;
@@ -35,7 +36,6 @@ PacApplication::~PacApplication()
 
 PacApplication* PacApplication::Get()
 {
-    assert(s_pacApp);
     return s_pacApp;
 }
 
@@ -81,6 +81,7 @@ void PacApplication::Advance()
                 if (_game && _game->IsGameOver() && pTitle)
                 {
                     // Start playing the selected game
+                    auto keepAliveGame = _game;
                     _game = nullptr;
                     SetState(APP_PLAYING_GAME);
                 }
@@ -92,8 +93,7 @@ void PacApplication::Advance()
             {
                 if (_game->IsGameOver())
                 {
-                    // Back to the title screen
-                    SetState(APP_LOADING);
+                    SetState(APP_TITLE);
                 }
                 else if (_game->IsPaused())
                 {
@@ -249,8 +249,7 @@ void PacApplication::HandleInputEvents()
             {
                 if (_game && !_game->IsPaused())
                 {
-                    _game->TogglePaused();
-                    ff::audio::pause_effects();
+                    PauseGame();
                 }
                 else
                 {
@@ -272,12 +271,12 @@ void PacApplication::HandleInputEvents()
                 }
                 else
                 {
-                    SetState(APP_LOADING);
+                    SetState(APP_TITLE);
                 }
             }
             else if (ie.event_id == GetEventHome() && _state == APP_PLAYING_GAME)
             {
-                SetState(APP_LOADING);
+                SetState(APP_TITLE);
             }
         }
     }
@@ -285,7 +284,11 @@ void PacApplication::HandleInputEvents()
     if (unpause && _game && _game->IsPaused())
     {
         _game->TogglePaused();
-        ff::audio::resume_effects();
+
+        if (!_game->IsPaused())
+        {
+            ff::audio::resume_effects();
+        }
     }
 
     HandlePressing(_inputRes.get());
@@ -400,6 +403,19 @@ ff::point_int PacApplication::HandleTouchPress(IPlayingActor* pac)
     return pressDir;
 }
 
+void PacApplication::PauseGame()
+{
+    if (_game && !_game->IsPaused())
+    {
+        _game->TogglePaused();
+
+        if (_game->IsPaused())
+        {
+            ff::audio::pause_effects();
+        }
+    }
+}
+
 void PacApplication::RenderGame(ff::dxgi::command_context_base& context, ff::dxgi::target_base& target, ff::dxgi::depth_base& depth, IPlayingGame* pGame)
 {
     check_ret(pGame);
@@ -476,16 +492,16 @@ void PacApplication::RenderPacPressing(ff::dxgi::draw_base& draw)
         if (_touchOffset)
         {
             rotation = ff::math::radians_to_degrees<float>((float)std::atan2(-_touchOffset.y, _touchOffset.x));
-            scale = (float)std::min(4.0, (_touchLen - TOUCH_DEAD_ZONE) / 80.0 + 0.75);
-            opacity = (float)ff::math::clamp(1.25 / scale, 0.25, 1.0);
+            scale = (float)std::min(2.0, (_touchLen - TOUCH_DEAD_ZONE) / 80.0 + 0.75);
+            opacity = (float)std::clamp(1.25 / scale, 0.25, 1.0);
         }
     }
-    else
-    {
-        rotation = ff::math::radians_to_degrees<float>((float)std::atan2(-pressDir.y, pressDir.x));
-        scale = 1.25;
-        opacity = 0.5;
-    }
+    // else // render for non-touch controls
+    // {
+    //     rotation = ff::math::radians_to_degrees<float>((float)std::atan2(-pressDir.y, pressDir.x));
+    //     scale = 1.25;
+    //     opacity = 0.5;
+    // }
 
     if (opacity != 0 && scale != 0)
     {
@@ -528,41 +544,27 @@ void PacApplication::SetState(EAppState state)
     {
         case APP_TITLE:
             {
-                std::shared_ptr<TitleScreen> pTitle = std::make_shared<TitleScreen>();
-                _game = pTitle;
+                std::shared_ptr<IPlayingGame> pTitle = std::make_shared<TitleScreen>();
+                std::swap(_game, pTitle);
                 _state = APP_TITLE;
             }
             break;
 
         case APP_PLAYING_GAME:
+            if (!_game)
             {
-                if (!_game)
-                {
-                    int players = _options.get<int>(OPTION_PAC_PLAYERS, DEFAULT_PAC_PLAYERS);
-                    std::shared_ptr<IMazes> pMazes = CreateMazesFromId(TitleScreen::GetMazesID());
-                    std::shared_ptr<IPlayingGame> pGame = IPlayingGame::Create(pMazes, players, this);
-                    _game = pGame;
-                }
-
-                if (_game)
-                {
-                    _state = APP_PLAYING_GAME;
-                }
+                int players = _options.get<int>(OPTION_PAC_PLAYERS, DEFAULT_PAC_PLAYERS);
+                std::shared_ptr<IMazes> pMazes = CreateMazesFromId(TitleScreen::GetMazesID());
+                std::shared_ptr<IPlayingGame> pGame = IPlayingGame::Create(pMazes, players, this);
+                std::swap(_game, pGame);
             }
-            break;
 
-        case APP_LOADING:
-            {
-                _game = nullptr;
-                _state = APP_LOADING;
-            }
+            _state = APP_PLAYING_GAME;
             break;
 
         case APP_HIGH_SCORE:
-            {
-                assert(_game && _pushedGame);
-                _state = APP_HIGH_SCORE;
-            }
+            assert(_game && _pushedGame);
+            _state = APP_HIGH_SCORE;
             break;
     }
 
