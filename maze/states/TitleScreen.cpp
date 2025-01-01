@@ -137,6 +137,13 @@ void TitleScreen::CreateOptions()
                 : std::string("SOUND:OFF");
         };
 
+    auto vibrateText = [options]()
+        {
+            return options->get<bool>(PacApplication::OPTION_VIBRATE_ON, PacApplication::DEFAULT_VIBRATE_ON)
+                ? std::string("VIBRATE:ON")
+                : std::string("VIBRATE:OFF");
+        };
+
     auto fullScreenText = []()
         {
             return ff::app_full_screen()
@@ -157,6 +164,9 @@ void TitleScreen::CreateOptions()
     optionPos.y += lineHeight;
 
     _options.push_back(Option(OPT_SOUND, optionPos, soundText));
+    optionPos.y += lineHeight;
+
+    _options.push_back(Option(OPT_VIBRATE, optionPos, vibrateText));
     optionPos.y += lineHeight;
 
     _options.push_back(Option(OPT_FULL_SCREEN, optionPos, fullScreenText));
@@ -241,6 +251,14 @@ void TitleScreen::Execute(EOption option, bool pressedLeft)
                 playEffect = true;
                 bool value = appOptions.get<bool>(PacApplication::OPTION_SOUND_ON, PacApplication::DEFAULT_SOUND_ON);
                 appOptions.set<bool>(PacApplication::OPTION_SOUND_ON, !value);
+            }
+            break;
+
+        case OPT_VIBRATE:
+            {
+                playEffect = true;
+                bool value = appOptions.get<bool>(PacApplication::OPTION_VIBRATE_ON, PacApplication::DEFAULT_VIBRATE_ON);
+                appOptions.set<bool>(PacApplication::OPTION_VIBRATE_ON, !value);
             }
             break;
 
@@ -368,6 +386,7 @@ void TitleScreen::Advance()
                         case OPT_PLAYERS:
                         case OPT_DIFF:
                         case OPT_SOUND:
+                        case OPT_VIBRATE:
                         case OPT_FULL_SCREEN:
                             bExecute = true;
                             bLeft = (ie.event_id == GetEventLeft());
@@ -484,26 +503,31 @@ void TitleScreen::RenderOptions(ff::dxgi::draw_base& draw)
         }
     }
 
-    std::string szTitles(" START GAME:\n\n\n\n\n\n\n\n\n\n");
-    if (_scores.size())
-    {
-        szTitles += "HIGH SCORES:";
-    }
-
     _text->DrawText(
         draw,
-        szTitles.c_str(),
+        " START GAME:",
         TileTopLeftToPixelF(ff::point_int(6, 2)),
         lineHeight,
         &s_titleColor,
         nullptr, nullptr);
 
-    _text->DrawText(
-        draw,
-        _scores.c_str(),
-        TileTopLeftToPixelF(ff::point_int(6, 19)),
-        0, &s_textColor,
+    if (_scores.size())
+    {
+        _text->DrawText(
+            draw,
+            "HIGH SCORES:",
+            TileTopLeftToPixelF(ff::point_int(6, 17)) + ff::point_float(0, PixelsPerTileF().y / 2),
+            lineHeight,
+            &s_titleColor,
+
         nullptr, nullptr);
+        _text->DrawText(
+            draw,
+            _scores.c_str(),
+            TileTopLeftToPixelF(ff::point_int(6, 19)),
+            0, &s_textColor,
+            nullptr, nullptr);
+    }
 }
 
 void TitleScreen::RenderFade(ff::dxgi::draw_base& draw)

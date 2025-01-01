@@ -102,6 +102,7 @@ private:
         OPT_PLAYERS,
         OPT_DIFF,
         OPT_SOUND,
+        OPT_VIBRATE,
         OPT_FULL_SCREEN,
         OPT_ABOUT,
         OPT_NONE,
