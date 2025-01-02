@@ -146,7 +146,7 @@ void TitleScreen::CreateOptions()
 
     auto fullScreenText = []()
         {
-            return ff::app_full_screen()
+            return ff::app_window().full_screen()
                 ? std::string("FULL SCREEN:ON")
                 : std::string("FULL SCREEN:OFF");
         };
@@ -267,7 +267,7 @@ void TitleScreen::Execute(EOption option, bool pressedLeft)
                 playEffect = true;
                 bool value = !appOptions.get<bool>(PacApplication::OPTION_FULL_SCREEN, PacApplication::DEFAULT_FULL_SCREEN);
                 appOptions.set<bool>(PacApplication::OPTION_FULL_SCREEN, value);
-                ff::app_full_screen(value);
+                ff::app_window().full_screen(value);
             }
             break;
 

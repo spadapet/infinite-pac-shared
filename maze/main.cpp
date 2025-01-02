@@ -7,7 +7,8 @@ class root_state : public ff::game::root_state_base, public IPacApplicationHost
 public:
     root_state()
         : pac_app(*this)
-    {}
+    {
+    }
 
     virtual std::shared_ptr<ff::state> advance_time() override
     {
@@ -22,15 +23,15 @@ public:
 
     virtual void ShowAboutDialog() override
     {
+        ff::thread_dispatch::get_main()->post([]()
+        {
+            ::MessageBox(ff::app_window(), L"Test about dialog", L"About", MB_OK);
+        });
     }
 
     virtual bool IsShowingPopup() const override
     {
-        return false;
-    }
-
-    virtual void SetPaused(bool value) override
-    {
+        return !::IsWindowEnabled(ff::app_window());
     }
 
 protected:
