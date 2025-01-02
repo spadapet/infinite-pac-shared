@@ -24,6 +24,7 @@ public:
     ff::rect_float GetRenderRect() const;
     ff::rect_float GetLevelRect() const;
 
+    void PauseGame();
     void SetInputEvent(size_t id);
 
     static std::string_view OPTION_PAC_DIFF;

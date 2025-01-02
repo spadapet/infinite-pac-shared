@@ -70,9 +70,12 @@ std::shared_ptr<IMazes> CreateMazesFromId(std::string_view id)
 
 std::shared_ptr<IMazes> CreateMazesFromResource(std::string_view name)
 {
-    std::shared_ptr<IMazes> mazes = IMazes::Create();
+    static std::shared_ptr<ff::resource_values> values_mazes;
+    if (!values_mazes)
+    {
+        values_mazes = ff::auto_resource<ff::resource_values>("values_mazes").object();
+    }
 
-    ff::auto_resource<ff::resource_values> values_mazes("values_mazes");
     ff::value_ptr rawValue = values_mazes->get_resource_value(name);
     assert_ret_val(rawValue, nullptr);
 
@@ -88,6 +91,7 @@ std::shared_ptr<IMazes> CreateMazesFromResource(std::string_view name)
     ff::value_ptr mazesValue = dict.get("mazes");
     ff::value_ptr diffsValue = dict.get("difficulties");
 
+    std::shared_ptr<IMazes> mazes = IMazes::Create();
     mazes->SetStartingLives(lives);
     mazes->SetFreeLifeScore(firstLife, repeatLife, maxFreeLives);
 

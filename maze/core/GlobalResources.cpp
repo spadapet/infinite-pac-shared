@@ -141,7 +141,11 @@ size_t GetEventClick()
 
 std::shared_ptr<ff::input_event_provider> GetGlobalInputMapping()
 {
-    ff::auto_resource<ff::input_mapping> inputRes("controls");
+    static std::shared_ptr<ff::input_mapping> input_mapping;
+    if (!input_mapping)
+    {
+        input_mapping = ff::auto_resource<ff::input_mapping>("controls").object();
+    }
 
     std::vector<ff::input_vk const*> devices;
     devices.push_back(&ff::input::keyboard());
@@ -152,5 +156,5 @@ std::shared_ptr<ff::input_event_provider> GetGlobalInputMapping()
         devices.push_back(&ff::input::gamepad(i));
     }
 
-    return std::make_shared<ff::input_event_provider>(*inputRes.object(), std::move(devices));
+    return std::make_shared<ff::input_event_provider>(*input_mapping, std::move(devices));
 }

@@ -56,7 +56,12 @@ static DirectX::XMFLOAT4 VectorFromRect(const ff::rect_float& rect)
 
 std::shared_ptr<IMaze> CreateMazeFromResource(std::string_view name)
 {
-    ff::auto_resource<ff::resource_values> values_maze("values_maze");
+    static std::shared_ptr<ff::resource_values> values_maze;
+    if (!values_maze)
+    {
+        values_maze = ff::auto_resource<ff::resource_values>("values_maze").object();
+    }
+
     ff::value_ptr rawValue = values_maze->get_resource_value(name);
     assert_ret_val(rawValue, nullptr);
 

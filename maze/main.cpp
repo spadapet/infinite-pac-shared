@@ -48,12 +48,44 @@ private:
     PacApplication pac_app;
 };
 
+ff::signal_connection window_connection;
+
+static void window_message(ff::window* window, ff::window_message& message)
+{
+    switch (message.msg)
+    {
+        case WM_SIZE:
+            if (message.wp == SIZE_MINIMIZED)
+            {
+                ff::thread_dispatch::get_game()->post([]()
+                {
+                    if (PacApplication::Get())
+                    {
+                        PacApplication::Get()->PauseGame();
+                    }
+                });
+            }
+            break;
+
+        case WM_DESTROY:
+            ::window_connection.disconnect();
+            break;
+    }
+}
+
+static void window_initialized(ff::window* window)
+{
+    ::close_splash_screen();
+
+    ::window_connection = window->message_sink().connect(::window_message);
+}
+
 int WINAPI wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ int)
 {
     ::show_splash_screen(instance);
 
     ff::game::init_params_t<::root_state> params;
-    params.window_initialized_func = std::bind(::close_splash_screen);
+    params.window_initialized_func = ::window_initialized;
 
     return ff::game::run(params);
 }
