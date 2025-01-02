@@ -9,7 +9,6 @@ class IPacApplicationHost
 public:
     virtual void ShowAboutDialog() = 0;
     virtual bool IsShowingPopup() const = 0;
-    virtual void SetPaused(bool value) = 0;
 };
 
 class PacApplication : public IPlayingGameHost
@@ -25,6 +24,7 @@ public:
     ff::rect_float GetLevelRect() const;
 
     void PauseGame();
+    bool IsPaused() const;
     void SetInputEvent(size_t id);
 
     static std::string_view OPTION_PAC_DIFF;

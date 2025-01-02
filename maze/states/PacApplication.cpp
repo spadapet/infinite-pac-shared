@@ -89,16 +89,9 @@ void PacApplication::Advance()
             break;
 
         case APP_PLAYING_GAME:
-            if (_game)
+            if (_game && _game->IsGameOver())
             {
-                if (_game->IsGameOver())
-                {
-                    SetState(APP_TITLE);
-                }
-                else if (_game->IsPaused())
-                {
-                    gamePaused = _game->IsPaused();
-                }
+                SetState(APP_TITLE);
             }
             break;
 
@@ -145,8 +138,6 @@ void PacApplication::Advance()
     {
         _game->Advance();
     }
-
-    _host.SetPaused(gamePaused);
 }
 
 void PacApplication::Render(ff::dxgi::command_context_base& context, ff::render_targets& targets)
@@ -368,7 +359,7 @@ ff::point_int PacApplication::HandleTouchPress(IPlayingActor* pac)
 
     if (pointer.touch_info_count())
     {
-        const double scale = ff::app_dpi_scale();
+        const double scale = ff::app_window().dpi_scale();
 
         _touching = true;
         _touchInfo = pointer.touch_info(0);
@@ -414,6 +405,11 @@ void PacApplication::PauseGame()
             ff::audio::pause_effects();
         }
     }
+}
+
+bool PacApplication::IsPaused() const
+{
+    return _game && _game->IsPaused();
 }
 
 void PacApplication::RenderGame(ff::dxgi::command_context_base& context, ff::dxgi::target_base& target, ff::dxgi::depth_base& depth, IPlayingGame* pGame)
