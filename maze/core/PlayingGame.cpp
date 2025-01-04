@@ -233,37 +233,38 @@ void Player::CheckFreeLife()
         _nextFreeLife = _freeLifeRepeat ? _nextFreeLife + _freeLifeRepeat : 0;
     }
 
-#ifdef _DEBUG
-    static bool s_bCheating = false;
-
-    if (ff::input::keyboard().pressing('0'))
+    if constexpr (ff::constants::debug_build)
     {
-        _stats._cheated = true;
+        static bool s_bCheating = false;
 
-        if (!s_bCheating)
+        if (ff::input::keyboard().pressing('0'))
         {
-            s_bCheating = true;
+            _stats._cheated = true;
 
-            _lives = std::min<size_t>(5, _lives + 1);
+            if (!s_bCheating)
+            {
+                s_bCheating = true;
+
+                _lives = std::min<size_t>(5, _lives + 1);
+            }
+        }
+        else
+        {
+            s_bCheating = false;
+        }
+
+        if (ff::input::keyboard().pressing('9'))
+        {
+            _stats._cheated = true;
+            _stats._score += 100;
+        }
+
+        if (ff::input::keyboard().pressing('8'))
+        {
+            // Doesn't count as cheating
+            _lives = 1;
         }
     }
-    else
-    {
-        s_bCheating = false;
-    }
-
-    if (ff::input::keyboard().pressing('9'))
-    {
-        _stats._cheated = true;
-        _stats._score += 100;
-    }
-
-    if (ff::input::keyboard().pressing('8'))
-    {
-        // Doesn't count as cheating
-        _lives = 1;
-    }
-#endif
 }
 
 // IPlayingMazeHost
@@ -424,13 +425,11 @@ void PlayingGame::InternalAdvance(bool bForce)
     {
         size_t speed = 1;
 
-#ifdef _DEBUG
-        if (ff::input::keyboard().pressing(VK_INSERT))
+        if (ff::constants::debug_build && ff::input::keyboard().pressing(VK_INSERT))
         {
             // Is this cheating? If so, set _bCheated in the stats
             speed = 4;
         }
-#endif
 
         for (; speed > 0; speed--)
         {
@@ -755,12 +754,10 @@ void PlayingGame::TogglePaused()
 
 void PlayingGame::PausedAdvance()
 {
-#ifdef _DEBUG
-    if (_paused)
+    if (ff::constants::debug_build && _paused)
     {
         _singleAdvance = true;
 
         InternalAdvance(true);
     }
-#endif
 }

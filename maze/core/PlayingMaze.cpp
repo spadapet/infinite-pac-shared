@@ -657,8 +657,7 @@ void PlayingMaze::AdvanceActors()
         AdvanceCustomActors();
         CheckPacCollisions(*_pac);
 
-#ifdef _DEBUG
-        if (_pac->IsActive() && ff::input::keyboard().pressing('4'))
+        if (ff::constants::debug_build && _pac->IsActive() && ff::input::keyboard().pressing('4'))
         {
             _stats._cheated = true;
 
@@ -666,7 +665,6 @@ void PlayingMaze::AdvanceActors()
             AdvancePac(*_pac);
             CheckPacCollisions(*_pac);
         }
-#endif
     }
 }
 
@@ -1223,13 +1221,11 @@ void PlayingMaze::OnPacEatDot(PacActor& pac, bool bPower)
 {
     _lastDotCounter = 0;
 
-#ifdef _DEBUG
-    if (ff::input::keyboard().pressing('6'))
+    if (ff::constants::debug_build && ff::input::keyboard().pressing('7'))
     {
         _stats._cheated = true;
         _dotCount = 1;
     }
-#endif
 
     if (_dotCount > 0 && !--_dotCount)
     {
@@ -1342,13 +1338,11 @@ void PlayingMaze::OnPacEatGhost(PacActor& pac, GhostActor& ghost)
 
 void PlayingMaze::OnGhostEatPac(PacActor& pac, GhostActor& ghost)
 {
-#ifdef _DEBUG
-    if (ff::input::keyboard().pressing('3'))
+    if (ff::constants::debug_build && ff::input::keyboard().pressing('6'))
     {
         _stats._cheated = true;
         return;
     }
-#endif
 
     _stats._ghostDeathCount[GhostIndex(ghost)]++;
 
@@ -1676,8 +1670,7 @@ void PlayingMaze::Render(ff::dxgi::draw_base& draw)
             _renderMaze->RenderPoints(draw, this);
         }
 
-#ifdef _DEBUG
-        if (ff::input::keyboard().pressing('2'))
+        if (ff::constants::debug_build && ff::input::keyboard().pressing('5'))
         {
             _stats._cheated = true;
 
@@ -1686,7 +1679,6 @@ void PlayingMaze::Render(ff::dxgi::draw_base& draw)
                 RenderDebugGhostPaths(draw);
             }
         }
-#endif
     }
 }
 
@@ -1728,7 +1720,11 @@ void PlayingMaze::Reset()
 
 void PlayingMaze::RenderDebugGhostPaths(ff::dxgi::draw_base& draw)
 {
-#ifdef _DEBUG
+    if constexpr (!ff::constants::debug_build)
+    {
+        return;
+    }
+
     for (size_t i = 0; i < _countof(_ghosts); i++)
     {
         GhostActor& ghost = *_ghosts[i];
@@ -1784,8 +1780,6 @@ void PlayingMaze::RenderDebugGhostPaths(ff::dxgi::draw_base& draw)
             }
         }
     }
-
-#endif
 }
 
 GameState PlayingMaze::GetGameState() const

@@ -3,7 +3,7 @@
 static HWND splash_screen_hwnd{};
 static HANDLE splash_screen_thread_handle{};
 static DWORD splash_screen_thread_id{};
-static BITMAPINFO* splash_screen_dib{};
+static const BITMAPINFO* splash_screen_dib{};
 
 static void splash_screen_paint(HWND hwnd)
 {
@@ -90,11 +90,10 @@ static DWORD WINAPI splash_screen_thread(void* cookie)
     assert_ret_val(::SystemParametersInfo(SPI_GETWORKAREA, 0, &work_area, 0), 1);
     UINT dpi = ::GetDpiForSystem();
     UINT bmp_resource_id = ::choose_splash_resource(dpi);
-    HRSRC bmp_resource = ::FindResource(instance, MAKEINTRESOURCE(bmp_resource_id), L"SPLASH");
+    double dpi_scale = bmp_resource_id / 100.0;
+    HRSRC bmp_resource = ::FindResource(instance, MAKEINTRESOURCE(bmp_resource_id), RT_BITMAP);
     HGLOBAL bmp_resource_mem = bmp_resource ? ::LoadResource(instance, bmp_resource) : nullptr;
-    BITMAPFILEHEADER* bmp = reinterpret_cast<BITMAPFILEHEADER*>(bmp_resource_mem ? ::LockResource(bmp_resource_mem) : nullptr);
-    assert_ret_val(bmp && bmp->bfType == 0x4D42, 1); // "BM"
-    ::splash_screen_dib = bmp ? reinterpret_cast<BITMAPINFO*>(bmp + 1) : nullptr;
+    ::splash_screen_dib = reinterpret_cast<const BITMAPINFO*>(bmp_resource_mem ? ::LockResource(bmp_resource_mem) : nullptr);
 
     constexpr std::wstring_view class_name = L"ff::splash_screen";
     const WNDCLASS window_class
@@ -127,6 +126,21 @@ static DWORD WINAPI splash_screen_thread(void* cookie)
             nullptr, // menu
             instance,
             nullptr); // param
+
+        int progress_margin = static_cast<int>(4 * dpi_scale);
+        int progress_height = static_cast<int>(6 * dpi_scale);
+
+        HWND progress_hwnd = ::CreateWindowEx(
+            0, PROGRESS_CLASS, nullptr, // ex style, class, name
+            WS_CHILD | WS_VISIBLE | PBS_MARQUEE,
+            progress_margin,
+            window_height - progress_height - progress_margin,
+            window_width - progress_margin * 2,
+            progress_height,
+            ::splash_screen_hwnd,
+            nullptr, instance, nullptr); // menu, instance, param
+
+        ::PostMessage(progress_hwnd, PBM_SETMARQUEE, 1, 10);
     }
 
     MSG msg;

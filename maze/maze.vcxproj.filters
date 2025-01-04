@@ -55,10 +55,10 @@
     <ClCompile Include="states\TitleScreen.cpp">
       <Filter>states</Filter>
     </ClCompile>
+    <ClCompile Include="about_dialog.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
-    <ClInclude Include="splash_screen.h" />
     <ClInclude Include="core\Difficulty.h">
       <Filter>core</Filter>
     </ClInclude>
@@ -110,6 +110,7 @@
     <ClInclude Include="states\TitleScreen.h">
       <Filter>states</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="app.manifest" />
@@ -130,6 +131,18 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\main.ico">
+      <Filter>assets</Filter>
+    </Image>
+    <Image Include="assets\SplashScreen.scale-100.dib">
+      <Filter>assets</Filter>
+    </Image>
+    <Image Include="assets\SplashScreen.scale-125.dib">
+      <Filter>assets</Filter>
+    </Image>
+    <Image Include="assets\SplashScreen.scale-150.dib">
+      <Filter>assets</Filter>
+    </Image>
+    <Image Include="assets\SplashScreen.scale-200.dib">
       <Filter>assets</Filter>
     </Image>
   </ItemGroup>

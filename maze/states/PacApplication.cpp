@@ -510,8 +510,7 @@ void PacApplication::RenderPacPressing(ff::dxgi::draw_base& draw)
 
 void PacApplication::RenderDebugGrid(ff::dxgi::draw_base& draw, ff::point_int tiles)
 {
-#ifdef _DEBUG
-    if (ff::input::keyboard().pressing('G'))
+    if (ff::constants::debug_build && ff::input::keyboard().pressing('G'))
     {
         ff::point_float tileSizeF = PixelsPerTileF();
 
@@ -531,7 +530,6 @@ void PacApplication::RenderDebugGrid(ff::dxgi::draw_base& draw, ff::point_int ti
                 DirectX::XMFLOAT4(1, 1, 1, 0.25f), 1, true);
         }
     }
-#endif
 }
 
 void PacApplication::SetState(EAppState state)

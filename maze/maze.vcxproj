@@ -7,6 +7,7 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.default.props" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ItemGroup>
+    <ClCompile Include="about_dialog.cpp" />
     <ClCompile Include="core\Actors.cpp" />
     <ClCompile Include="core\Audio.cpp" />
     <ClCompile Include="core\Difficulty.cpp" />
@@ -44,7 +45,7 @@
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
-    <ClInclude Include="splash_screen.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="states\HighScoreScreen.h" />
     <ClInclude Include="states\PacApplication.h" />
     <ClInclude Include="states\TitleScreen.h" />
@@ -65,6 +66,10 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\main.ico" />
+    <Image Include="assets\SplashScreen.scale-100.dib" />
+    <Image Include="assets\SplashScreen.scale-125.dib" />
+    <Image Include="assets\SplashScreen.scale-150.dib" />
+    <Image Include="assets\SplashScreen.scale-200.dib" />
   </ItemGroup>
   <ItemGroup>
     <ResJson Include="assets\Assets.res.json">

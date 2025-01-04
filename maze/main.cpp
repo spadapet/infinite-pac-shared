@@ -1,11 +1,19 @@
 #include "pch.h"
-#include "splash_screen.h"
 #include "states/PacApplication.h"
 
-class root_state : public ff::game::root_state_base, public IPacApplicationHost
+static ff::signal_connection window_connection;
+
+// about_dialog.cpp
+void show_about_dialog();
+
+// splash_screen.cpp
+bool show_splash_screen(HINSTANCE instance);
+void close_splash_screen();
+
+class pac_host : public ff::game::root_state_base, public IPacApplicationHost
 {
 public:
-    root_state()
+    pac_host()
         : pac_app(*this)
     {
     }
@@ -23,10 +31,7 @@ public:
 
     virtual void ShowAboutDialog() override
     {
-        ff::thread_dispatch::get_main()->post([]()
-        {
-            ::MessageBox(ff::app_window(), L"Test about dialog", L"About", MB_OK);
-        });
+        ff::thread_dispatch::get_main()->post(::show_about_dialog);
     }
 
     virtual bool IsShowingPopup() const override
@@ -48,8 +53,6 @@ protected:
 private:
     PacApplication pac_app;
 };
-
-ff::signal_connection window_connection;
 
 static void window_message(ff::window* window, ff::window_message& message)
 {
@@ -77,15 +80,16 @@ static void window_message(ff::window* window, ff::window_message& message)
 static void window_initialized(ff::window* window)
 {
     ::close_splash_screen();
-
     ::window_connection = window->message_sink().connect(::window_message);
 }
 
 int WINAPI wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ int)
 {
+    INITCOMMONCONTROLSEX cc_init{ sizeof(INITCOMMONCONTROLSEX), ICC_LINK_CLASS };
+    ::InitCommonControlsEx(&cc_init);
     ::show_splash_screen(instance);
 
-    ff::game::init_params_t<::root_state> params;
+    ff::game::init_params_t<::pac_host> params;
     params.window_initialized_func = ::window_initialized;
 
     return ff::game::run(params);
