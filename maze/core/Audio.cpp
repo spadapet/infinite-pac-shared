@@ -50,8 +50,6 @@ SoundEffects::~SoundEffects()
 
 void SoundEffects::Play(AudioEffect effect)
 {
-    check_ret(IsEnabled());
-
     if (IsEnabled() && effect >= 0 && effect < _countof(_effects))
     {
         if (IsBG(effect))
@@ -70,25 +68,25 @@ void SoundEffects::Play(AudioEffect effect)
         switch (effect)
         {
             case EFFECT_DYING:
-                ff::input::gamepad(0).vibrate(0.375, 0, 1.25);
+                ff::input::gamepad().vibrate(0.375, 0, 1.25);
                 break;
 
             case EFFECT_EAT_GHOST:
-                ff::input::gamepad(0).vibrate(0.75, 0, 0.75);
+                ff::input::gamepad().vibrate(0.75, 0, 0.75);
                 break;
 
             case EFFECT_EAT_FRUIT:
             case EFFECT_EAT_POWER1:
             case EFFECT_EAT_POWER2:
-                ff::input::gamepad(0).vibrate(0, 1, 0.5);
+                ff::input::gamepad().vibrate(0, 1, 0.5);
                 break;
 
             case EFFECT_FRUIT_BOUNCE:
-                ff::input::gamepad(0).vibrate(0.5, 0, 0.1);
+                ff::input::gamepad().vibrate(0.5, 0, 0.1);
                 break;
 
             case EFFECT_EAT_DOT1:
-                ff::input::gamepad(0).vibrate(0, 0.5, 0.1);
+                ff::input::gamepad().vibrate(0, 0.5, 0.1);
                 break;
 
             case EFFECT_EAT_DOT2:

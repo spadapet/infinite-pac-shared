@@ -78,6 +78,7 @@ static INT_PTR CALLBACK about_dialog_proc(HWND hwnd, UINT msg, WPARAM wp, LPARAM
                     {
                         case IDC_LINK_SITE:
                         case IDC_LINK_SUPPORT:
+                        case IDC_LINK_SOURCE:
                             {
                                 const NMLINK* link = reinterpret_cast<const NMLINK*>(lp);
                                 url = link->item.szUrl;

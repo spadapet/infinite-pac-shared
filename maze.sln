@@ -36,6 +36,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ff.dx", "ff_game_library\so
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ff.application", "ff_game_library\source\ff.application\ff.application.vcxproj", "{376073E9-EA4D-4513-941C-906CA968C6C3}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "include", "include", "{41D76B3E-C24E-46B2-9A3B-C461CAB25495}"
+	ProjectSection(SolutionItems) = preProject
+		ff_game_library\include\ff.all.h = ff_game_library\include\ff.all.h
+		ff_game_library\include\ff.application.h = ff_game_library\include\ff.application.h
+		ff_game_library\include\ff.base.h = ff_game_library\include\ff.base.h
+		ff_game_library\include\ff.dx.h = ff_game_library\include\ff.dx.h
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -103,6 +111,7 @@ Global
 		{F89161F3-74E5-4B6B-9A53-6B97B83D1700} = {BE94EA9E-D7CF-46D8-9AA4-50097F83A5F0}
 		{0580ED07-BB8F-472A-94FC-E0EE4A79421D} = {BE94EA9E-D7CF-46D8-9AA4-50097F83A5F0}
 		{376073E9-EA4D-4513-941C-906CA968C6C3} = {BE94EA9E-D7CF-46D8-9AA4-50097F83A5F0}
+		{41D76B3E-C24E-46B2-9A3B-C461CAB25495} = {BE94EA9E-D7CF-46D8-9AA4-50097F83A5F0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9C2C9693-764C-4050-BD33-0675E8192367}

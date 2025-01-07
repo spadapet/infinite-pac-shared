@@ -5,4 +5,9 @@
     <DevRoot Condition=" '$(DevRoot)' == '' ">$(MSBuildThisFileDirectory)</DevRoot>
   </PropertyGroup>
   <Import Project="ff_game_library\build\project.props" Condition=" '$(SharedProjectPropsImported)' == '' " />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <RuntimeLibrary Condition=" '$(Configuration)' == 'Release' ">MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+  </ItemDefinitionGroup>
 </Project>

@@ -11,6 +11,7 @@
 #define IDC_LINK_SITE                   1001
 #define IDC_LINK_LIBS                   1002
 #define IDC_LINK_SUPPORT                1003
+#define IDC_LINK_SOURCE                 1004
 
 // Next default values for new objects
 // 

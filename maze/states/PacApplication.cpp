@@ -59,15 +59,9 @@ ff::rect_float PacApplication::GetLevelRect() const
     return _levelRect;
 }
 
-void PacApplication::SetInputEvent(size_t id)
-{
-    ::InterlockedExchange(&_pendingEvent, id);
-}
-
 void PacApplication::Advance()
 {
     check_ret(!_host.IsShowingPopup());
-    bool gamePaused = false;
 
     switch (_state)
     {
@@ -220,55 +214,51 @@ void PacApplication::OnPlayerGameOver(IPlayingGame* pGame, std::shared_ptr<IPlay
 
 void PacApplication::HandleInputEvents()
 {
-    _inputRes->advance();
-
     bool unpause = false;
-    std::vector<ff::input_event> events = _inputRes->events();
 
-    size_t pendingEvent = ::InterlockedExchange(&_pendingEvent, 0);
-    if (pendingEvent)
-    {
-        events.push_back(ff::input_event{ pendingEvent, 1 });
-        events.push_back(ff::input_event{ pendingEvent, 0 });
-    }
+    _inputRes->advance();
+    std::vector<ff::input_event> events = _inputRes->events();
+    HandleButtons(events);
 
     for (const ff::input_event& ie : events)
     {
-        if (ie.started())
+        if (!ie.started())
         {
-            if (ie.event_id == GetEventPause() || ie.event_id == GetEventStart())
+            continue;
+        }
+
+        if (ie.event_id == GetEventPause() || ie.event_id == GetEventStart())
+        {
+            if (_game && !_game->IsPaused())
             {
-                if (_game && !_game->IsPaused())
-                {
-                    PauseGame();
-                }
-                else
-                {
-                    unpause = true;
-                }
+                PauseGame();
             }
-            else if (ie.event_id == GetEventPauseAdvance())
+            else
             {
-                if (ff::constants::debug_build && _game && _game->IsPaused())
-                {
-                    _game->PausedAdvance();
-                }
+                unpause = true;
             }
-            else if (ie.event_id == GetEventCancel() && _state == APP_PLAYING_GAME)
+        }
+        else if (ie.event_id == GetEventPauseAdvance())
+        {
+            if (ff::constants::debug_build && _game && _game->IsPaused())
             {
-                if (_game && _game->IsPaused())
-                {
-                    unpause = true;
-                }
-                else
-                {
-                    SetState(APP_TITLE);
-                }
+                _game->PausedAdvance();
             }
-            else if (ie.event_id == GetEventHome() && _state == APP_PLAYING_GAME)
+        }
+        else if (ie.event_id == GetEventCancel() && _state == APP_PLAYING_GAME)
+        {
+            if (_game && _game->IsPaused())
+            {
+                unpause = true;
+            }
+            else
             {
                 SetState(APP_TITLE);
             }
+        }
+        else if (ie.event_id == GetEventHome() && _state == APP_PLAYING_GAME)
+        {
+            SetState(APP_TITLE);
         }
     }
 
@@ -352,14 +342,44 @@ void PacApplication::HandlePressing(ff::input_event_provider* inputMap)
     }
 }
 
+void PacApplication::HandleButtons(std::vector<ff::input_event>& events)
+{
+    if (!_targetSize.dpi_scale || !ff::input::pointer().release_count(VK_LBUTTON))
+    {
+        return;
+    }
+
+    ff::point_float pos = ff::input::pointer().pos().cast<float>() / static_cast<float>(_targetSize.dpi_scale);
+    constexpr EPlayButton buttons[] = { EPlayButton::HOME, EPlayButton::PAUSE, EPlayButton::PLAY };
+
+    for (EPlayButton button : buttons)
+    {
+        const ff::rect_float rect = GetButtonRect(button);
+        if (rect && rect.contains(pos))
+        {
+            switch (button)
+            {
+                case EPlayButton::HOME:
+                    events.push_back(ff::input_event{ GetEventHome(), 1 });
+                    break;
+
+                case EPlayButton::PAUSE:
+                case EPlayButton::PLAY:
+                    events.push_back(ff::input_event{ GetEventPause(), 1 });
+                    break;
+            }
+        }
+    }
+}
+
 ff::point_int PacApplication::HandleTouchPress(IPlayingActor* pac)
 {
     ff::point_int pressDir(0, 0);
     ff::pointer_device& pointer = ff::input::pointer();
 
-    if (pointer.touch_info_count())
+    if (pointer.touch_info_count() && _targetSize.dpi_scale)
     {
-        const double scale = ff::app_window().dpi_scale();
+        const double scale = _targetSize.dpi_scale;
 
         _touching = true;
         _touchInfo = pointer.touch_info(0);
@@ -416,11 +436,11 @@ void PacApplication::RenderGame(ff::dxgi::command_context_base& context, ff::dxg
 {
     check_ret(pGame);
 
-    ff::window_size target_size = target.size();
-    ff::rect_int renderRect(target_size.logical_pixel_rect<int>());
+    _targetSize = target.size();
+    ff::rect_int renderRect(_targetSize.logical_pixel_rect<int>());
     ff::rect_int clientRect(renderRect);
     ff::rect_int visibleRect(renderRect);
-    int padding1 = (int)(PixelsPerTileF().y * target_size.dpi_scale);
+    int padding1 = (int)(PixelsPerTileF().y * _targetSize.dpi_scale);
     ff::rect_int padding(padding1, padding1, padding1, padding1);
 
     if (visibleRect.right > padding.left + padding.right)
@@ -460,13 +480,19 @@ void PacApplication::RenderGame(ff::dxgi::command_context_base& context, ff::dxg
 
         _renderRect = playRenderRect.cast<float>();
 
-        ff::dxgi::draw_ptr draw = ff::dxgi::global_draw_device().begin_draw(context, target, &depth, _renderRect,
-            ff::rect_float(ff::point_float{}, playPixelSize.cast<float>()));
-        if (draw)
+        if (ff::dxgi::draw_ptr draw = ff::dxgi::global_draw_device().begin_draw(context, target, &depth, _renderRect, _levelRect))
         {
             pGame->Render(*draw);
             RenderPacPressing(*draw);
             RenderDebugGrid(*draw, tiles);
+        }
+
+        if (_state == APP_PLAYING_GAME)
+        {
+            if (ff::dxgi::draw_ptr draw = ff::dxgi::global_draw_device().begin_draw(context, target, &depth))
+            {
+                RenderButtons(*draw);
+            }
         }
     }
 }
@@ -476,30 +502,18 @@ void PacApplication::RenderPacPressing(ff::dxgi::draw_base& draw)
     std::shared_ptr<IPlayingActor> pac = GetCurrentPac();
     check_ret(pac);
 
-    ff::point_int pressDir = pac->GetPressDir();
-    check_ret(pressDir);
-
     float rotation = 0;
     float scale = 0;
     float opacity = 0;
 
-    if (_touching)
+    if (_touching && _touchOffset)
     {
-        if (_touchOffset)
-        {
-            rotation = ff::math::radians_to_degrees<float>((float)std::atan2(-_touchOffset.y, _touchOffset.x));
-            scale = (float)std::min(2.0, (_touchLen - TOUCH_DEAD_ZONE) / 80.0 + 0.75);
-            opacity = (float)std::clamp(1.25 / scale, 0.25, 1.0);
-        }
+        rotation = ff::math::radians_to_degrees(static_cast<float>(std::atan2(-_touchOffset.y, _touchOffset.x)));
+        scale = static_cast<float>(std::min(3.0, (_touchLen - TOUCH_DEAD_ZONE) / 100.0 + 1.0));
+        opacity = std::clamp(1.0f / scale, 0.25f, 0.75f);
     }
-    // else // render for non-touch controls
-    // {
-    //     rotation = ff::math::radians_to_degrees<float>((float)std::atan2(-pressDir.y, pressDir.x));
-    //     scale = 1.25;
-    //     opacity = 0.5;
-    // }
 
-    if (opacity != 0 && scale != 0)
+    if (opacity > 0.0f && scale > 0.0f)
     {
         ff::point_float arrowPos = pac->GetPixel().cast<float>() + PixelsPerTileF() * ff::point_float(0, 3);
 
@@ -530,6 +544,145 @@ void PacApplication::RenderDebugGrid(ff::dxgi::draw_base& draw, ff::point_int ti
                 DirectX::XMFLOAT4(1, 1, 1, 0.25f), 1, true);
         }
     }
+}
+
+void PacApplication::RenderButtons(ff::dxgi::draw_base& draw)
+{
+    check_ret(_state == APP_PLAYING_GAME && _targetSize.logical_pixel_size);
+
+    ff::point_float pos = ff::input::pointer().pos().cast<float>() / static_cast<float>(_targetSize.dpi_scale);
+    const bool pressing = ff::input::pointer().pressing(VK_LBUTTON);
+    constexpr EPlayButton buttons[] = { EPlayButton::HOME, EPlayButton::PAUSE, EPlayButton::PLAY };
+
+    auto getBgColor = [](bool hover, bool pressing) -> DirectX::XMFLOAT4
+        {
+            if (hover)
+            {
+                return DirectX::XMFLOAT4(1, 1, 1, pressing ? 0.5f : 0.25f);
+            }
+
+            return DirectX::XMFLOAT4(1, 1, 1, 0.125);
+        };
+
+    auto getFgColor = [](bool hover, bool pressing) -> DirectX::XMFLOAT4
+        {
+            return DirectX::XMFLOAT4(1, 1, 1, hover ? 1.0f : 0.5f);
+        };
+
+    for (EPlayButton button : buttons)
+    {
+        const ff::rect_float rect = GetButtonRect(button);
+        if (!rect)
+        {
+            continue;
+        }
+
+        const bool hover = rect.contains(pos);
+        const float thick = 1;
+        const DirectX::XMFLOAT4 bgColor = getBgColor(hover, pressing);
+        const DirectX::XMFLOAT4 fgColor = getFgColor(hover, pressing);
+
+        draw.draw_filled_rectangle(rect, bgColor);
+        draw.draw_outline_rectangle(rect, fgColor, thick, true);
+
+        DirectX::XMFLOAT4X4 matrix;
+        DirectX::XMStoreFloat4x4(&matrix, DirectX::XMMatrixTranslation(rect.left, rect.top, 0));
+        draw.world_matrix_stack().push();
+        draw.world_matrix_stack().transform(matrix);
+
+        switch (button)
+        {
+            case EPlayButton::HOME:
+                {
+                    const ff::point_float points[] =
+                    {
+                        { 12, 37 },
+                        { 12, 21 },
+                        { 23, 10 },
+                        { 24, 10 },
+                        { 35, 21 },
+                        { 35, 37 },
+                        { 27, 37 },
+                        { 27, 29 },
+                        { 20, 29 },
+                        { 20, 37 },
+                        { 12, 37 },
+                    };
+
+                    draw.draw_line_strip(points, _countof(points), fgColor, thick, true);
+                }
+                break;
+
+            case EPlayButton::PLAY:
+                {
+                    const ff::point_float points[] = { { 14, 10 }, { 34, 23 }, { 14, 38 }, { 14, 10 } };
+                    draw.draw_line_strip(points, _countof(points), fgColor, thick, true);
+                }
+                break;
+
+            case EPlayButton::PAUSE:
+                draw.draw_outline_rectangle(ff::rect_float(7, 7, 13, 25), fgColor, thick, true);
+                draw.draw_outline_rectangle(ff::rect_float(19, 7, 25, 25), fgColor, thick, true);
+                break;
+        }
+
+        draw.world_matrix_stack().pop();
+    }
+}
+
+ff::rect_float PacApplication::GetButtonRect(EPlayButton button)
+{
+    ff::point_float targetSize = _targetSize.logical_scaled_size<float>();
+    check_ret_val(_state == APP_PLAYING_GAME && targetSize, ff::rect_float{});
+
+    const float padding = 8;
+    const float smallSize = 32;
+    const float size = 48;
+    const bool paused = _game && _game->IsPaused();
+
+    switch (button)
+    {
+        case EPlayButton::HOME:
+            if (paused)
+            {
+                return
+                {
+                    targetSize.x - size * 2 - padding * 2,
+                    padding,
+                    targetSize.x - size - padding * 2,
+                    size + padding
+                };
+            }
+            break;
+
+        case EPlayButton::PLAY:
+            if (paused)
+            {
+                return
+                {
+                    targetSize.x - size - padding,
+                    padding,
+                    targetSize.x - padding,
+                    size + padding
+                };
+            }
+            break;
+
+        case EPlayButton::PAUSE:
+            if (!paused)
+            {
+                return
+                {
+                    targetSize.x - smallSize - padding,
+                    padding,
+                    targetSize.x - padding,
+                    smallSize + padding
+                };
+            }
+            break;
+    }
+
+    return {};
 }
 
 void PacApplication::SetState(EAppState state)

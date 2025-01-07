@@ -25,7 +25,6 @@ public:
 
     void PauseGame();
     bool IsPaused() const;
-    void SetInputEvent(size_t id);
 
     static std::string_view OPTION_PAC_DIFF;
     static std::string_view OPTION_PAC_MAZES;
@@ -61,19 +60,22 @@ private:
         APP_HIGH_SCORE,
     };
 
-    enum EButtons
+    enum class EPlayButton
     {
-        BUTTON_NONE,
-        BUTTON_PAUSE,
-        BUTTON_HOME,
+        HOME,
+        PLAY,
+        PAUSE,
     };
 
     void HandleInputEvents();
     void HandlePressing(ff::input_event_provider* inputMap);
+    void HandleButtons(std::vector<ff::input_event>& events);
     ff::point_int HandleTouchPress(IPlayingActor* pac);
     void RenderGame(ff::dxgi::command_context_base& context, ff::dxgi::target_base& target, ff::dxgi::depth_base& depth, IPlayingGame* pGame);
     void RenderPacPressing(ff::dxgi::draw_base& draw);
     void RenderDebugGrid(ff::dxgi::draw_base& draw, ff::point_int tiles);
+    void RenderButtons(ff::dxgi::draw_base& draw);
+    ff::rect_float GetButtonRect(EPlayButton button);
     void SetState(EAppState state);
     std::shared_ptr<IPlayingActor> GetCurrentPac() const;
 
@@ -83,9 +85,9 @@ private:
     std::shared_ptr<IPlayingGame> _game;
     std::shared_ptr<IPlayingGame> _pushedGame;
     std::shared_ptr<ff::input_event_provider> _inputRes;
-    size_t _pendingEvent{};
 
     // Rendering
+    ff::window_size _targetSize{};
     ff::rect_float _renderRect{};
     ff::rect_float _levelRect{};
     float _fade{};

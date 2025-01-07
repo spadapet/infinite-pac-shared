@@ -97,5 +97,11 @@
       <Content>true</Content>
     </ResJson>
   </ItemGroup>
+  <ItemDefinitionGroup>
+    <Link>
+      <DelayLoadDLLs>comctl32.dll;d3d12.dll;d3dcompiler_47.dll;dwrite.dll;dxgi.dll;gdi32.dll;mfplat.dll;mfreadwrite.dll;ole32.dll;shell32.dll;xinput1_4.dll;version.dll%(DelayLoadDLLs)</DelayLoadDLLs>
+      <DelayLoadDLLs Condition=" '$(Configuration)' != 'Release' ">WinPixEventRuntime.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+    </Link>
+  </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>
