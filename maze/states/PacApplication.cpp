@@ -152,7 +152,7 @@ void PacApplication::Render(ff::dxgi::command_context_base& context, ff::render_
         {
             DirectX::XMFLOAT4 colorFade(0, 0, 0, _fade);
 
-            draw->draw_filled_rectangle(ff::rect_float((float)rect.left, (float)rect.top, (float)rect.right, (float)rect.bottom), colorFade);
+            draw->draw_rectangle(ff::rect_float((float)rect.left, (float)rect.top, (float)rect.right, (float)rect.bottom), colorFade);
             draw.reset();
             depth.clear(context, 0, 0);
         }
@@ -533,7 +533,7 @@ void PacApplication::RenderDebugGrid(ff::dxgi::draw_base& draw, ff::point_int ti
             draw.draw_line(
                 ff::point_float(i * tileSizeF.x, 0),
                 ff::point_float(i * tileSizeF.x, tiles.y * tileSizeF.y),
-                DirectX::XMFLOAT4(1, 1, 1, 0.25f), 1, true);
+                DirectX::XMFLOAT4(1, 1, 1, 0.25f), 1);
         }
 
         for (int i = 0; i < tiles.y; i++)
@@ -541,7 +541,7 @@ void PacApplication::RenderDebugGrid(ff::dxgi::draw_base& draw, ff::point_int ti
             draw.draw_line(
                 ff::point_float(0, i * tileSizeF.y),
                 ff::point_float(tiles.x * tileSizeF.x, i * tileSizeF.y),
-                DirectX::XMFLOAT4(1, 1, 1, 0.25f), 1, true);
+                DirectX::XMFLOAT4(1, 1, 1, 0.25f), 1);
         }
     }
 }
@@ -579,11 +579,11 @@ void PacApplication::RenderButtons(ff::dxgi::draw_base& draw)
 
         const bool hover = rect.contains(pos);
         const float thick = 1;
-        const DirectX::XMFLOAT4 bgColor = getBgColor(hover, pressing);
-        const DirectX::XMFLOAT4 fgColor = getFgColor(hover, pressing);
+        const ff::color bgColor = getBgColor(hover, pressing);
+        const ff::color fgColor = getFgColor(hover, pressing);
 
-        draw.draw_filled_rectangle(rect, bgColor);
-        draw.draw_outline_rectangle(rect, fgColor, thick, true);
+        draw.draw_rectangle(rect, bgColor);
+        draw.draw_rectangle(rect, fgColor, thick);
 
         DirectX::XMFLOAT4X4 matrix;
         DirectX::XMStoreFloat4x4(&matrix, DirectX::XMMatrixTranslation(rect.left, rect.top, 0));
@@ -594,35 +594,42 @@ void PacApplication::RenderButtons(ff::dxgi::draw_base& draw)
         {
             case EPlayButton::HOME:
                 {
-                    const ff::point_float points[] =
+                    const ff::dxgi::endpoint_t points[] =
                     {
-                        { 12, 37 },
-                        { 12, 21 },
-                        { 23, 10 },
-                        { 24, 10 },
-                        { 35, 21 },
-                        { 35, 37 },
-                        { 27, 37 },
-                        { 27, 29 },
-                        { 20, 29 },
-                        { 20, 37 },
-                        { 12, 37 },
+                        { { 12, 37 }, &fgColor, thick },
+                        { { 12, 21 }, &fgColor, thick },
+                        { { 23, 10 }, &fgColor, thick },
+                        { { 24, 10 }, &fgColor, thick },
+                        { { 35, 21 }, &fgColor, thick },
+                        { { 35, 37 }, &fgColor, thick },
+                        { { 27, 37 }, &fgColor, thick },
+                        { { 27, 29 }, &fgColor, thick },
+                        { { 20, 29 }, &fgColor, thick },
+                        { { 20, 37 }, &fgColor, thick },
+                        { { 12, 37 }, &fgColor, thick },
                     };
 
-                    draw.draw_line_strip(points, _countof(points), fgColor, thick, true);
+                    draw.draw_lines(points);
                 }
                 break;
 
             case EPlayButton::PLAY:
                 {
-                    const ff::point_float points[] = { { 14, 10 }, { 34, 23 }, { 14, 38 }, { 14, 10 } };
-                    draw.draw_line_strip(points, _countof(points), fgColor, thick, true);
+                    const ff::dxgi::endpoint_t points[] =
+                    {
+                        { { 14, 10 }, &fgColor, thick },
+                        { { 34, 23 }, &fgColor, thick },
+                        { { 14, 38 }, &fgColor, thick },
+                        { { 14, 10 }, &fgColor, thick },
+                    };
+
+                    draw.draw_lines(points);
                 }
                 break;
 
             case EPlayButton::PAUSE:
-                draw.draw_outline_rectangle(ff::rect_float(7, 7, 13, 25), fgColor, thick, true);
-                draw.draw_outline_rectangle(ff::rect_float(19, 7, 25, 25), fgColor, thick, true);
+                draw.draw_rectangle(ff::rect_float(7, 7, 13, 25), fgColor, thick);
+                draw.draw_rectangle(ff::rect_float(19, 7, 25, 25), fgColor, thick);
                 break;
         }
 

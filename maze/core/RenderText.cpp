@@ -145,6 +145,8 @@ void RenderText::DrawText(
     ff::point_float curPos = pos;
     ff::point_float tileSize = PixelsPerTileF();
 
+    draw.push_no_overlap();
+
     for (char ch = *szText; ch; szText++, ch = *szText)
     {
         if (ch == '\n')
@@ -157,12 +159,14 @@ void RenderText::DrawText(
             if (ch >= 0 && ch < _font.size() && _font[ch])
             {
                 // pBgColor is ignored, it was never needed
-                draw.draw_sprite(_font[ch]->sprite_data(), ff::transform(curPos, scale, 0, ff::color_or_white(pColor)));
+                draw.draw_sprite(_font[ch]->sprite_data(), ff::transform(curPos, scale, 0, pColor ? ff::color(*pColor) : ff::color_white()));
             }
 
             curPos.x += tileSize.x * scale.x * 8.0f;
         }
     }
+
+    draw.pop_no_overlap();
 }
 
 void RenderText::DrawSmallNumber(
@@ -223,7 +227,7 @@ void RenderText::DrawSmallNumber(
         size_t nSprite = str[i] - '0';
         const ff::sprite_base* pSprite = smallSprites->get(nSprite);
 
-        draw.draw_sprite(pSprite->sprite_data(), ff::transform(pos, scale, 0, ff::color_or_white(pColor)));
+        draw.draw_sprite(pSprite->sprite_data(), ff::transform(pos, scale, 0, pColor ? ff::color(*pColor) : ff::color_white()));
 
         const ff::dxgi::sprite_data& data = pSprite->sprite_data();
         pos.x += data.world().width() * scale.x + 1.0f;

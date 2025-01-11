@@ -749,7 +749,7 @@ void RenderMaze::RenderTheMaze(ff::dxgi::draw_base& draw)
             }
             else if (_maze->GetTileZone(tile) != ZONE_OUT_OF_BOUNDS)
             {
-                draw.draw_filled_rectangle(ff::rect_float(topLeft, topLeft + tileSize), colors[0]);
+                draw.draw_rectangle(ff::rect_float(topLeft, topLeft + tileSize), colors[0]);
             }
         }
     }

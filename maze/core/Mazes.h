@@ -39,4 +39,3 @@ public:
 };
 
 std::shared_ptr<IMazes> CreateMazesFromId(std::string_view id);
-std::shared_ptr<IMazes> CreateMazesFromResource(std::string_view name);

@@ -625,7 +625,7 @@ void PlayingGame::Render(ff::dxgi::draw_base& draw)
         if (!_singleAdvance)
         {
             // Fade the screen
-            draw.draw_filled_rectangle(ff::rect_float(ff::point_float(0, 0), TileTopLeftToPixelF(totalTiles)), s_pausedFade);
+            draw.draw_rectangle(ff::rect_float(ff::point_float(0, 0), TileTopLeftToPixelF(totalTiles)), s_pausedFade);
         }
 
         if (pPlayMaze)

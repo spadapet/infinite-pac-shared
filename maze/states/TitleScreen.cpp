@@ -471,7 +471,7 @@ void TitleScreen::RenderBackMaze(ff::dxgi::draw_base& draw)
 
     static const DirectX::XMFLOAT4 s_color(0, 0, 0, 0.75f);
     ff::point_int tiles = GetSizeInTiles();
-    draw.draw_filled_rectangle(ff::rect_float(0, 0, tiles.x * PixelsPerTileF().x, tiles.y * PixelsPerTileF().y), s_color);
+    draw.draw_rectangle(ff::rect_float(0, 0, tiles.x * PixelsPerTileF().x, tiles.y * PixelsPerTileF().y), s_color);
 
 }
 
@@ -548,7 +548,7 @@ void TitleScreen::RenderFade(ff::dxgi::draw_base& draw)
     {
         DirectX::XMFLOAT4 color(0, 0, 0, _fade);
         ff::point_int tiles = GetSizeInTiles();
-        draw.draw_filled_rectangle(ff::rect_float(0, 0, tiles.x * PixelsPerTileF().x, tiles.y * PixelsPerTileF().y), color);
+        draw.draw_rectangle(ff::rect_float(0, 0, tiles.x * PixelsPerTileF().x, tiles.y * PixelsPerTileF().y), color);
     }
 }
 

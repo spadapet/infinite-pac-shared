@@ -1767,7 +1767,7 @@ void PlayingMaze::RenderDebugGhostPaths(ff::dxgi::draw_base& draw)
 
             ff::point_float targetF((float)target.x, (float)target.y);
 
-            draw.draw_filled_rectangle(ff::rect_float(targetF - PixelsPerTileF() / 2.0f, targetF + PixelsPerTileF() / 2.0f), color);
+            draw.draw_rectangle(ff::rect_float(targetF - PixelsPerTileF() / 2.0f, targetF + PixelsPerTileF() / 2.0f), color);
 
             for (size_t h = 0; h < _countof(points) - 1; h++)
             {
@@ -1776,7 +1776,7 @@ void PlayingMaze::RenderDebugGhostPaths(ff::dxgi::draw_base& draw)
                         DirectX::XMLoadFloat4(&color),
                         DirectX::XMVectorSet(0, 0, 0, 0.019231f)));
 
-                draw.draw_line(points[h], points[h + 1], color, 1, true);
+                draw.draw_line(points[h], points[h + 1], color, 1);
             }
         }
     }
