@@ -54,9 +54,6 @@
     <ProjectReference Include="..\ff_game_library\source\ff.application\ff.application.vcxproj">
       <Project>{376073e9-ea4d-4513-941c-906ca968c6c3}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\ff_game_library\source\ff.dx\ff.dx.vcxproj">
-      <Project>{0580ed07-bb8f-472a-94fc-e0ee4a79421d}</Project>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="app.manifest" />
