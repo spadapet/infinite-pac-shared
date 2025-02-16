@@ -46,6 +46,11 @@ public:
         return !::IsWindowEnabled(ff::app_window());
     }
 
+    virtual void Quit() override
+    {
+        ff::app_window().close();
+    }
+
 protected:
     virtual void save_settings(ff::dict& dict)
     {

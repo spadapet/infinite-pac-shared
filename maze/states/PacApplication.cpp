@@ -245,15 +245,22 @@ void PacApplication::HandleInputEvents()
                 _game->PausedAdvance();
             }
         }
-        else if (ie.event_id == GetEventCancel() && _state == APP_PLAYING_GAME)
+        else if (ie.event_id == GetEventCancel())
         {
-            if (_game && _game->IsPaused())
+            if (_state == APP_PLAYING_GAME)
             {
-                unpause = true;
+                if (_game && _game->IsPaused())
+                {
+                    unpause = true;
+                }
+                else
+                {
+                    SetState(APP_TITLE);
+                }
             }
-            else
+            else if (_state == APP_TITLE)
             {
-                SetState(APP_TITLE);
+                _host.Quit();
             }
         }
         else if (ie.event_id == GetEventHome() && _state == APP_PLAYING_GAME)

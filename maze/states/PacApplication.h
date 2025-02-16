@@ -9,6 +9,7 @@ class IPacApplicationHost
 public:
     virtual void ShowAboutDialog() = 0;
     virtual bool IsShowingPopup() const = 0;
+    virtual void Quit() = 0;
 };
 
 class PacApplication : public IPlayingGameHost
