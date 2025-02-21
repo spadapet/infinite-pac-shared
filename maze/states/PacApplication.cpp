@@ -19,17 +19,23 @@ std::string_view PacApplication::OPTION_FULL_SCREEN("OPTION_FULL_SCREEN");
 static const double TOUCH_DEAD_ZONE = 20;
 
 PacApplication::PacApplication(IPacApplicationHost& host)
-    : _inputRes(GetGlobalInputMapping())
-    , _host(host)
+    : _host(host)
+    , _inputRes(GetGlobalInputMapping())
+    , _depth(ff::dxgi::create_depth({}))
+    , _touchArrowSprite("char-sprites.move-arrow")
 {
-    _touchArrowSprite = "char-sprites.move-arrow";
-
     assert(!s_pacApp);
     s_pacApp = this;
+
+    ff::input::pointer().touch_to_mouse(true);
+
+    LoadState();
 }
 
 PacApplication::~PacApplication()
 {
+    SaveState();
+
     assert(s_pacApp == this);
     s_pacApp = nullptr;
 }
@@ -59,7 +65,7 @@ ff::rect_float PacApplication::GetLevelRect() const
     return _levelRect;
 }
 
-void PacApplication::Advance()
+void PacApplication::Update()
 {
     check_ret(!_host.IsShowingPopup());
 
@@ -110,7 +116,7 @@ void PacApplication::Advance()
                     _game = _pushedGame;
                     _pushedGame = nullptr;
                     SetState(APP_PLAYING_GAME);
-
+                    SaveState();
                     ff::save_settings();
                 }
                 else
@@ -134,33 +140,28 @@ void PacApplication::Advance()
     }
 }
 
-void PacApplication::Render(ff::dxgi::command_context_base& context, ff::render_targets& targets)
+void PacApplication::Render(ff::dxgi::command_context_base& context, ff::dxgi::target_base& target)
 {
     check_ret(!_host.IsShowingPopup());
 
-    ff::dxgi::depth_base& depth = targets.depth(context);
-    ff::dxgi::target_base& target = targets.target(context);
-
     if (_pushedGame)
     {
-        RenderGame(context, target, depth, _pushedGame.get());
-        depth.clear(context, 0, 0);
+        RenderGame(context, target, *_depth, _pushedGame.get());
 
         ff::rect_float rect = target.size().logical_pixel_rect<float>();
-        ff::dxgi::draw_ptr draw = ff::dxgi::global_draw_device().begin_draw(context, target, &depth);
+        ff::dxgi::draw_ptr draw = ff::dxgi::global_draw_device().begin_draw(context, target, _depth.get());
         if (_fade < 1 && draw)
         {
             DirectX::XMFLOAT4 colorFade(0, 0, 0, _fade);
 
             draw->draw_rectangle(ff::rect_float((float)rect.left, (float)rect.top, (float)rect.right, (float)rect.bottom), colorFade);
             draw.reset();
-            depth.clear(context, 0, 0);
         }
     }
 
     if (!_pushedGame || _fade == _destFade)
     {
-        RenderGame(context, target, depth, _game.get());
+        RenderGame(context, target, *_depth, _game.get());
     }
 }
 
@@ -216,7 +217,7 @@ void PacApplication::HandleInputEvents()
 {
     bool unpause = false;
 
-    _inputRes->advance();
+    _inputRes->update();
     std::vector<ff::input_event> events = _inputRes->events();
     HandleButtons(events);
 

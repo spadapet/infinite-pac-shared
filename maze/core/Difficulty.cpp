@@ -198,12 +198,12 @@ size_t Difficulty::GetGhostSpeed(
 
 size_t Difficulty::GetScaredFrames() const
 {
-    return _scaredSeconds * ff::constants::advances_per_second<size_t>();
+    return _scaredSeconds * ff::constants::updates_per_second<size_t>();
 }
 
 size_t Difficulty::GetEatenFrames() const
 {
-    return ff::constants::advances_per_second<size_t>() * 9 / 10;
+    return ff::constants::updates_per_second<size_t>() * 9 / 10;
 }
 
 size_t Difficulty::GetGhostDotCounter(size_t nGhost) const
@@ -227,13 +227,13 @@ size_t Difficulty::GetGlobalDotCounter(size_t nIndex) const
 
 size_t Difficulty::GetLastDotFrames() const
 {
-    return _lastDotSeconds * ff::constants::advances_per_second<size_t>();
+    return _lastDotSeconds * ff::constants::updates_per_second<size_t>();
 }
 
 size_t Difficulty::GetFruitFrames(CharType type) const
 {
     int seconds = IsFruitMoving(type) ? 14 : 9;
-    return seconds * ff::constants::advances_per_second<size_t>() + (rand() % ff::constants::advances_per_second<size_t>());
+    return seconds * ff::constants::updates_per_second<size_t>() + (rand() % ff::constants::updates_per_second<size_t>());
 }
 
 FruitType Difficulty::GetFruit() const
@@ -253,13 +253,13 @@ bool Difficulty::HasRandomGhostMovement(CharType type) const
 
 void Difficulty::GetGhostModeFrames(size_t nIndex, size_t& nScatter, size_t& nChase) const
 {
-    size_t nMinScatter = 1 * ff::constants::advances_per_second<size_t>();
-    size_t nMaxChase = 5 * 60 * ff::constants::advances_per_second<size_t>();
+    size_t nMinScatter = 1 * ff::constants::updates_per_second<size_t>();
+    size_t nMaxChase = 5 * 60 * ff::constants::updates_per_second<size_t>();
 
     if (nIndex >= 0 && nIndex < _countof(_ghostModeSeconds) / 2)
     {
-        nScatter = _ghostModeSeconds[nIndex * 2] * ff::constants::advances_per_second<size_t>();
-        nChase = _ghostModeSeconds[nIndex * 2 + 1] * ff::constants::advances_per_second<size_t>();
+        nScatter = _ghostModeSeconds[nIndex * 2] * ff::constants::updates_per_second<size_t>();
+        nChase = _ghostModeSeconds[nIndex * 2 + 1] * ff::constants::updates_per_second<size_t>();
 
         nScatter = nScatter ? std::max<size_t>(nMinScatter, nScatter) : nMinScatter;
         nChase = nChase ? std::min<size_t>(nMaxChase, nChase) : nMaxChase;

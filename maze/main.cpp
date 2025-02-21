@@ -5,37 +5,9 @@ void show_about_dialog();
 bool show_splash_screen(HINSTANCE instance);
 void close_splash_screen(ff::window* main_window);
 
-class pac_host : public ff::game::root_state_base, public IPacApplicationHost
+static class pac_host_t : public IPacApplicationHost
 {
 public:
-    pac_host()
-        : pac_app(*this)
-    {
-        ff::input::pointer().touch_to_mouse(true);
-    }
-
-    virtual std::shared_ptr<ff::state> advance_time() override
-    {
-        this->pac_app.Advance();
-        return {};
-    }
-
-    virtual void render(ff::dxgi::command_context_base& context, ff::render_targets& targets) override
-    {
-        this->pac_app.Render(context, targets);
-    }
-
-    virtual void notify_window_message(ff::window* window, ff::window_message& message) override
-    {
-        if (message.msg == WM_SIZE && message.wp == SIZE_MINIMIZED)
-        {
-            ff::thread_dispatch::get_game()->post([&pac_app = this->pac_app]()
-            {
-                pac_app.PauseGame();
-            });
-        }
-    }
-
     virtual void ShowAboutDialog() override
     {
         ff::thread_dispatch::get_main()->post(::show_about_dialog);
@@ -50,28 +22,33 @@ public:
     {
         ff::app_window().close();
     }
+} pac_host;
 
-protected:
-    virtual void save_settings(ff::dict& dict)
+static void window_message(ff::window* window, ff::window_message& message)
+{
+    if (message.msg == WM_SIZE && message.wp == SIZE_MINIMIZED)
     {
-        this->pac_app.SaveState();
+        ff::thread_dispatch::get_game()->post([]
+        {
+            PacApplication::Get()->PauseGame();
+        });
     }
-
-    virtual void load_settings(const ff::dict& dict)
-    {
-        this->pac_app.LoadState();
-    }
-
-private:
-    PacApplication pac_app;
-};
+}
 
 int WINAPI wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ int)
 {
     ::show_splash_screen(instance);
 
-    ff::game::init_params_t<::pac_host> params;
-    params.window_initialized_func = ::close_splash_screen;
+    ff::init_game_params params;
+    std::unique_ptr<PacApplication> pac_app;
 
-    return ff::game::run(params);
+    params.game_clears_back_buffer_func = [] { return true; };
+    params.game_update_func = [&] { pac_app->Update(); };
+    params.game_render_func = [&](ff::app_update_t, ff::dxgi::command_context_base& context, ff::dxgi::target_base& target) { pac_app->Render(context, target); };
+    params.game_thread_initialized_func = [&] { pac_app = std::make_unique<PacApplication>(::pac_host); };
+    params.game_thread_finished_func = [&] { pac_app.reset(); };
+    params.main_thread_initialized_func = ::close_splash_screen;
+    params.main_window_message_func = ::window_message;
+
+    return ff::run_game(params);
 }

@@ -193,7 +193,7 @@ void HighScoreScreen::Advance()
     bool bExecute = false;
     bool bTyped = false;
 
-    if (!_done && _inputRes->advance())
+    if (!_done && _inputRes->update())
     {
         for (const ff::input_event& ie : _inputRes->events())
         {

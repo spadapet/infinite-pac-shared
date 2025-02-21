@@ -109,9 +109,9 @@ void TitleScreen::CreateOptions()
     ff::point_int optionPos = TileBottomRightToPixel(ff::point_int(5, 3)) + ff::point_int(PixelsPerTile().x / -2, 0);
     const ff::dict* options = &PacApplication::Get()->GetOptions();
 
-    auto mrPacText = []() { return std::string("MR.PAC"); };
-    auto msPacText = []() { return std::string("MS.LILA"); };
-    auto aboutText = []() { return std::string("ABOUT"); };
+    auto mrPacText = [] { return std::string("MR.PAC"); };
+    auto msPacText = [] { return std::string("MS.LILA"); };
+    auto aboutText = [] { return std::string("ABOUT"); };
 
     auto playersText = [options]()
         {
@@ -144,7 +144,7 @@ void TitleScreen::CreateOptions()
                 : std::string("VIBRATE:OFF");
         };
 
-    auto fullScreenText = []()
+    auto fullScreenText = []
         {
             return ff::app_window().full_screen()
                 ? std::string("FULL SCREEN:ON")
@@ -365,7 +365,7 @@ void TitleScreen::Advance()
     bool bExecute = false;
     bool bLeft = false;
 
-    if (!_done && _inputRes->advance())
+    if (!_done && _inputRes->update())
     {
         for (const ff::input_event& ie : _inputRes->events())
         {
