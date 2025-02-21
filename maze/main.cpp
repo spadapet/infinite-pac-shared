@@ -39,16 +39,14 @@ int WINAPI wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE, _In_ LPWSTR, _I
 {
     ::show_splash_screen(instance);
 
-    ff::init_game_params params;
     std::unique_ptr<PacApplication> pac_app;
-
-    params.game_clears_back_buffer_func = [] { return true; };
-    params.game_update_func = [&] { pac_app->Update(); };
-    params.game_render_func = [&](ff::app_update_t, ff::dxgi::command_context_base& context, ff::dxgi::target_base& target) { pac_app->Render(context, target); };
-    params.game_thread_initialized_func = [&] { pac_app = std::make_unique<PacApplication>(::pac_host); };
-    params.game_thread_finished_func = [&] { pac_app.reset(); };
+    ff::init_game_params params;
     params.main_thread_initialized_func = ::close_splash_screen;
     params.main_window_message_func = ::window_message;
+    params.game_thread_initialized_func = [&] { pac_app = std::make_unique<PacApplication>(::pac_host); };
+    params.game_thread_finished_func = [&] { pac_app.reset(); };
+    params.game_update_func = [&] { pac_app->Update(); };
+    params.game_render_func = [&](ff::app_update_t, ff::dxgi::command_context_base& context, ff::dxgi::target_base& target) { pac_app->Render(context, target); };
 
     return ff::run_game(params);
 }
