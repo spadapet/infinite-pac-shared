@@ -21,7 +21,6 @@ static const double TOUCH_DEAD_ZONE = 20;
 PacApplication::PacApplication(IPacApplicationHost& host)
     : _host(host)
     , _inputRes(GetGlobalInputMapping())
-    , _depth(ff::dxgi::create_depth({}))
     , _touchArrowSprite("char-sprites.move-arrow")
 {
     assert(!s_pacApp);
@@ -140,16 +139,16 @@ void PacApplication::Update()
     }
 }
 
-void PacApplication::Render(ff::dxgi::command_context_base& context, ff::dxgi::target_base& target)
+void PacApplication::Render(ff::dxgi::command_context_base& context, ff::dxgi::target_base& target, ff::dxgi::depth_base& depth)
 {
     check_ret(!_host.IsShowingPopup());
 
     if (_pushedGame)
     {
-        RenderGame(context, target, *_depth, _pushedGame.get());
+        RenderGame(context, target, depth, _pushedGame.get());
 
         ff::rect_float rect = target.size().logical_pixel_rect<float>();
-        ff::dxgi::draw_ptr draw = ff::dxgi::global_draw_device().begin_draw(context, target, _depth.get());
+        ff::dxgi::draw_ptr draw = ff::dxgi::global_draw_device().begin_draw(context, target, &depth);
         if (_fade < 1 && draw)
         {
             DirectX::XMFLOAT4 colorFade(0, 0, 0, _fade);
@@ -161,7 +160,7 @@ void PacApplication::Render(ff::dxgi::command_context_base& context, ff::dxgi::t
 
     if (!_pushedGame || _fade == _destFade)
     {
-        RenderGame(context, target, *_depth, _game.get());
+        RenderGame(context, target, depth, _game.get());
     }
 }
 
