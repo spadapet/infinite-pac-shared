@@ -43,7 +43,8 @@ public:
 
     // State
     void Update();
-    void Render(ff::dxgi::command_context_base& context, ff::dxgi::target_base& target);
+    void RenderOffscreen(const ff::render_params& params);
+    void RenderScreen(const ff::render_params& params);
     void SaveState();
     void LoadState();
 
@@ -88,7 +89,6 @@ private:
     std::shared_ptr<ff::input_event_provider> _inputRes;
 
     // Rendering
-    std::shared_ptr<ff::dxgi::depth_base> _depth;
     ff::window_size _targetSize{};
     ff::rect_float _renderRect{};
     ff::rect_float _levelRect{};
@@ -104,4 +104,5 @@ private:
     ff::point_double _touchOffset{};
     ff::point_int _touchStartPacDir{};
     ff::auto_resource<ff::sprite_base> _touchArrowSprite;
+    ff::render_targets _targets;
 };

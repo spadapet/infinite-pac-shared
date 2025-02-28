@@ -46,7 +46,8 @@ int WINAPI wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE, _In_ LPWSTR, _I
     params.game_thread_initialized_func = [&] { pac_app = std::make_unique<PacApplication>(::pac_host); };
     params.game_thread_finished_func = [&] { pac_app.reset(); };
     params.game_update_func = [&] { pac_app->Update(); };
-    params.game_render_func = [&](ff::app_update_t, ff::dxgi::command_context_base& context, ff::dxgi::target_base& target) { pac_app->Render(context, target); };
+    params.game_render_offscreen_func = [&](const ff::render_params& params) { pac_app->RenderOffscreen(params); };
+    params.game_render_screen_func = [&](const ff::render_params& params) { pac_app->RenderScreen(params); };
 
     return ff::run_game(params);
 }

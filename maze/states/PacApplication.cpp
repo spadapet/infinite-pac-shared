@@ -21,8 +21,8 @@ static const double TOUCH_DEAD_ZONE = 20;
 PacApplication::PacApplication(IPacApplicationHost& host)
     : _host(host)
     , _inputRes(GetGlobalInputMapping())
-    , _depth(ff::dxgi::create_depth({}))
     , _touchArrowSprite("char-sprites.move-arrow")
+    , _targets(1, { 896, 1024 })
 {
     assert(!s_pacApp);
     s_pacApp = this;
@@ -140,16 +140,21 @@ void PacApplication::Update()
     }
 }
 
-void PacApplication::Render(ff::dxgi::command_context_base& context, ff::dxgi::target_base& target)
+void PacApplication::RenderOffscreen(const ff::render_params& params)
 {
     check_ret(!_host.IsShowingPopup());
 
+    _targets.clear(params.context, 0);
+
+    ff::dxgi::target_base& target = _targets.target(0);
+    ff::dxgi::depth_base& depth = _targets.depth(0);
+
     if (_pushedGame)
     {
-        RenderGame(context, target, *_depth, _pushedGame.get());
+        RenderGame(params.context, target, depth, _pushedGame.get());
 
         ff::rect_float rect = target.size().logical_pixel_rect<float>();
-        ff::dxgi::draw_ptr draw = ff::dxgi::global_draw_device().begin_draw(context, target, _depth.get());
+        ff::dxgi::draw_ptr draw = ff::dxgi::global_draw_device().begin_draw(params.context, target, &depth);
         if (_fade < 1 && draw)
         {
             DirectX::XMFLOAT4 colorFade(0, 0, 0, _fade);
@@ -161,7 +166,21 @@ void PacApplication::Render(ff::dxgi::command_context_base& context, ff::dxgi::t
 
     if (!_pushedGame || _fade == _destFade)
     {
-        RenderGame(context, target, *_depth, _game.get());
+        RenderGame(params.context, target, depth, _game.get());
+    }
+}
+
+void PacApplication::RenderScreen(const ff::render_params& params)
+{
+    check_ret(!_host.IsShowingPopup());
+
+    if (ff::dxgi::draw_ptr draw = ff::dxgi::global_draw_device().begin_draw(
+        params.context, params.target, nullptr,
+        params.target.size().logical_pixel_rect<float>(),
+        ff::rect_float{ {}, _targets.size().cast<float>() }))
+    {
+        ff::texture& texture = _targets.texture(0);
+        draw->draw_sprite(texture.sprite_data(), ff::pixel_transform::identity());
     }
 }
 
