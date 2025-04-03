@@ -22,6 +22,7 @@ PacApplication::PacApplication(IPacApplicationHost& host)
     : _host(host)
     , _inputRes(GetGlobalInputMapping())
     , _touchArrowSprite("char-sprites.move-arrow")
+    , _targets({ 896, 1024 })
 {
     assert(!s_pacApp);
     s_pacApp = this;
@@ -139,20 +140,23 @@ void PacApplication::Update()
     }
 }
 
-void PacApplication::RenderOffscreen(ff::dxgi::command_context_base& context)
-{
-}
-
-void PacApplication::RenderScreen(ff::dxgi::command_context_base& context, ff::dxgi::target_base& target)
+void PacApplication::RenderOffscreen(const ff::render_params& params)
 {
     check_ret(!_host.IsShowingPopup());
 
+    _targets.count(params.buffer_count);
+    _targets.size(params.target.size().logical_pixel_size);
+    _targets.clear(params.context, params.buffer_index);
+
+    ff::dxgi::target_base& target = _targets.target(params.buffer_index);
+    ff::dxgi::depth_base& depth = _targets.depth(params.buffer_index);
+
     if (_pushedGame)
     {
-        RenderGame(context, target, depth, _pushedGame.get());
+        RenderGame(params.context, target, depth, _pushedGame.get());
 
         ff::rect_float rect = target.size().logical_pixel_rect<float>();
-        ff::dxgi::draw_ptr draw = ff::dxgi::global_draw_device().begin_draw(context, target, &depth);
+        ff::dxgi::draw_ptr draw = ff::dxgi::global_draw_device().begin_draw(params.context, target, &depth);
         if (_fade < 1 && draw)
         {
             DirectX::XMFLOAT4 colorFade(0, 0, 0, _fade);
@@ -164,8 +168,17 @@ void PacApplication::RenderScreen(ff::dxgi::command_context_base& context, ff::d
 
     if (!_pushedGame || _fade == _destFade)
     {
-        RenderGame(context, target, depth, _game.get());
+        RenderGame(params.context, target, depth, _game.get());
     }
+}
+
+void PacApplication::RenderScreen(const ff::render_params& params)
+{
+    check_ret(!_host.IsShowingPopup());
+
+    //if (ff::dxgi::draw_ptr draw = ff::dxgi::global_draw_device().begin_draw(params.context, params.target, nullptr, ff::rect_float{ { 0, 0 }, params.target.size().physical_pixel_size().cast<float>() }, _targets.size().cast<float>()))
+    //{
+    //}
 }
 
 static std::string_view s_state = "PacApplication";

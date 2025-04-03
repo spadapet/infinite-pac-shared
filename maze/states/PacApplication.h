@@ -43,8 +43,8 @@ public:
 
     // State
     void Update();
-    void RenderOffscreen(ff::dxgi::command_context_base& context);
-    void RenderScreen(ff::dxgi::command_context_base& context, ff::dxgi::target_base& target);
+    void RenderOffscreen(const ff::render_params& params);
+    void RenderScreen(const ff::render_params& params);
     void SaveState();
     void LoadState();
 
@@ -104,4 +104,5 @@ private:
     ff::point_double _touchOffset{};
     ff::point_int _touchStartPacDir{};
     ff::auto_resource<ff::sprite_base> _touchArrowSprite;
+    ff::render_targets _targets;
 };
