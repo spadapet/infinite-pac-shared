@@ -139,7 +139,11 @@ void PacApplication::Update()
     }
 }
 
-void PacApplication::Render(ff::dxgi::command_context_base& context, ff::dxgi::target_base& target, ff::dxgi::depth_base& depth)
+void PacApplication::RenderOffscreen(ff::dxgi::command_context_base& context)
+{
+}
+
+void PacApplication::RenderScreen(ff::dxgi::command_context_base& context, ff::dxgi::target_base& target)
 {
     check_ret(!_host.IsShowingPopup());
 

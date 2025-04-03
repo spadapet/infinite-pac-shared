@@ -43,7 +43,8 @@ public:
 
     // State
     void Update();
-    void Render(ff::dxgi::command_context_base& context, ff::dxgi::target_base& target, ff::dxgi::depth_base& depth);
+    void RenderOffscreen(ff::dxgi::command_context_base& context);
+    void RenderScreen(ff::dxgi::command_context_base& context, ff::dxgi::target_base& target);
     void SaveState();
     void LoadState();
 
