@@ -22,7 +22,7 @@ PacApplication::PacApplication(IPacApplicationHost& host)
     : _host(host)
     , _inputRes(GetGlobalInputMapping())
     , _touchArrowSprite("char-sprites.move-arrow")
-    , _targets({ 896, 1024 })
+    , _targets(1, { 896, 1024 })
 {
     assert(!s_pacApp);
     s_pacApp = this;
@@ -142,14 +142,12 @@ void PacApplication::Update()
 
 void PacApplication::RenderOffscreen(const ff::render_params& params)
 {
-    check_ret(!_host.IsShowingPopup());
+    check_ret(!_host.IsShowingPopup() && params.buffer_count);
 
-    _targets.count(params.buffer_count);
-    _targets.size(params.target.size().logical_pixel_size);
-    _targets.clear(params.context, params.buffer_index);
+    _targets.clear(params.context, 0);
 
-    ff::dxgi::target_base& target = _targets.target(params.buffer_index);
-    ff::dxgi::depth_base& depth = _targets.depth(params.buffer_index);
+    ff::dxgi::target_base& target = _targets.target(0);
+    ff::dxgi::depth_base& depth = _targets.depth(0);
 
     if (_pushedGame)
     {
@@ -174,11 +172,16 @@ void PacApplication::RenderOffscreen(const ff::render_params& params)
 
 void PacApplication::RenderScreen(const ff::render_params& params)
 {
-    check_ret(!_host.IsShowingPopup());
+    check_ret(!_host.IsShowingPopup() && params.buffer_count);
 
-    //if (ff::dxgi::draw_ptr draw = ff::dxgi::global_draw_device().begin_draw(params.context, params.target, nullptr, ff::rect_float{ { 0, 0 }, params.target.size().physical_pixel_size().cast<float>() }, _targets.size().cast<float>()))
-    //{
-    //}
+    if (ff::dxgi::draw_ptr draw = ff::dxgi::global_draw_device().begin_draw(
+        params.context, params.target, nullptr,
+        params.target.size().logical_pixel_rect<float>(),
+        ff::rect_float{ {}, _targets.size().cast<float>() }))
+    {
+        ff::texture& texture = _targets.texture(0);
+        draw->draw_sprite(texture.sprite_data(), ff::pixel_transform::identity());
+    }
 }
 
 static std::string_view s_state = "PacApplication";
