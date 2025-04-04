@@ -142,7 +142,7 @@ void PacApplication::Update()
 
 void PacApplication::RenderOffscreen(const ff::render_params& params)
 {
-    check_ret(!_host.IsShowingPopup() && params.buffer_count);
+    check_ret(!_host.IsShowingPopup());
 
     _targets.clear(params.context, 0);
 
@@ -172,7 +172,7 @@ void PacApplication::RenderOffscreen(const ff::render_params& params)
 
 void PacApplication::RenderScreen(const ff::render_params& params)
 {
-    check_ret(!_host.IsShowingPopup() && params.buffer_count);
+    check_ret(!_host.IsShowingPopup());
 
     if (ff::dxgi::draw_ptr draw = ff::dxgi::global_draw_device().begin_draw(
         params.context, params.target, nullptr,
