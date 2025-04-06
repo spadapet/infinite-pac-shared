@@ -144,6 +144,7 @@ void PacApplication::RenderOffscreen(const ff::render_params& params)
 {
     check_ret(!_host.IsShowingPopup());
 
+    _targets.size(params.target.size().logical_pixel_size);
     _targets.clear(params.context, 0);
 
     ff::dxgi::target_base& target = _targets.target(0);
@@ -153,14 +154,12 @@ void PacApplication::RenderOffscreen(const ff::render_params& params)
     {
         RenderGame(params.context, target, depth, _pushedGame.get());
 
-        ff::rect_float rect = target.size().logical_pixel_rect<float>();
-        ff::dxgi::draw_ptr draw = ff::dxgi::global_draw_device().begin_draw(params.context, target, &depth);
-        if (_fade < 1 && draw)
+        if (_fade < 1)
         {
-            DirectX::XMFLOAT4 colorFade(0, 0, 0, _fade);
-
-            draw->draw_rectangle(ff::rect_float((float)rect.left, (float)rect.top, (float)rect.right, (float)rect.bottom), colorFade);
-            draw.reset();
+            if (ff::dxgi::draw_ptr draw = ff::dxgi::global_draw_device().begin_draw(params.context, target, &depth))
+            {
+                draw->draw_rectangle(target.size().logical_pixel_rect<float>(), ff::color(0, 0, 0, _fade));
+            }
         }
     }
 
