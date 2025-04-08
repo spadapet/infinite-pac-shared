@@ -22,7 +22,7 @@ PacApplication::PacApplication(IPacApplicationHost& host)
     : _host(host)
     , _inputRes(GetGlobalInputMapping())
     , _touchArrowSprite("char-sprites.move-arrow")
-    , _targets(1, { 896, 1024 })
+    , _targets(1, { 896, 1024 }, 1.0)
 {
     assert(!s_pacApp);
     s_pacApp = this;
@@ -144,7 +144,8 @@ void PacApplication::RenderOffscreen(const ff::render_params& params)
 {
     check_ret(!_host.IsShowingPopup());
 
-    _targets.size(params.target.size().logical_pixel_size);
+    ff::window_size size = params.target.size();
+    _targets.size(size.logical_pixel_size, size.dpi_scale);
     _targets.clear(params.context, 0);
 
     ff::dxgi::target_base& target = _targets.target(0);
