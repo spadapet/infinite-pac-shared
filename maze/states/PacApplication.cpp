@@ -22,7 +22,7 @@ PacApplication::PacApplication(IPacApplicationHost& host)
     : _host(host)
     , _inputRes(GetGlobalInputMapping())
     , _touchArrowSprite("char-sprites.move-arrow")
-    , _targets(1, { 896, 1024 }, 1.0)
+    , _targets(1, { 896, 1024 }, 1.0, DXGI_FORMAT_R8G8B8A8_UNORM, 1, &ff::color_black())
 {
     assert(!s_pacApp);
     s_pacApp = this;
