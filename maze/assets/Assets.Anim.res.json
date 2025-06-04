@@ -212,12 +212,12 @@
 
     "visuals":
     [
-      { "visual": "sprite0", "rotate": "rotate", "scale": "scale", "color": "color0" }
+      { "visual": "sprite", "rotate": "rotate", "scale": "scale", "color": "color" }
     ],
 
     "keys":
     {
-      "sprite0":
+      "sprite":
       {
         "values":
         [
@@ -243,13 +243,13 @@
           { "frame": 2, "value": [ 3, 3 ] }
         ]
       },
-      "color0":
+      "color":
       {
         "values":
         [
-          { "frame": 0, "value": [ 1, 1, 1, 1 ] },
+          { "frame": 0, "value": [ 1, 1, 1, 0.5 ] },
           { "frame": 1, "value": [ 1, 1, 1, 1 ] },
-          { "frame": 2, "value": [ 1, 1, 1, 0 ] }
+          { "frame": 2, "value": [ 1, 1, 1, 0.5 ] }
         ]
       }
     }

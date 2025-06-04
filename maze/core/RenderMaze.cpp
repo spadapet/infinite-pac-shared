@@ -765,7 +765,7 @@ void RenderMaze::RenderDots(ff::dxgi::draw_base& draw)
     float dotFrame = _powerCounter * dotAnim->frames_per_second() / 60.0f;
     float powerFrame = _powerCounter * powerAnim->frames_per_second() / 60.0f + powerAnim->frame_length() / 2.0f;
 
-    draw.push_opaque();
+    draw.push_no_overlap();
 
     for (ff::point_int tile(0, 0); tile.y < size.y; tile.x = 0, tile.y++)
     {
@@ -784,7 +784,7 @@ void RenderMaze::RenderDots(ff::dxgi::draw_base& draw)
         }
     }
 
-    draw.pop_opaque();
+    draw.pop_no_overlap();
 }
 
 void RenderMaze::RenderActors(ff::dxgi::draw_base& draw, bool bPac, bool bGhosts, bool bCustom, IPlayingMaze* pPlay)
