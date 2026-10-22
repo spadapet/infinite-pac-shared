@@ -6,6 +6,11 @@
 .vs/
 bin/
 obj/
+node_modules/
+/maze.web/dist/
+/maze.web/public/assets/
+/maze.web/test-results/
+/maze.web/playwright-report/
 
 # files
 *.ipch

@@ -4,7 +4,7 @@
   <PropertyGroup>
     <DevRoot Condition=" '$(DevRoot)' == '' ">$(MSBuildThisFileDirectory)</DevRoot>
   </PropertyGroup>
-  <Import Project="ff_game_library\build\project.props" Condition=" '$(SharedProjectPropsImported)' == '' " />
+  <Import Project="ff_game_library\build\project.props" Condition=" '$(SharedProjectPropsImported)' == '' And '$(MSBuildProjectExtension)' != '.esproj' " />
   <ItemDefinitionGroup>
     <ClCompile>
       <RuntimeLibrary Condition=" '$(Configuration)' == 'Release' ">MultiThreaded</RuntimeLibrary>

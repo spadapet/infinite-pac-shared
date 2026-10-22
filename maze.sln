@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.31516.353
+# Visual Studio Version 18
+VisualStudioVersion = 18.3.11312.210 d18.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "maze", "maze\maze.vcxproj", "{C3A0AF9F-5AF7-471E-AE92-14032A8A9A94}"
 EndProject
@@ -42,6 +42,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "include", "include", "{41D7
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "vendor", "vendor", "{B1C82CFC-C604-46DB-805B-276E0E264816}"
+EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "maze.web", "maze.web\maze.web.esproj", "{D9DA44B4-50B5-460E-B9E3-0731C87A7E97}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -92,6 +94,15 @@ Global
 		{376073E9-EA4D-4513-941C-906CA968C6C3}.Profile|x64.Build.0 = Profile|x64
 		{376073E9-EA4D-4513-941C-906CA968C6C3}.Release|x64.ActiveCfg = Release|x64
 		{376073E9-EA4D-4513-941C-906CA968C6C3}.Release|x64.Build.0 = Release|x64
+		{D9DA44B4-50B5-460E-B9E3-0731C87A7E97}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D9DA44B4-50B5-460E-B9E3-0731C87A7E97}.Debug|x64.Build.0 = Debug|Any CPU
+		{D9DA44B4-50B5-460E-B9E3-0731C87A7E97}.Debug|x64.Deploy.0 = Debug|Any CPU
+		{D9DA44B4-50B5-460E-B9E3-0731C87A7E97}.Profile|x64.ActiveCfg = Release|Any CPU
+		{D9DA44B4-50B5-460E-B9E3-0731C87A7E97}.Profile|x64.Build.0 = Release|Any CPU
+		{D9DA44B4-50B5-460E-B9E3-0731C87A7E97}.Profile|x64.Deploy.0 = Release|Any CPU
+		{D9DA44B4-50B5-460E-B9E3-0731C87A7E97}.Release|x64.ActiveCfg = Release|Any CPU
+		{D9DA44B4-50B5-460E-B9E3-0731C87A7E97}.Release|x64.Build.0 = Release|Any CPU
+		{D9DA44B4-50B5-460E-B9E3-0731C87A7E97}.Release|x64.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
