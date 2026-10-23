@@ -96,6 +96,7 @@ interface LevelRun {
     state: GameState;
     stateTick: number;
     playerReadyTicks: number;
+    readyPhase: 'before' | 'player' | 'ready';
     playIntro: boolean;
     ghostCount: number;
     gameOverEmitted: boolean;
@@ -323,6 +324,7 @@ export class Game {
     private tickCount = 0;
     private currentPlayer = 0;
     private switchCountdown = 0;
+    private gameOverCountdown = 0;
     private gameOver = false;
     private mazeSerial = 0;
 
@@ -362,7 +364,10 @@ export class Game {
             state: this.gameOver ? 'gameover' : run.state,
             tick: this.tickCount,
             stateTick: run.stateTick,
-            playerReady: run.state === 'ready' && run.stateTick <= run.playerReadyTicks && run.playerReadyTicks > 0,
+            playerReady: run.state === 'ready' && run.readyPhase === 'player',
+            beforeReady: run.state === 'ready' && run.readyPhase === 'before',
+            playerGameOver: player.gameOver && !this.gameOver,
+            switchingPlayer: this.switchCountdown > 0,
             animation: { ...run.animation },
             level: player.level + 1,
             score: player.score,
@@ -378,7 +383,7 @@ export class Game {
                 direction: directionName(run.pac),
                 powered: run.ghosts.some(ghost => ghost.active && ['scared', 'eaten', 'waiting'].includes(ghost.move)),
                 moving: !run.pac.stuck && (run.pac.dx !== 0 || run.pac.dy !== 0),
-                visible: run.pac.active && run.ghostEatenCountdown === 0 && (run.state !== 'ready' || run.stateTick > run.playerReadyTicks || run.playerReadyTicks === 0),
+                visible: run.pac.active && run.ghostEatenCountdown === 0 && (run.state !== 'ready' || run.readyPhase === 'ready'),
             },
             ghosts,
             fruit: run.fruit.active ? { position: { x: run.fruit.x, y: run.fruit.y }, type: run.fruit.type, moving: run.fruit.dx !== 0 || run.fruit.dy !== 0 } : null,
@@ -399,18 +404,32 @@ export class Game {
         this.tickCount++;
         if (this.gameOver) return;
         if (this.switchCountdown > 0) {
-            this.switchCountdown--;
-            if (this.switchCountdown === 0) this.advancePlayerSwitch();
-            return;
+            if (--this.switchCountdown > 0) return;
+            this.advancePlayerSwitch();
+            if (this.gameOver) return;
         }
 
         const player = this.players[this.currentPlayer];
-        if (!player || player.gameOver) return;
+        if (this.gameOverCountdown > 0) {
+            if (--this.gameOverCountdown === 0) {
+                this.events.push({ type: 'gameOver', player: this.currentPlayer + 1, score: player.score, level: player.level + 1 });
+                player.run.gameOverEmitted = true;
+                this.switchCountdown = 1;
+            }
+            return;
+        }
+        if (player.gameOver) return;
         const run = player.run;
         switch (run.state) {
             case 'ready':
-                if (run.playIntro && run.stateTick === 0) this.sound('intro');
-                if (run.stateTick > 120 + run.playerReadyTicks) {
+                if (run.readyPhase === 'before') {
+                    run.readyPhase = run.playerReadyTicks ? 'player' : 'ready';
+                    this.setState(run, 'ready');
+                    if (run.playIntro) this.sound('intro');
+                } else if (run.readyPhase === 'player' && run.stateTick > 150) {
+                    run.readyPhase = 'ready';
+                    this.setState(run, 'ready');
+                } else if (run.readyPhase === 'ready' && run.stateTick > 120) {
                     this.setState(run, 'playing');
                     if (run.playIntro) this.events.push({ type: 'stopSound', name: 'mr-intro' });
                 }
@@ -428,17 +447,15 @@ export class Game {
                 }
                 if (run.stateTick > 120) this.setState(run, 'dead');
                 break;
-            case 'dead':
-                if (run.stateTick > 30) this.finishDeath(player);
-                break;
-            case 'winning':
-                if (run.stateTick > 240) this.finishLevel(player);
-                break;
         }
         if (run.state !== 'playing') this.stopBackground(run);
-        if (!player.gameOver) this.checkFreeLife(player);
         this.advanceAnimation(run);
+        const finishedDeath = run.state === 'dead' && run.stateTick > 30;
+        const finishedLevel = run.state === 'winning' && run.stateTick > 240;
         run.stateTick++;
+        this.checkFreeLife(player);
+        if (finishedDeath) this.finishDeath(player);
+        else if (finishedLevel) this.finishLevel(player);
     }
 
     private advanceAnimation(run: LevelRun): void {
@@ -483,7 +500,7 @@ export class Game {
             move: 'normal' as MoveMode, house: 'outside' as HouseMode, dotCounter: 0,
         }));
         const run: LevelRun = {
-            maze, state: 'ready', stateTick: 0, playerReadyTicks: playerReady ? 150 : 0, playIntro: playerReady && level === 0,
+            maze, state: 'ready', stateTick: 0, playerReadyTicks: playerReady ? 150 : 0, readyPhase: 'before', playIntro: playerReady && level === 0,
             ghostCount: 0, gameOverEmitted: false, pac, ghosts, fruit, points: [], particles: [],
             animation: { pacFrame: 0, deathFrame: 0, ghostTicks: 0, dotTicks: 0, totalTicks: 0, pacTicks: 0, deathTicks: 0 },
             dotCount: 0, dotCountTotal: 0, lastDotCounter: 0, globalDotIndex: 0, globalDotCounter: 0,
@@ -688,7 +705,7 @@ export class Game {
         let choice: Point;
         if (candidates.length === 1) choice = candidates[0];
         else if (fruit) choice = this.fruitChooseTile(run, currentTile, candidates);
-        else if (move === 'scared' || move === 'waiting') choice = candidates[Math.floor(this.random() * candidates.length) % candidates.length];
+        else if (move === 'scared') choice = candidates[Math.floor(this.random() * candidates.length) % candidates.length];
         else {
             const index = run.ghosts.findIndex(item => item === actor);
             choice = this.closestTile(candidates, this.ghostTarget(index, move, run));
@@ -729,7 +746,7 @@ export class Game {
 
     private ghostTarget(index: number, move: MoveMode | null, run: LevelRun): Point {
         if (move === 'eyes') return run.ghostStartPixel;
-        if (run.ghostScatterCountdown > 0 || !run.pac.active) return this.ghostScatterTarget(index, run);
+        if (move === 'normal' && (run.ghostScatterCountdown > 0 || !run.pac.active)) return this.ghostScatterTarget(index, run);
         const pac = point(run.pac.x, run.pac.y);
         if (index === 0) return pac;
         if (index === 1) return point(pac.x + run.pac.dx * 32, pac.y + run.pac.dy * 32);
@@ -848,7 +865,6 @@ export class Game {
         }
         if (run.dotCount === 0) this.setState(run, 'winning');
         player.score += power ? 50 : 10;
-        this.checkFreeLife(player);
         const vibratesForDot = run.dotEffect === 0;
         if (power) {
             this.scareGhosts(run, true);
@@ -873,7 +889,6 @@ export class Game {
         run.ghostEatenIndex++;
         player.score += score;
         run.points.push({ x: ghost.x, y: ghost.y, value: score, remaining: 54, color: 0x00ffff });
-        this.checkFreeLife(player);
         this.sound('eat-ghost');
         this.events.push({ type: 'vibrate', duration: 750 });
         this.addParticles(run, point(ghost.x, ghost.y), 30, 13);
@@ -883,7 +898,6 @@ export class Game {
         run.fruitCounter = 0;
         const score = FRUIT_POINTS[run.fruit.type] ?? 0;
         player.score += score;
-        this.checkFreeLife(player);
         run.points.push({ x: run.fruit.x, y: run.fruit.y, value: score, remaining: 120, color: 0xffb8ff });
         this.sound('eat-fruit');
         this.events.push({ type: 'vibrate', duration: 500 });
@@ -1080,6 +1094,7 @@ export class Game {
             player.lives--;
             const oldRun = player.run;
             player.run = this.createLevel(player.level);
+            player.run.readyPhase = 'ready';
             player.run.maze = oldRun.maze;
             player.run.dotCount = oldRun.maze.tiles.reduce((total, row) => total + row.filter(tile => tile.kind === 'dot' || tile.kind === 'power').length, 0);
             player.run.dotCountTotal = oldRun.dotCountTotal;
@@ -1095,15 +1110,7 @@ export class Game {
             if (this.players.length > 1) this.schedulePlayerSwitch();
         } else {
             player.gameOver = true;
-            if (!player.run.gameOverEmitted) {
-                this.events.push({ type: 'gameOver', player: this.currentPlayer + 1, score: player.score, level: player.level + 1 });
-                player.run.gameOverEmitted = true;
-            }
-            if (this.players.length > 1 && this.players.some(other => !other.gameOver)) this.switchCountdown = 120;
-            else {
-                this.gameOver = true;
-                this.setState(player.run, 'gameover');
-            }
+            this.gameOverCountdown = 120;
         }
     }
 
@@ -1121,9 +1128,8 @@ export class Game {
     }
 
     private advancePlayerSwitch(): void {
-        if (this.players.length < 2) return;
         const other = this.currentPlayer === 0 ? 1 : 0;
-        if (!this.players[other].gameOver) {
+        if (this.players[other] && !this.players[other].gameOver) {
             this.currentPlayer = other;
             return;
         }

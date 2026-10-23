@@ -2,7 +2,7 @@ import './style.css';
 import { Game } from './game';
 import { GameRenderer } from './renderer';
 import { GameAudio } from './audio';
-import { GameStorage } from './storage';
+import { GameStorage, scoreName } from './storage';
 import { InputController } from './input';
 import type { GameOptions, GameEvent } from './types';
 
@@ -182,12 +182,16 @@ function fullscreen(): void {
     else void element('app', HTMLElement).requestFullscreen().catch(failure);
 }
 function showNextScore(): void {
+    while (pendingScores.length && !storage.qualifies(options, pendingScores[0].score)) pendingScores.shift();
     const entry = pendingScores[0];
     if (!entry) {
         scoreEntry.hidden = true;
         paused = false;
         accumulator = 0;
+        lastTime = 0;
+        pauseButton.disabled = false;
         if (game.view.state === 'gameover') showMenu();
+        else if (document.hidden || graphicsLost) setPaused(true);
         else { void audio.setPaused(false).catch(failure); void unlockSound().catch(failure); host.focus({ preventScroll: true }); }
         return;
     }
@@ -195,11 +199,11 @@ function showNextScore(): void {
     void audio.setPaused(true).catch(failure);
     scoreEntry.hidden = false;
     pauseMenu.hidden = true;
+    pauseButton.disabled = true;
     element('score-summary', HTMLElement).textContent = `Player ${entry.player}: ${entry.score.toLocaleString()} points - Level ${entry.level}`;
     const name = element('score-name', HTMLInputElement);
-    name.value = `PLAYER ${entry.player}`;
+    name.value = '';
     name.focus({ preventScroll: true });
-    name.select();
 }
 function handleEvents(): void {
     for (const event of game.drainEvents()) {
@@ -227,7 +231,7 @@ element('scores-button', HTMLButtonElement).addEventListener('click', () => {
     const scores = storage.scores(settings);
     for (const score of scores) {
         const item = document.createElement('li');
-        item.append(document.createTextNode(score.name));
+        item.append(document.createTextNode(score.name || '---'));
         const points = document.createElement('span');
         points.textContent = score.score.toLocaleString();
         item.append(points);
@@ -239,12 +243,31 @@ element('scores-button', HTMLButtonElement).addEventListener('click', () => {
     element('scores-close', HTMLButtonElement).focus({ preventScroll: true });
 });
 element('scores-close', HTMLButtonElement).addEventListener('click', () => { scoresPanel.hidden = true; element('scores-button', HTMLButtonElement).focus(); });
+const scoreNameInput = element('score-name', HTMLInputElement);
+scoreNameInput.maxLength = 9;
+scoreNameInput.required = false;
+scoreNameInput.pattern = '[a-zA-Z .]*';
+scoreNameInput.addEventListener('input', () => { scoreNameInput.value = scoreName(scoreNameInput.value); });
+const skipScore = (): void => {
+    pendingScores.shift();
+    showNextScore();
+};
+const skipScoreButton = document.createElement('button');
+skipScoreButton.type = 'button';
+skipScoreButton.textContent = 'Skip score';
+skipScoreButton.addEventListener('click', skipScore);
+element('score-form', HTMLFormElement).append(skipScoreButton);
+document.addEventListener('keydown', event => {
+    if (scoreEntry.hidden || event.key !== 'Escape') return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    if (!event.repeat) skipScore();
+}, true);
 element('score-form', HTMLFormElement).addEventListener('submit', event => {
     event.preventDefault();
     const entry = pendingScores[0];
-    const name = element('score-name', HTMLInputElement).value.trim();
-    if (!entry || !name) return;
-    storage.addScore(options, { name, score: entry.score, level: entry.level, date: new Date().toISOString() });
+    if (!entry || scoreEntry.hidden) return;
+    storage.addScore(options, { name: scoreNameInput.value, score: entry.score, level: entry.level, date: new Date().toISOString() });
     pendingScores.shift();
     showNextScore();
 });

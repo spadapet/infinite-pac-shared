@@ -22,7 +22,7 @@ function setup(t: TestContext) {
     const actorPool: Sprite[] = [], dotPool: Sprite[] = [], livesPool: Sprite[] = [], fruitPool: Sprite[] = [], pointTextPool: Sprite[] = [], joystickPool: Sprite[] = [];
     const actorLayer = new Container(), dotLayer = new Container(), wallLayer = new Container(), hudLayer = new Container(), joystickLayer = new Container();
     const background = new Graphics();
-    const renderer = Object.create(GameRenderer.prototype);
+    const renderer: GameRenderer = Object.create(GameRenderer.prototype);
     Object.assign(renderer, { textures: { frames }, boardTop: 24, layoutWidth: 224, layoutHeight: 296,
         actorPool, actorLayer, dotPool, dotLayer, wallLayer, background, livesPool, fruitPool, pointTextPool, hudLayer, hudTextPool: [], joystickPool, joystickLayer });
     const draw = (method: string, ...args: unknown[]) => Reflect.apply(Reflect.get(GameRenderer.prototype, method), renderer, args);
@@ -30,6 +30,7 @@ function setup(t: TestContext) {
     const view = game.view;
     view.state = 'playing';
     view.playerReady = false;
+    view.beforeReady = false;
     view.pac.visible = false;
     view.ghosts = [];
     t.after(() => {
@@ -38,7 +39,7 @@ function setup(t: TestContext) {
         for (const texture of textures) texture.destroy();
         source.destroy();
     });
-    return { draw, view, frames, actorPool, dotPool, livesPool, fruitPool, pointTextPool, wallLayer, joystickPool };
+    return { renderer, draw, view, frames, actorPool, dotPool, livesPool, fruitPool, pointTextPool, wallLayer, joystickPool };
 }
 
 test('all sixteen native maze variants render every wall/door through the original three-layer patterns', t => {
@@ -161,4 +162,44 @@ test('held pointer draws the original orange arrow with native handle, angle, sc
     draw('drawJoystick', view, null);
     assert.equal(arrow.visible, false);
     assert.equal(joystickPool.length, 1, 'the arrow is reused rather than recreated per frame');
+});
+
+test('ready and player-gameover overlays retain native phase visibility, anchors and colors', t => {
+    const { renderer, draw, view } = setup(t);
+    const labels: Array<{ text: string; x: number; y: number; tint: number }> = [];
+    Object.assign(renderer, { overlayTextPool: [] });
+    renderer['drawBitmapText'] = (text, x, y, tint, _pool, count = 0) => {
+        if (text) labels.push({ text, x, y, tint });
+        return count + text.length;
+    };
+    view.state = 'ready';
+    view.beforeReady = true;
+    draw('drawOverlay', view, false);
+    assert.deepEqual(labels, [], 'BEFORE_TIME does not announce READY early');
+    view.beforeReady = false;
+    view.playerReady = true;
+    view.level = 100;
+    draw('drawOverlay', view, false);
+    assert.deepEqual(labels, [
+        { text: 'PLAYER ONE', x: 72, y: 112, tint: 0x00ffff },
+        { text: 'LEVEL 100', x: 80, y: 160, tint: 0xffff00 },
+    ]);
+    labels.length = 0;
+    view.playerReady = false;
+    draw('drawOverlay', view, false);
+    assert.deepEqual(labels, [{ text: 'READY!', x: 88, y: 160, tint: 0xffff00 }]);
+    labels.length = 0;
+    view.state = 'dead';
+    view.playerGameOver = true;
+    view.player = 2;
+    draw('drawOverlay', view, false);
+    assert.deepEqual(labels, [
+        { text: 'GAME OVER', x: 72, y: 160, tint: 0xff0000 },
+        { text: 'PLAYER TWO', x: 72, y: 112, tint: 0xff0000 },
+    ]);
+    labels.length = 0;
+    view.state = 'gameover';
+    view.playerGameOver = false;
+    draw('drawOverlay', view, false);
+    assert.deepEqual(labels, [{ text: 'GAME OVER', x: 72, y: 160, tint: 0xff0000 }]);
 });

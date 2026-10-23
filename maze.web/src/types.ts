@@ -33,6 +33,9 @@ export interface GameView {
     tick: number;
     stateTick: number;
     playerReady: boolean;
+    beforeReady: boolean;
+    playerGameOver: boolean;
+    switchingPlayer: boolean;
     animation: { pacFrame: number; deathFrame: number; ghostTicks: number; dotTicks: number; totalTicks: number };
     level: number;
     score: number;

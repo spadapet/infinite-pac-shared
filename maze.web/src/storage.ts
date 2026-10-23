@@ -10,6 +10,7 @@ const character = (value: unknown): value is Character => value === 'mr' || valu
 const difficulty = (value: unknown): value is Difficulty => value === 'easy' || value === 'normal' || value === 'hard';
 const record = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value);
 const integer = (value: unknown): value is number => typeof value === 'number' && Number.isSafeInteger(value) && value >= 0;
+export const scoreName = (name: string): string => name.toLowerCase().replace(/[^a-z .]/g, '').slice(0, 9);
 
 export class GameStorage {
     private data: SavedData = { version: 1, settings: { ...defaultSettings }, scores: {} };
@@ -34,7 +35,9 @@ export class GameStorage {
                     || !integer(entry.level) || typeof entry.date !== 'string')) {
                     throw new Error('Invalid saved high scores');
                 }
-                scores[category] = entries.map((entry: HighScore) => ({ ...entry })).sort((a, b) => b.score - a.score).slice(0, 10);
+                scores[category] = entries.filter((entry: HighScore) => entry.score > 0)
+                    .map((entry: HighScore) => ({ ...entry, name: scoreName(entry.name) }))
+                    .sort((a, b) => b.score - a.score).slice(0, 10);
             }
             this.data = { version: 1, settings: { character: options.character, mazeSet: options.mazeSet, difficulty: options.difficulty,
                 players: options.players, sound: options.sound, vibration: options.vibration }, scores };
@@ -56,15 +59,16 @@ export class GameStorage {
 
     qualifies(options: GameOptions, score: number): boolean {
         const scores = this.scores(options);
-        return score > 0 && (scores.length < 10 || score > scores[scores.length - 1].score);
+        return integer(score) && score > 0 && (scores.length < 10 || score > scores[scores.length - 1].score);
     }
 
     addScore(options: GameOptions, entry: HighScore): void {
-        if (!integer(entry.score) || !integer(entry.level) || !entry.name.trim() || entry.name.length > 16) {
+        if (!integer(entry.score) || !integer(entry.level) || typeof entry.name !== 'string' || typeof entry.date !== 'string') {
             throw new Error('Invalid high score');
         }
+        if (!this.qualifies(options, entry.score)) return;
         const scores = this.scores(options);
-        scores.push({ ...entry, name: entry.name.trim() });
+        scores.push({ ...entry, name: scoreName(entry.name) });
         this.data.scores[this.category(options)] = scores.sort((a, b) => b.score - a.score).slice(0, 10);
         this.save();
     }

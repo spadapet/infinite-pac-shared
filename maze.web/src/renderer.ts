@@ -456,7 +456,7 @@ export class GameRenderer {
 
     private drawActors(view: GameView): void {
         this.actorCursor = 0;
-        const ghostsVisible = !view.playerReady && ['ready', 'playing', 'caught'].includes(view.state);
+        const ghostsVisible = !view.beforeReady && !view.playerReady && ['ready', 'playing', 'caught'].includes(view.state);
         if (ghostsVisible && view.fruit) {
             const sprite = this.obtainSprite(this.actorPool, this.actorLayer, this.actorCursor++);
             const pos = this.boardPosition(view.fruit.position);
@@ -519,7 +519,7 @@ export class GameRenderer {
         const formatScore = (value: number) => String(Math.min(9_999_999, Math.max(0, Math.trunc(value)))).padStart(7, ' ');
         for (let player = 0; player < view.scores.length; player++) {
             const x = player === 0 ? 0 : this.layoutWidth - 64;
-            if (view.player !== player + 1 || view.tick % 30 < 15 || view.state === 'gameover') {
+            if (view.player !== player + 1 || view.tick % 30 < 15 || view.state === 'gameover' || view.switchingPlayer) {
                 hudCount = this.drawBitmapText(`${player + 1}UP`, x + (player === 0 ? 24 : 16), 0, 0xdedeff, this.hudTextPool, hudCount);
             }
             hudCount = this.drawBitmapText(view.scores[player] === 0 ? '     00' : formatScore(view.scores[player]), x, 8, 0xdedeff, this.hudTextPool, hudCount);
@@ -530,7 +530,7 @@ export class GameRenderer {
 
         const bottom = this.boardTop + view.maze.height * TILE_PIXELS;
         let lifeCount = 0;
-        for (let i = 0; i < Math.min(5, Math.max(0, view.lives - (view.playerReady ? 0 : 1))); i++) {
+        for (let i = 0; i < Math.min(5, Math.max(0, view.lives - (view.playerReady || view.beforeReady ? 0 : 1))); i++) {
             lifeCount = this.drawAnimation(`${view.character}-char-anim`, 0,
                 { x: 24 + i * TILE_PIXELS * 2, y: bottom + HUD_BOTTOM - 8 }, { x: 0.125 * 0.875, y: 0.125 * 0.875 },
                 this.livesPool, this.hudLayer, lifeCount);
@@ -578,15 +578,22 @@ export class GameRenderer {
         let text = '';
         if (paused) text = 'PAUSED';
         else if (view.playerReady) text = 'PLAYER ONE';
-        else if (view.state === 'ready') text = 'READY!';
-        else if (view.state === 'gameover') text = 'GAME OVER';
-        const ghostRow = view.maze.tiles.findIndex(row => row.some(tile => tile.kind === 'door')) - 1;
-        const y = this.boardTop + (ghostRow + (view.playerReady ? 0 : 6)) * TILE_PIXELS;
-        const tint = view.playerReady ? 0x00ffff : view.state === 'gameover' ? 0xff0000 : 0xffff00;
-        let count = this.drawBitmapText(text, Math.max(0, (this.layoutWidth - text.length * 8) / 2), y, tint, this.overlayTextPool, 0, this.overlayLayer);
+        else if (view.state === 'ready' && !view.beforeReady) text = 'READY!';
+        else if (view.state === 'gameover' || view.playerGameOver) text = 'GAME OVER';
+        const doorRow = view.maze.tiles.findIndex(row => row.some(tile => tile.kind === 'door'));
+        const doorColumn = view.maze.tiles[doorRow].findIndex(tile => tile.kind === 'door');
+        const y = this.boardTop + (doorRow - 1 + (view.playerReady ? 0 : 6)) * TILE_PIXELS;
+        const gameOver = view.state === 'gameover' || view.playerGameOver;
+        const tint = view.playerReady ? 0x00ffff : gameOver ? 0xff0000 : 0xffff00;
+        const x = paused ? Math.max(0, (this.layoutWidth - text.length * 8) / 2)
+            : (doorColumn - (view.playerReady || gameOver ? 4 : 2)) * TILE_PIXELS;
+        let count = this.drawBitmapText(text, x, y, tint, this.overlayTextPool, 0, this.overlayLayer);
         if (view.playerReady && !paused) {
             const levelText = `LEVEL ${String(view.level).padStart(2, '0')}`;
-            count = this.drawBitmapText(levelText, (this.layoutWidth - levelText.length * 8) / 2, y + 48, 0xffff00, this.overlayTextPool, count, this.overlayLayer);
+            count = this.drawBitmapText(levelText, (doorColumn - 3) * TILE_PIXELS, y + 48, 0xffff00, this.overlayTextPool, count, this.overlayLayer);
+        } else if (view.playerGameOver && !paused) {
+            const playerText = view.player === 1 ? 'PLAYER ONE' : 'PLAYER TWO';
+            count = this.drawBitmapText(playerText, (doorColumn - 4) * TILE_PIXELS, y - 48, 0xff0000, this.overlayTextPool, count, this.overlayLayer);
         }
         this.hideSprites(this.overlayTextPool, count);
     }

@@ -15,7 +15,7 @@ test('a browser without WebGL receives an explicit startup error', async ({ page
     await expect(page.locator('#menu')).toBeHidden();
 });
 
-test('stored high-score names are displayed as plain text', async ({ page }) => {
+test('legacy high-score names migrate to native characters and render as plain text', async ({ page }) => {
     await page.addInitScript(() => {
         localStorage.setItem('infinite-pac-web.v1', JSON.stringify({
             version: 1,
@@ -26,8 +26,13 @@ test('stored high-score names are displayed as plain text', async ({ page }) => 
     await page.goto('/');
     await expect(page.locator('#menu')).toBeVisible({ timeout: 30_000 });
     await page.getByRole('button', { name: 'High scores', exact: true }).click();
-    await expect(page.locator('#score-list li')).toContainText('<b>ACE</b>');
+    await expect(page.locator('#score-list li')).toHaveText('baceb12,340');
+    expect(await page.locator('#score-list li').evaluate(item => ({
+        name: item.firstChild?.textContent,
+        nameNodeType: item.firstChild?.nodeType,
+    }))).toEqual({ name: 'baceb', nameNodeType: 3 });
     await expect(page.locator('#score-list b')).toHaveCount(0);
+    await expect(page.locator('#score-list li > *')).toHaveCount(1);
     await expect(page.locator('#score-list span')).toHaveText('12,340');
     await page.getByRole('button', { name: 'Back', exact: true }).click();
     await expect(page.locator('#menu')).toBeVisible();

@@ -222,11 +222,13 @@ test('two-player games expose 1-based player metadata and reject invalid player 
 
 test('the first-player intro plays once and stops exactly when the native ready sequence ends', () => {
     const game = new Game(options(), () => 0);
-    assert.equal(game.view.playerReady, true);
+    assert.equal(game.view.playerReady, false);
+    assert.equal(game.view.beforeReady, true);
     assert.equal(game.view.pac.visible, false);
     game.advance();
+    assert.equal(game.view.playerReady, true);
     assert.deepEqual(game.drainEvents().filter(event => event.type === 'sound'), [{ type: 'sound', name: 'mr-intro' }]);
-    for (let tick = 0; tick < 150; tick++) game.advance();
+    for (let tick = 0; tick < 151; tick++) game.advance();
     assert.equal(game.view.state, 'ready');
     assert.equal(game.view.playerReady, false);
     assert.equal(game.view.pac.visible, true);
