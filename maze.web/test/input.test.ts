@@ -356,3 +356,36 @@ test('cancel, capture loss, blur, tab hiding and pause remove both the arrow and
         assert.equal(moves.length, count + 1, `${end}: only the next fixed update samples the cleared state`);
     }
 });
+
+test('native screens receive controller direction edges and B cancellation without gameplay mutation', t => {
+    const { controller, setPads, setActive, moves, key } = setup(t);
+    const navigation: Direction[] = [];
+    let cancellations = 0;
+    let starts = 0;
+    controller['actions'].start = () => { starts++; };
+    controller['actions'].menuActive = () => true;
+    controller['actions'].navigate = direction => navigation.push(direction);
+    controller['actions'].cancel = () => { cancellations++; };
+    setActive(false);
+    setPads([pad([13])]);
+    controller.poll();
+    controller.poll();
+    assert.deepEqual(navigation, ['down']);
+    setPads([pad([15])]);
+    controller.poll();
+    assert.deepEqual(navigation, ['down', 'right']);
+    setPads([pad([1])]);
+    controller.poll(); controller.poll();
+    assert.equal(cancellations, 1);
+    setPads([]); controller.poll();
+    setPads([pad([1])]); controller.poll();
+    assert.equal(cancellations, 2);
+    key('keydown', 'Escape', 'Escape');
+    assert.equal(cancellations, 3);
+    setPads([pad([9])]);
+    controller.poll(); controller.poll();
+    assert.equal(starts, 1);
+    key('keydown', 'p', 'KeyP');
+    assert.equal(starts, 1, 'the pause key is not a title-screen launch action');
+    assert.deepEqual(moves, []);
+});

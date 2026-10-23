@@ -8,6 +8,10 @@ export interface InputActions {
     mute(): void;
     fullscreen(): void;
     direction(): Direction;
+    menuActive?(): boolean;
+    navigate?(direction: Direction): void;
+    cancel?(): void;
+    start?(): void;
 }
 const keys: Record<string, Direction> = { ArrowUp: 'up', ArrowLeft: 'left', ArrowDown: 'down', ArrowRight: 'right',
     w: 'up', a: 'left', s: 'down', d: 'right' };
@@ -18,6 +22,9 @@ export class InputController {
     private readonly buttons = new Map<number, { start: boolean; action: boolean; directions: Set<Direction> }>();
     private readonly heldKeys = new Map<string, Direction>();
     private readonly heldGamepad = new Set<Direction>();
+    private navigationDirection: Direction | undefined;
+    private navigationRepeat = 0;
+    private cancelHeld = false;
 
     constructor(private readonly host: Pick<HTMLElement, 'addEventListener' | 'focus' | 'setPointerCapture' | 'hasPointerCapture' | 'releasePointerCapture'>, private readonly actions: InputActions) {
         window.addEventListener('keydown', event => {
@@ -29,7 +36,8 @@ export class InputController {
                 event.preventDefault();
                 this.heldKeys.set(event.code || key, direction);
             }
-            else if (!event.repeat && (key === 'p' || key === 'Escape')) { event.preventDefault(); actions.pause(); }
+            else if (!event.repeat && key === 'p') { event.preventDefault(); actions.pause(); }
+            else if (!event.repeat && key === 'Escape') { event.preventDefault(); if (actions.cancel) actions.cancel(); else actions.pause(); }
             else if (!event.repeat && key === 'm') actions.mute();
             else if (!event.repeat && key === 'f') actions.fullscreen();
             else if (!event.repeat && (key === 'Enter' || key === ' ') && !(target instanceof HTMLButtonElement)) {
@@ -130,13 +138,15 @@ export class InputController {
         if (document.hidden) return;
         this.heldGamepad.clear();
         const connected = new Set<number>();
+        let cancel = false;
         for (const pad of navigator.getGamepads?.() ?? []) {
             if (!pad || !pad.connected || (pad.mapping !== 'standard' && !isXboxGamepad(pad))) continue;
             connected.add(pad.index);
             const previous = this.buttons.get(pad.index);
             const start = pad.buttons[9]?.pressed ?? false;
             const action = pad.buttons[0]?.pressed ?? false;
-            if (start && !previous?.start) this.actions.pause();
+            cancel ||= pad.buttons[1]?.pressed ?? false;
+            if (start && !previous?.start) { if (this.actions.start) this.actions.start(); else this.actions.pause(); }
             if (action && !previous?.action) this.actions.action();
             const x = pad.axes[0] ?? 0;
             const y = pad.axes[1] ?? 0;
@@ -151,6 +161,15 @@ export class InputController {
             this.buttons.set(pad.index, { start, action, directions });
         }
         for (const index of this.buttons.keys()) if (!connected.has(index)) this.buttons.delete(index);
+        if (cancel && !this.cancelHeld) this.actions.cancel?.();
+        this.cancelHeld = cancel;
+        const direction = this.actions.menuActive?.() ? (['up', 'down', 'left', 'right'] as const).find(value => this.heldGamepad.has(value)) : undefined;
+        const now = performance.now();
+        if (direction && (direction !== this.navigationDirection || now >= this.navigationRepeat)) {
+            this.actions.navigate?.(direction);
+            this.navigationRepeat = now + (direction !== this.navigationDirection ? 400 : 100);
+        }
+        this.navigationDirection = direction;
         if (!this.actions.active() && (this.pointer || this.touchPress)) this.cancelPointer();
     }
 }

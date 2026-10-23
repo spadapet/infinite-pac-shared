@@ -33,9 +33,8 @@ test('gameplay waits for every original WAV to decode, with no stale effects rep
     await page.route('**/assets/*.wav', async route => { requests++; await gate; await route.continue(); });
     await page.goto('/');
     await expect(page.locator('#menu')).toBeVisible({ timeout: 30_000 });
-    await page.getByRole('button', { name: 'Play game', exact: true }).click();
+    await page.getByRole('button', { name: 'Play Mr. Pac', exact: true }).click();
     try {
-        await expect(page.locator('#start')).toHaveText('Loading sound...');
         await expect(page.locator('#start')).toBeDisabled();
         await expect.poll(() => requests).toBeGreaterThan(0);
         const tick = await page.locator('#game').getAttribute('data-tick');
@@ -60,13 +59,13 @@ test('sound load errors keep the game at the menu and a retry can start normally
     await page.route('**/assets/*.wav', route => route.fulfill({ status: 503, body: 'Unavailable' }));
     await page.goto('/');
     await expect(page.locator('#menu')).toBeVisible({ timeout: 30_000 });
-    await page.getByRole('button', { name: 'Play game', exact: true }).click();
+    await page.getByRole('button', { name: 'Play Mr. Pac', exact: true }).click();
     await expect(page.locator('#status')).toContainText('Could not load sound');
     await expect(page.locator('#menu')).toBeVisible();
     await expect(page.locator('#game')).toHaveAttribute('data-state', 'menu');
     await expect(page.locator('#start')).toBeEnabled();
     await page.unroute('**/assets/*.wav');
-    await page.getByRole('button', { name: 'Play game', exact: true }).click();
+    await page.getByRole('button', { name: 'Play Mr. Pac', exact: true }).click();
     await expect(page.locator('#menu')).toBeHidden();
     await expect(page.locator('#game')).toHaveAttribute('data-state', 'ready');
     await expect(page.locator('#status')).not.toHaveClass(/error/);

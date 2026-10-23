@@ -335,7 +335,7 @@ export class Game {
     private gameOver = false;
     private mazeSerial = 0;
 
-    constructor(options: GameOptions, random: () => number = Math.random) {
+    constructor(options: GameOptions, random: () => number = Math.random, private readonly attract = false) {
         if (!Number.isInteger(options.players) || options.players < 1 || options.players > 2) {
             throw new RangeError('players must be 1 or 2.');
         }
@@ -362,6 +362,24 @@ export class Game {
             };
             return player;
         });
+    }
+
+    static titleBackground(random: () => number = Math.random): Game {
+        const game = new Game({ character: 'ms', mazeSet: 'ms', difficulty: 'normal', players: 1 }, random, true);
+        const run = game.players[0].run;
+        run.state = 'playing';
+        run.readyPhase = 'ready';
+        run.playIntro = false;
+        for (const row of run.maze.tiles) for (const tile of row) {
+            if (tile.kind === 'dot' || tile.kind === 'power') tile.kind = 'path';
+        }
+        return game;
+    }
+
+    private levelDifficulty(level: number): DifficultyData {
+        return this.attract ? { ghostCount: 4, pacSpeed: 80, pacSubtract: 0, pacAdd: 0, elroyDots: 20,
+            scaredSeconds: 6, ghostModeSeconds: [7, 20, 7, 20, 5, 20, 5, 0], ghostDots: [0, 0, 30, 60],
+            lastDotSeconds: 4, fruitType: 0 } : difficultyFor(this.options, level);
     }
 
     get view(): GameView {
@@ -512,13 +530,14 @@ export class Game {
     }
 
     drainEvents(): GameEvent[] {
-        return this.events.splice(0, this.events.length);
+        const events = this.events.splice(0, this.events.length);
+        return this.attract ? [] : events;
     }
 
     private createLevel(level: number, playerReady = false): LevelRun {
-        const mazeName = mazeNameFor(this.options, level);
+        const mazeName = this.attract ? 'title-maze-back' : mazeNameFor(this.options, level);
         const maze = parseMazeResource(mazeName, `${mazeName}:${++this.mazeSerial}`);
-        const difficulty = difficultyFor(this.options, level);
+        const difficulty = this.levelDifficulty(level);
         const pac = Object.assign(actor(), { canTurn: true, stuck: false });
         const fruit: Fruit = Object.assign(actor(), { type: 0, exitTile: point(), chosenRandom: new Set<string>(), chosenExit: new Set<string>() });
         const ghosts: Ghost[] = Array.from({ length: 4 }, () => Object.assign(actor(), {
@@ -593,7 +612,7 @@ export class Game {
         const history: number[] = [];
         let previous = -1;
         for (let index = level; index >= 0 && history.length < 7; index--) {
-            const fruit = difficultyFor(this.options, index).fruitType;
+            const fruit = this.levelDifficulty(index).fruitType;
             if (fruit !== 13 && (fruit !== 12 || fruit !== previous)) history.push(fruit);
             previous = fruit;
         }
@@ -601,6 +620,7 @@ export class Game {
     }
 
     private setState(run: LevelRun, state: GameState): void {
+        if (this.attract) return;
         run.state = state;
         run.stateTick = 0;
     }
@@ -797,7 +817,7 @@ export class Game {
             if (--run.ghostChaseCountdown === 0) {
                 this.flipGhosts(run);
                 run.ghostScatterChaseIndex++;
-                const difficulty = difficultyFor(this.options, this.players[this.currentPlayer].level);
+                const difficulty = this.levelDifficulty(this.players[this.currentPlayer].level);
                 const index = run.ghostScatterChaseIndex * 2;
                 run.ghostScatterCountdown = Math.max(1, difficulty.ghostModeSeconds[index] || 1) * 60;
                 run.ghostChaseCountdown = Math.min(18000, (difficulty.ghostModeSeconds[index + 1] || 300) * 60);
@@ -809,7 +829,7 @@ export class Game {
         const red = run.ghosts[0];
         if (red.active && red.move === 'normal' && red.house === 'inside') red.house = 'leaving';
         run.lastDotCounter++;
-        const difficulty = difficultyFor(this.options, this.players[this.currentPlayer].level);
+        const difficulty = this.levelDifficulty(this.players[this.currentPlayer].level);
         if (run.lastDotCounter > difficulty.lastDotSeconds * 60) this.releaseGhost(run);
         else if (run.globalDotIndex > 0) {
             const thresholds = [0, 7, 17, 32];
@@ -829,7 +849,7 @@ export class Game {
     }
 
     private updateSpeeds(run: LevelRun, level: number): void {
-        const difficulty = difficultyFor(this.options, level);
+        const difficulty = this.levelDifficulty(level);
         const powered = run.ghostScaredCountdown > 0;
         let pacSpeed = difficulty.pacSpeed - difficulty.pacSubtract + difficulty.pacAdd;
         if (powered) pacSpeed = Math.max(pacSpeed, Math.floor((difficulty.pacSpeed + 100) / 2));

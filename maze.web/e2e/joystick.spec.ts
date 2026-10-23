@@ -8,10 +8,10 @@ async function orangeArrowPixels(page: Page): Promise<number> {
             if (!source || !position) { reject(new Error('Expected a rendered game and Pac position')); return; }
             const capture = document.createElement('canvas');
             capture.width = 224;
-            capture.height = 296;
+            capture.height = 288;
             const context = capture.getContext('2d');
             if (!context) { reject(new Error('Unable to inspect rendered joystick pixels')); return; }
-            context.drawImage(source, 0, 0, 224, 296);
+            context.drawImage(source, 0, 0, 224, 288);
             const x = Math.max(0, Math.min(164, Math.floor(position[0] - 20)));
             const y = Math.max(0, Math.min(236, Math.floor(position[1] + 24 - 30)));
             const pixels = context.getImageData(x, y, 60, 60).data;
@@ -28,7 +28,7 @@ async function start(page: Page): Promise<void> {
     await page.goto('/');
     await expect(page.locator('#menu')).toBeVisible({ timeout: 30_000 });
     await page.getByRole('button', { name: 'Sound on', exact: true }).click();
-    await page.getByRole('button', { name: 'Play game', exact: true }).click();
+    await page.getByRole('button', { name: 'Play Mr. Pac', exact: true }).click();
     await expect(page.locator('#menu')).toBeHidden();
 }
 

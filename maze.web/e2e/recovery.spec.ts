@@ -5,7 +5,7 @@ test('losing WebGL pauses simulation and restores graphics before the player res
     page.on('pageerror', error => errors.push(error.message));
     await page.goto('/');
     await expect(page.locator('#menu')).toBeVisible({ timeout: 30_000 });
-    await page.getByRole('button', { name: 'Play game', exact: true }).click();
+    await page.getByRole('button', { name: 'Play Mr. Pac', exact: true }).click();
     await expect(page.locator('#game')).toHaveAttribute('data-state', 'playing', { timeout: 12_000 });
     const extension = await page.locator('canvas').evaluateHandle(canvas => {
         if (!(canvas instanceof HTMLCanvasElement)) throw new Error('Expected a canvas');

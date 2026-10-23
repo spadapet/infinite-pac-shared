@@ -1,5 +1,6 @@
 import { Application, Assets, Container, Graphics, Rectangle, Sprite, Texture, WebGLRenderer } from 'pixi.js';
 import { animationDefinition, nativeSprites, sampleAnimation, type AnimationVisual } from './native-animation';
+import type { NativeScreenView } from './screens';
 import type { GameView, JoystickView, MazeView, Tile, Vec } from './types';
 
 const TILE_PIXELS = 8;
@@ -144,8 +145,19 @@ export class GameRenderer {
     private readonly particleLayer = new Container();
     private readonly hudLayer = new Container();
     private readonly overlayLayer = new Container();
+    private readonly screenLayer = new Container();
+    private readonly screenWash = new Graphics();
+    private readonly screenWallLayer = new Container();
+    private readonly screenDotLayer = new Container();
+    private readonly screenActorLayer = new Container();
+    private readonly screenTextLayer = new Container();
+    private readonly screenFade = new Graphics();
+    private readonly pauseFade = new Graphics();
     private readonly joystickLayer = new Container();
     private readonly joystickPool: RenderableSprite[] = [];
+    private readonly screenDotPool: RenderableSprite[] = [];
+    private readonly screenActorPool: RenderableSprite[] = [];
+    private readonly screenTextPool: RenderableSprite[] = [];
     private readonly dotPool: RenderableSprite[] = [];
     private readonly actorPool: RenderableSprite[] = [];
     private readonly bubblePool: RenderableSprite[] = [];
@@ -167,19 +179,24 @@ export class GameRenderer {
         this.contextStatus.hidden = true;
         this.contextStatus.style.display = 'none';
         requestAnimationFrame(() => {
-            if (!this.destroyed && this.lastView) {
+            if (!this.destroyed && this.lastScreen) {
+                this.resizeCanvas();
+                this.renderScreen(this.lastScreen);
+            } else if (!this.destroyed && this.lastView) {
                 this.resizeCanvas();
                 this.render(this.lastView, this.lastPaused);
             }
         });
     };
-    private mazeCache: { id: string; width: number; height: number; colors: string; tiles: Tile[][] } | null = null;
+    private mazeCache: { id: string; width: number; height: number; colors: string; tiles: Tile[][]; boardTop: number } | null = null;
+    private screenMazeCache: { id: string; width: number; height: number; colors: string; tiles: Tile[][]; boardTop: number } | null = null;
     private layoutWidth = 0;
     private layoutHeight = 0;
     private displayPixelRatio = 0;
     private actorCursor = 0;
     private boardTop = HUD_TOP;
     private lastView: GameView | null = null;
+    private lastScreen: NativeScreenView | null = null;
     private lastPaused = false;
     private contextLost = false;
     private destroyed = false;
@@ -228,11 +245,14 @@ export class GameRenderer {
             this.particleLayer,
             this.hudLayer,
             this.overlayLayer,
+            this.screenLayer,
             this.joystickLayer,
         );
+        this.screenLayer.addChild(this.screenWash, this.screenWallLayer, this.screenDotLayer, this.screenActorLayer, this.screenTextLayer, this.screenFade);
+        this.overlayLayer.addChildAt(this.pauseFade, 0);
         this.resizeObserver = new ResizeObserver(() => {
             this.resizeCanvas();
-            if (this.lastView && !this.destroyed && !this.contextLost) this.app.render();
+            if ((this.lastView || this.lastScreen) && !this.destroyed && !this.contextLost) this.app.render();
         });
         this.resizeObserver.observe(this.mount);
         this.resizeCanvas();
@@ -268,7 +288,16 @@ export class GameRenderer {
     render(view: GameView, paused: boolean, joystick: JoystickView | null = null): void {
         if (this.destroyed) return;
         this.lastView = view;
+        this.lastScreen = null;
         this.lastPaused = paused;
+        this.screenLayer.visible = false;
+        this.wallLayer.visible = true;
+        this.dotLayer.visible = true;
+        this.actorLayer.visible = true;
+        this.particleLayer.visible = true;
+        this.hudLayer.visible = true;
+        this.overlayLayer.visible = true;
+        this.joystickLayer.visible = true;
         if (this.contextLost) return;
         const { maze } = view;
         const boardWidth = maze.width * TILE_PIXELS;
@@ -286,7 +315,7 @@ export class GameRenderer {
         const colorKey = `${maze.backgroundColor}:${maze.fillColor}:${maze.borderColor}:${winningFlash}`;
         const cached = this.mazeCache;
         if (!cached || cached.id !== maze.id || cached.width !== maze.width || cached.height !== maze.height ||
-            cached.colors !== colorKey || cached.tiles !== maze.tiles) {
+            cached.colors !== colorKey || cached.tiles !== maze.tiles || cached.boardTop !== this.boardTop) {
             this.rebuildStaticMaze(maze, colorKey, winningFlash);
         }
 
@@ -297,6 +326,85 @@ export class GameRenderer {
         this.drawHud(view);
         this.drawOverlay(view, paused);
         this.drawJoystick(view, paused ? null : joystick);
+        this.app.render();
+    }
+
+    renderScreen(screen: NativeScreenView): void {
+        if (this.destroyed) return;
+        this.lastScreen = screen;
+        this.lastView = null;
+        if (this.contextLost) return;
+
+        const { maze } = screen;
+        const width = maze.width * TILE_PIXELS;
+        this.boardTop = screen.kind === 'score' ? HUD_TOP : 0;
+        const height = this.boardTop + maze.height * TILE_PIXELS + (screen.kind === 'score' ? HUD_BOTTOM : 0);
+        if (this.layoutWidth !== width || this.layoutHeight !== height || this.displayPixelRatio !== window.devicePixelRatio) {
+            this.layoutWidth = width;
+            this.layoutHeight = height;
+            this.resizeCanvas();
+        }
+
+        this.screenLayer.visible = true;
+        this.pauseFade.clear();
+        this.hudLayer.visible = false;
+        this.overlayLayer.visible = false;
+        this.joystickLayer.visible = false;
+        const showForeground = screen.showForeground !== false;
+        this.screenWallLayer.visible = showForeground;
+        this.screenDotLayer.visible = showForeground;
+        this.screenActorLayer.visible = showForeground;
+        this.screenTextLayer.visible = showForeground;
+        this.screenWash.clear();
+        this.background.clear().rect(0, 0, width, height).fill(0x000000);
+
+        if (screen.background) {
+            const view = screen.background;
+            const backMaze = view.maze;
+            const winningFlash = screen.kind === 'score' && view.state === 'winning' && view.stateTick >= 120 && view.stateTick < 225 && (view.stateTick - 120) % 30 < 15;
+            const colorKey = `${backMaze.backgroundColor}:${backMaze.fillColor}:${backMaze.borderColor}:${winningFlash}`;
+            const cached = this.mazeCache;
+            if (!cached || cached.id !== backMaze.id || cached.width !== backMaze.width || cached.height !== backMaze.height ||
+                cached.colors !== colorKey || cached.tiles !== backMaze.tiles || cached.boardTop !== this.boardTop) {
+                this.rebuildStaticMaze(backMaze, colorKey, winningFlash);
+            }
+            this.wallLayer.visible = screen.kind === 'title' || view.state !== 'winning' || view.stateTick < 240;
+            this.dotLayer.visible = true;
+            this.actorLayer.visible = true;
+            this.particleLayer.visible = true;
+            this.drawDots(view);
+            this.drawActors(view);
+            this.drawParticles(view);
+            if (screen.kind === 'score') {
+                this.hudLayer.visible = true;
+                this.overlayLayer.visible = true;
+                this.drawHud(view);
+                this.drawOverlay(view, false);
+            }
+            this.screenWash.rect(0, 0, width, height).fill({ color: 0x000000, alpha: screen.backgroundFade ?? (screen.kind === 'score' ? 0.875 : 0.75) });
+        } else {
+            this.wallLayer.visible = false;
+            this.dotLayer.visible = false;
+            this.actorLayer.visible = false;
+            this.particleLayer.visible = false;
+            this.background.clear().rect(0, 0, width, height).fill(0x000000);
+        }
+
+        this.boardTop = screen.kind === 'score' ? HUD_TOP : 0;
+        if (showForeground) {
+            this.drawScreenMaze(maze);
+            this.drawScreenDots(maze);
+            const actorCount = this.drawAnimation(`${screen.pac.character}-char-anim`, screen.pac.frame,
+                { x: screen.pac.x, y: screen.pac.y }, { x: -0.125, y: 0.125 }, this.screenActorPool, this.screenActorLayer, 0);
+            this.hideSprites(this.screenActorPool, actorCount);
+            let textCount = 0;
+            for (const text of screen.texts) {
+                textCount = this.drawBitmapText(text.text, text.x, text.y, text.color, this.screenTextPool, textCount, this.screenTextLayer, 1, text.alpha ?? 1);
+            }
+            this.hideSprites(this.screenTextPool, textCount);
+        }
+        this.screenFade.clear();
+        if (screen.kind === 'title' && screen.fade > 0) this.screenFade.rect(0, 0, width, height).fill({ color: 0x000000, alpha: Math.min(1, Math.max(0, screen.fade)) });
         this.app.render();
     }
 
@@ -312,6 +420,16 @@ export class GameRenderer {
         return { x, y };
     }
 
+    screenPoint(clientX: number, clientY: number): Vec | null {
+        if (!this.lastScreen || this.destroyed || !Number.isFinite(clientX) || !Number.isFinite(clientY)) return null;
+        const rect = this.app.canvas.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0) return null;
+        const x = (clientX - rect.left) * this.layoutWidth / rect.width;
+        const y = (clientY - rect.top) * this.layoutHeight / rect.height;
+        if (x < 0 || x >= this.layoutWidth || y < 0 || y >= this.layoutHeight) return null;
+        return { x, y };
+    }
+
     destroy(): void {
         if (this.destroyed) return;
         this.destroyed = true;
@@ -324,7 +442,9 @@ export class GameRenderer {
             for (const texture of frames) texture.destroy(false);
         }
         this.mazeCache = null;
+        this.screenMazeCache = null;
         this.lastView = null;
+        this.lastScreen = null;
     }
 
     private resizeCanvas(): void {
@@ -357,6 +477,28 @@ export class GameRenderer {
     private rebuildStaticMaze(maze: MazeView, colorKey: string, winningFlash: boolean): void {
         this.wallLayer.removeChildren().forEach(child => child.destroy());
         this.background.clear().rect(0, 0, this.layoutWidth, this.layoutHeight).fill(0x000000);
+        this.renderMazeLayer(maze, this.wallLayer, winningFlash);
+        this.mazeCache = {
+            id: maze.id,
+            width: maze.width,
+            height: maze.height,
+            colors: colorKey,
+            tiles: maze.tiles,
+            boardTop: this.boardTop,
+        };
+    }
+
+    private drawScreenMaze(maze: MazeView): void {
+        const colors = `${maze.backgroundColor}:${maze.fillColor}:${maze.borderColor}:false`;
+        const cached = this.screenMazeCache;
+        if (cached && cached.id === maze.id && cached.width === maze.width && cached.height === maze.height &&
+            cached.colors === colors && cached.tiles === maze.tiles && cached.boardTop === this.boardTop) return;
+        this.screenWallLayer.removeChildren().forEach(child => child.destroy());
+        this.renderMazeLayer(maze, this.screenWallLayer, false);
+        this.screenMazeCache = { id: maze.id, width: maze.width, height: maze.height, colors, tiles: maze.tiles, boardTop: this.boardTop };
+    }
+
+    private renderMazeLayer(maze: MazeView, layer: Container, winningFlash: boolean): void {
         const floor = new Graphics();
         for (let y = 0; y < maze.height; y++) {
             for (let x = 0; x < maze.width; x++) {
@@ -370,9 +512,9 @@ export class GameRenderer {
                     const fillAlpha = winningFlash && !door ? 0 : door ? 1 : colorAlpha(maze.fillColor);
                     const borderTint = winningFlash && !door ? WHITE : door ? GHOST_DOOR_COLOR : maze.borderColor & 0xffffff;
                     const borderAlpha = winningFlash || door ? 1 : colorAlpha(maze.borderColor);
-                    this.addWallSprite('wall-bg-sprites', spriteIndex, left, top, maze.backgroundColor & 0xffffff, winningFlash ? 0 : colorAlpha(maze.backgroundColor));
-                    this.addWallSprite('wall-fill-sprites', spriteIndex, left, top, door ? GHOST_DOOR_COLOR : winningFlash ? 0 : maze.fillColor & 0xffffff, fillAlpha);
-                    this.addWallSprite('wall-border-sprites', spriteIndex, left, top, borderTint, borderAlpha);
+                    this.addWallSprite('wall-bg-sprites', spriteIndex, left, top, maze.backgroundColor & 0xffffff, winningFlash ? 0 : colorAlpha(maze.backgroundColor), layer);
+                    this.addWallSprite('wall-fill-sprites', spriteIndex, left, top, door ? GHOST_DOOR_COLOR : winningFlash ? 0 : maze.fillColor & 0xffffff, fillAlpha, layer);
+                    this.addWallSprite('wall-border-sprites', spriteIndex, left, top, borderTint, borderAlpha, layer);
                 } else if (!winningFlash) {
                     floor.rect(left, top, TILE_PIXELS, TILE_PIXELS).fill({
                         color: maze.backgroundColor & 0xffffff,
@@ -381,22 +523,15 @@ export class GameRenderer {
                 }
             }
         }
-        this.wallLayer.addChildAt(floor, 0);
-        this.mazeCache = {
-            id: maze.id,
-            width: maze.width,
-            height: maze.height,
-            colors: colorKey,
-            tiles: maze.tiles,
-        };
+        layer.addChildAt(floor, 0);
     }
 
-    private addWallSprite(group: string, index: number, x: number, y: number, tint: number, alpha = 1): void {
+    private addWallSprite(group: string, index: number, x: number, y: number, tint: number, alpha = 1, layer: Container = this.wallLayer): void {
         const sprite = createSprite(Texture.EMPTY);
         this.paintSprite(sprite, `${group}.${String(index).padStart(2, '0')}`, { x, y }, { x: 0.125, y: 0.125 });
         sprite.tint = tint & 0xffffff;
         sprite.alpha = alpha;
-        this.wallLayer.addChild(sprite);
+        layer.addChild(sprite);
     }
 
     private paintSprite(sprite: Sprite, name: string, position: Vec, scale: Vec, rotation = 0, visual?: AnimationVisual): void {
@@ -437,36 +572,45 @@ export class GameRenderer {
         this.hideSprites(this.joystickPool, used);
     }
 
-    private drawDots(view: GameView): void {
+    private drawDots(view: GameView, layer: Container = this.dotLayer, pool: RenderableSprite[] = this.dotPool): void {
+        this.drawMazeDots(view.maze, view.animation.dotTicks, layer, pool,
+            view.state !== 'gameover' && !(view.state === 'dead' && view.stateTick >= 20));
+    }
+
+    private drawScreenDots(maze: MazeView): void {
+        this.drawMazeDots(maze, 0, this.screenDotLayer, this.screenDotPool);
+    }
+
+    private drawMazeDots(maze: MazeView, dotTicks: number, layer: Container, pool: RenderableSprite[], visible = true): void {
         let used = 0;
-        if (view.state !== 'gameover' && !(view.state === 'dead' && view.stateTick >= 20)) {
-            for (let y = 0; y < view.maze.height; y++) {
-                for (let x = 0; x < view.maze.width; x++) {
-                    const tile = tileAt(view.maze, x, y);
+        if (visible) {
+            for (let y = 0; y < maze.height; y++) {
+                for (let x = 0; x < maze.width; x++) {
+                    const tile = tileAt(maze, x, y);
                     if (tile?.kind !== 'dot' && tile?.kind !== 'power') continue;
                     const power = tile.kind === 'power';
                     const name = power ? 'power-anim' : 'dot-anim';
                     const animation = animationDefinition(name);
-                    const frame = view.animation.dotTicks * animation.fps / 60 + (power ? animation.length / 2 : Math.floor(x / 2) + Math.floor(y / 2));
-                    used = this.drawAnimation(name, frame, { x: x * 8 + 4, y: this.boardTop + y * 8 + 4 }, { x: 0.125, y: 0.125 }, this.dotPool, this.dotLayer, used);
+                    const frame = dotTicks * animation.fps / 60 + (power ? animation.length / 2 : Math.floor(x / 2) + Math.floor(y / 2));
+                    used = this.drawAnimation(name, frame, { x: x * TILE_PIXELS + 4, y: this.boardTop + y * TILE_PIXELS + 4 }, { x: 0.125, y: 0.125 }, pool, layer, used);
                 }
             }
         }
-        this.hideSprites(this.dotPool, used);
+        this.hideSprites(pool, used);
     }
 
-    private drawActors(view: GameView): void {
+    private drawActors(view: GameView, layer: Container = this.actorLayer, pool: RenderableSprite[] = this.actorPool): void {
         this.actorCursor = 0;
         const ghostsVisible = !view.beforeReady && !view.playerReady && ['ready', 'playing', 'caught'].includes(view.state);
         if (ghostsVisible && view.fruit) {
-            const sprite = this.obtainSprite(this.actorPool, this.actorLayer, this.actorCursor++);
+            const sprite = this.obtainSprite(pool, layer, this.actorCursor++);
             const pos = this.boardPosition(view.fruit.position);
             if (view.fruit.moving) pos.y += fruitBounceOffset(view.fruit.position);
             this.paintSprite(sprite, `char-sprites.fruit[${view.fruit.type}]`, pos, { x: 0.125, y: 0.125 });
         }
         if (ghostsVisible) {
             for (const ghost of view.ghosts) {
-                if (ghost.state === 'scared' || ghost.state === 'flash') this.drawGhost(view, ghost);
+                if (ghost.state === 'scared' || ghost.state === 'flash') this.drawGhost(view, ghost, layer, pool);
             }
         }
         if (view.pac.visible) {
@@ -475,32 +619,32 @@ export class GameRenderer {
             const scale = { x: view.pac.direction === 'right' ? -0.125 : 0.125, y: 0.125 };
             if (view.pac.powered) {
                 const frame = view.animation.totalTicks * animationDefinition('power-aura-anim').fps / 60;
-                this.actorCursor = this.drawAnimation('power-aura-anim', frame, pos, scale, this.actorPool, this.actorLayer, this.actorCursor, rotation);
+                this.actorCursor = this.drawAnimation('power-aura-anim', frame, pos, scale, pool, layer, this.actorCursor, rotation);
             }
             const dying = ['dying', 'dead', 'gameover'].includes(view.state);
             const name = `${view.character}-${dying ? 'death' : view.pac.powered ? 'power' : 'char'}-anim`;
-            this.actorCursor = this.drawAnimation(name, dying ? view.animation.deathFrame : view.animation.pacFrame, pos, scale, this.actorPool, this.actorLayer, this.actorCursor, rotation);
+            this.actorCursor = this.drawAnimation(name, dying ? view.animation.deathFrame : view.animation.pacFrame, pos, scale, pool, layer, this.actorCursor, rotation);
         }
         if (ghostsVisible) {
             for (const ghost of view.ghosts) {
-                if (ghost.state !== 'scared' && ghost.state !== 'flash') this.drawGhost(view, ghost);
+                if (ghost.state !== 'scared' && ghost.state !== 'flash') this.drawGhost(view, ghost, layer, pool);
             }
         }
-        this.hideSprites(this.actorPool, this.actorCursor);
+        this.hideSprites(pool, this.actorCursor);
     }
 
-    private drawGhost(view: GameView, ghost: GameView['ghosts'][number]): void {
+    private drawGhost(view: GameView, ghost: GameView['ghosts'][number], layer: Container = this.actorLayer, pool: RenderableSprite[] = this.actorPool): void {
         const type = ghost.state === 'scared' ? 'scared' : ghost.state === 'flash' ? 'flash' : ghost.state === 'eyes' ? 'eyes' : 'move';
         const name = `ghost-${ghost.index + 1}-${type}-anim`;
         const pos = this.boardPosition(ghost.position);
         const scale = { x: 0.125, y: 0.125 };
         const frame = view.animation.ghostTicks * animationDefinition(name).fps / 60;
-        this.actorCursor = this.drawAnimation(name, frame, pos, scale, this.actorPool, this.actorLayer, this.actorCursor);
+        this.actorCursor = this.drawAnimation(name, frame, pos, scale, pool, layer, this.actorCursor);
         if (type === 'move' || type === 'eyes') {
             const pupils = `ghost-${ghost.index + 1}-pupils-anim`;
             const eye = directionVector(ghost.eyeDirection);
             this.actorCursor = this.drawAnimation(pupils, view.animation.ghostTicks * animationDefinition(pupils).fps / 60,
-                { x: pos.x + eye.x, y: pos.y + eye.y }, scale, this.actorPool, this.actorLayer, this.actorCursor);
+                { x: pos.x + eye.x, y: pos.y + eye.y }, scale, pool, layer, this.actorCursor);
         }
     }
 
@@ -576,6 +720,8 @@ export class GameRenderer {
     }
 
     private drawOverlay(view: GameView, paused: boolean): void {
+        this.pauseFade.clear();
+        if (paused) this.pauseFade.rect(0, 0, this.layoutWidth, this.layoutHeight).fill({ color: 0x000000, alpha: 0.5 });
         let text = '';
         if (paused) text = 'PAUSED';
         else if (view.playerReady) text = 'PLAYER ONE';
@@ -586,9 +732,13 @@ export class GameRenderer {
         const y = this.boardTop + (doorRow - 1 + (view.playerReady ? 0 : 6)) * TILE_PIXELS;
         const gameOver = view.state === 'gameover' || view.playerGameOver;
         const tint = view.playerReady ? 0x00ffff : gameOver ? 0xff0000 : 0xffff00;
-        const x = paused ? Math.max(0, (this.layoutWidth - text.length * 8) / 2)
-            : (doorColumn - (view.playerReady || gameOver ? 4 : 2)) * TILE_PIXELS;
-        let count = this.drawBitmapText(text, x, y, tint, this.overlayTextPool, 0, this.overlayLayer);
+        const x = paused ? (doorColumn - 5) * TILE_PIXELS : (doorColumn - (view.playerReady || gameOver ? 4 : 2)) * TILE_PIXELS;
+        const pauseY = this.boardTop + (doorRow + 3) * TILE_PIXELS;
+        let count = paused
+            ? this.drawBitmapText(text, x - 0.5, pauseY - 0.5, 0x000000, this.overlayTextPool, 0, this.overlayLayer, 2)
+            : this.drawBitmapText(text, x, y, tint, this.overlayTextPool, 0, this.overlayLayer);
+        if (paused) count = this.drawBitmapText(text, x + 0.5, pauseY + 0.5, WHITE, this.overlayTextPool, count, this.overlayLayer, 2);
+        if (paused) count = this.drawBitmapText(text, x, pauseY, 0xff0000, this.overlayTextPool, count, this.overlayLayer, 2, 0.5);
         if (view.playerReady && !paused) {
             const levelText = `LEVEL ${String(view.level).padStart(2, '0')}`;
             count = this.drawBitmapText(levelText, (doorColumn - 3) * TILE_PIXELS, y + 48, 0xffff00, this.overlayTextPool, count, this.overlayLayer);
@@ -599,18 +749,25 @@ export class GameRenderer {
         this.hideSprites(this.overlayTextPool, count);
     }
 
-    private drawBitmapText(text: string, x: number, y: number, tint: number, pool: RenderableSprite[], startIndex = 0, parent: Container = this.hudLayer): number {
+    private drawBitmapText(text: string, x: number, y: number, tint: number, pool: RenderableSprite[], startIndex = 0, parent: Container = this.hudLayer, scale = 1, alpha = 1): number {
+        const lineStart = x;
         for (const char of text.toLowerCase()) {
+            if (char === '\n') {
+                x = lineStart;
+                y += 8 * scale;
+                continue;
+            }
             const sprite = this.obtainSprite(pool, parent, startIndex);
             const texture = this.frame('font-sprites', char);
             if (texture) {
-                this.paintSprite(sprite, `font-sprites.${char}`, { x, y }, { x: 0.125, y: 0.125 });
+                this.paintSprite(sprite, `font-sprites.${char}`, { x, y }, { x: 0.125 * scale, y: 0.125 * scale });
                 sprite.tint = tint;
+                sprite.alpha = alpha;
                 sprite.visible = true;
             } else {
                 sprite.visible = false;
             }
-            x += 8;
+            x += 8 * scale;
             startIndex++;
         }
         return startIndex;

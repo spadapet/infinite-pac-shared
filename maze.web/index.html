@@ -10,65 +10,32 @@
 </head>
 <body>
     <main id="app">
-        <header class="topbar">
-            <a class="brand" href="./" aria-label="Infinite Pac home">INFINITE <span>PAC</span><small>WEB ARCADE</small></a>
-            <nav aria-label="Game controls">
-                <button id="sound" type="button" aria-pressed="false" title="Toggle sound (M)">Sound on</button>
-                <button id="fullscreen" type="button" title="Fullscreen (F)">Fullscreen</button>
-                <button id="pause" type="button" disabled title="Pause (P or Escape)">Pause</button>
-            </nav>
-        </header>
-        <div id="status" role="status" aria-live="polite">Loading original game assets...</div>
-        <section id="cabinet" aria-label="Game cabinet">
-            <div id="game" role="application" aria-label="Infinite Pac game. Use arrow keys or W A S D to move." tabindex="0"></div>
-            <section id="menu" class="overlay" aria-label="Main menu" hidden>
-                <div class="panel">
-                    <p class="eyebrow">THE ORIGINAL MAZES. A NEW PLAYGROUND.</p>
-                    <h1>INFINITE <span>PAC</span></h1>
-                    <p class="intro">Chase the dots. Outsmart the ghosts.<br>One more maze.</p>
-                    <form id="options">
-                        <div class="option-grid">
-                            <label>Character<select id="character" name="character"><option value="mr">Mr. Pac</option><option value="ms">Ms. Pac</option></select></label>
-                            <label>Mazes<select id="mazeSet" name="mazeSet"><option value="mr">Mr. Pac mazes</option><option value="ms">Ms. Pac mazes</option></select></label>
-                            <label>Difficulty<select id="difficulty" name="difficulty"><option value="easy">Easy</option><option value="normal">Normal</option><option value="hard">Hard</option></select></label>
-                            <label>Players<select id="players" name="players"><option value="1">1 player</option><option value="2">2 players</option></select></label>
-                        </div>
-                        <label class="checkbox"><input id="vibration" type="checkbox"> Vibration / controller rumble (supported devices)</label>
-                        <button id="start" class="primary" type="submit">Play game</button>
-                    </form>
-                    <button id="scores-button" class="quiet" type="button">High scores</button>
-                    <p class="hint">ARROWS / WASD &nbsp; &middot; &nbsp; TOUCH &nbsp; &middot; &nbsp; GAMEPAD</p>
-                </div>
+        <section id="cabinet" aria-label="Infinite Pac">
+            <div id="game" role="application" aria-label="Infinite Pac" tabindex="0"></div>
+            <section id="menu" class="screen-controls" aria-label="Title screen" hidden>
+                <button id="start" type="button" aria-label="Play Mr. Pac"></button>
+                <button id="start-ms" type="button" aria-label="Play Ms. Lila"></button>
+                <button id="players" type="button"></button>
+                <button id="difficulty" type="button"></button>
+                <button id="sound" type="button"></button>
+                <button id="vibration" type="button"></button>
+                <button id="fullscreen" type="button"></button>
+                <button id="about" type="button" aria-label="About"></button>
             </section>
-            <section id="pause-menu" class="overlay" aria-label="Paused game" hidden>
-                <div class="panel compact">
-                    <p class="eyebrow">TAKE A BREATHER</p><h2>Paused</h2>
-                    <button id="resume" class="primary" type="button">Resume game</button>
-                    <button id="home" type="button">End game &amp; return to menu</button>
-                </div>
+            <button id="pause" class="play-control" type="button" aria-label="Pause" hidden><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M7 7H13V25H7Z M19 7H25V25H19Z"/></svg></button>
+            <section id="pause-menu" aria-label="Paused game" hidden>
+                <button id="home" class="play-control" type="button" aria-label="End game &amp; return to menu"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M12 37V21L23 10H24L35 21V37H27V29H20V37Z"/></svg></button>
+                <button id="resume" class="play-control" type="button" aria-label="Resume game"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 10L34 23L14 38Z"/></svg></button>
             </section>
-            <section id="scores" class="overlay" aria-label="High scores" hidden>
-                <div class="panel compact">
-                    <h2>High scores</h2>
-                    <p id="score-category"></p>
-                    <ol id="score-list"></ol>
-                    <button id="scores-close" class="primary" type="button">Back</button>
-                </div>
-            </section>
-            <section id="score-entry" class="overlay" aria-label="New high score" hidden>
-                <form id="score-form" class="panel compact">
-                    <p class="eyebrow">WELL PLAYED</p><h2>New high score</h2>
-                    <p id="score-summary"></p>
-                    <label>Your name<input id="score-name" name="name" maxlength="16" autocomplete="nickname" required value="PLAYER"></label>
-                    <button class="primary" type="submit">Save score</button>
-                </form>
-            </section>
+            <section id="score-entry" class="screen-controls" aria-label="New high score" hidden></section>
+            <dialog id="about-dialog">
+                <h1>Infinite Pac</h1>
+                <p>Original game and assets &copy; Peter Spada.</p>
+                <p>WebGL recreation using the original graphics, audio, and gameplay.</p>
+                <form method="dialog"><button>Back</button></form>
+            </dialog>
         </section>
-        <div id="touch-controls" aria-label="Touch direction controls">
-            <button type="button" data-direction="up" aria-label="Move up">&#9650;</button>
-            <div><button type="button" data-direction="left" aria-label="Move left">&#9664;</button><button type="button" data-direction="down" aria-label="Move down">&#9660;</button><button type="button" data-direction="right" aria-label="Move right">&#9654;</button></div>
-        </div>
-        <footer>Move: <kbd>WASD</kbd> / <kbd>&larr; &uarr; &darr; &rarr;</kbd> <span>Pause: <kbd>P</kbd> &nbsp; Sound: <kbd>M</kbd></span><small>Original game &amp; assets &copy; Peter Spada</small></footer>
+        <div id="status" role="status" aria-live="polite">Loading original game assets...</div>
     </main>
     <script type="module" src="./src/main.ts"></script>
 </body>

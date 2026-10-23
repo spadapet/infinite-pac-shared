@@ -5,6 +5,14 @@ import { Game, parseMazeResource } from '../src/game';
 import { nativeSprites } from '../src/native-animation';
 import { GameRenderer } from '../src/renderer';
 
+function graphicsFillAlpha(graphics: Graphics): unknown {
+    const instruction = graphics.context.instructions[0];
+    assert.ok(instruction);
+    const style = instruction.data.style;
+    assert.ok(typeof style === 'object' && style !== null && 'alpha' in style);
+    return style.alpha;
+}
+
 function setup(t: TestContext) {
     const source = new TextureSource({ width: 2048, height: 2048 });
     const frames = new Map<string, Texture[]>();
@@ -20,11 +28,17 @@ function setup(t: TestContext) {
         textures.push(texture);
     }
     const actorPool: Sprite[] = [], dotPool: Sprite[] = [], livesPool: Sprite[] = [], fruitPool: Sprite[] = [], pointTextPool: Sprite[] = [], joystickPool: Sprite[] = [];
-    const actorLayer = new Container(), dotLayer = new Container(), wallLayer = new Container(), hudLayer = new Container(), joystickLayer = new Container();
-    const background = new Graphics();
+    const screenDotPool: Sprite[] = [], screenActorPool: Sprite[] = [], screenTextPool: Sprite[] = [];
+    const actorLayer = new Container(), dotLayer = new Container(), wallLayer = new Container(), hudLayer = new Container(), overlayLayer = new Container(), joystickLayer = new Container();
+    const screenLayer = new Container(), screenWallLayer = new Container(), screenDotLayer = new Container(), screenActorLayer = new Container(), screenTextLayer = new Container();
+    const background = new Graphics(), screenWash = new Graphics(), screenFade = new Graphics(), pauseFade = new Graphics();
+    screenLayer.addChild(screenWash, screenWallLayer, screenDotLayer, screenActorLayer, screenTextLayer, screenFade);
+    overlayLayer.addChild(pauseFade);
     const renderer: GameRenderer = Object.create(GameRenderer.prototype);
     Object.assign(renderer, { textures: { frames }, boardTop: 24, layoutWidth: 224, layoutHeight: 288,
-        actorPool, actorLayer, dotPool, dotLayer, wallLayer, background, livesPool, fruitPool, pointTextPool, hudLayer, hudTextPool: [], joystickPool, joystickLayer });
+        actorPool, actorLayer, dotPool, dotLayer, wallLayer, background, livesPool, fruitPool, pointTextPool, hudLayer, hudTextPool: [], joystickPool, joystickLayer,
+        screenDotPool, screenActorPool, screenTextPool, screenLayer, screenWallLayer, screenDotLayer, screenActorLayer, screenTextLayer, screenWash, screenFade, pauseFade,
+        overlayLayer, overlayTextPool: [], particleLayer: new Container(), bubblePool: [], destroyed: false, contextLost: false, mazeCache: null });
     const draw = (method: string, ...args: unknown[]) => Reflect.apply(Reflect.get(GameRenderer.prototype, method), renderer, args);
     const game = new Game({ character: 'mr', mazeSet: 'mr', difficulty: 'easy', players: 1 }, () => 0);
     const view = game.view;
@@ -34,12 +48,12 @@ function setup(t: TestContext) {
     view.pac.visible = false;
     view.ghosts = [];
     t.after(() => {
-        for (const layer of [actorLayer, dotLayer, wallLayer, hudLayer, joystickLayer]) layer.destroy({ children: true });
+        for (const layer of [actorLayer, dotLayer, wallLayer, hudLayer, overlayLayer, joystickLayer, screenLayer, renderer['particleLayer']]) layer.destroy({ children: true });
         background.destroy();
         for (const texture of textures) texture.destroy();
         source.destroy();
     });
-    return { renderer, draw, view, frames, actorPool, dotPool, livesPool, fruitPool, pointTextPool, wallLayer, joystickPool };
+    return { renderer, draw, view, frames, actorPool, dotPool, livesPool, fruitPool, pointTextPool, wallLayer, joystickPool, screenActorPool, screenDotPool, screenWallLayer };
 }
 
 test('all sixteen native maze variants render every wall/door through the original three-layer patterns', t => {
@@ -162,12 +176,224 @@ test('canvas height contains exactly two native status tiles', t => {
     const renderer = Object.create(GameRenderer.prototype) as GameRenderer;
     Object.assign(renderer, {
         app: { render() {} }, destroyed: false, contextLost: false, layoutWidth: 0, layoutHeight: 0, displayPixelRatio: 0,
-        wallLayer: { visible: true }, resizeCanvas() {}, rebuildStaticMaze() {}, drawDots() {}, drawActors() {},
+        wallLayer: { visible: true }, dotLayer: { visible: true }, actorLayer: { visible: true }, particleLayer: { visible: true },
+        hudLayer: { visible: true }, overlayLayer: { visible: true }, joystickLayer: { visible: true }, screenLayer: { visible: true },
+        resizeCanvas() {}, rebuildStaticMaze() {}, drawDots() {}, drawActors() {},
         drawParticles() {}, drawHud() {}, drawOverlay() {}, drawJoystick() {},
     });
     const view = new Game({ character: 'mr', mazeSet: 'mr', difficulty: 'easy', players: 1 }, () => 0).view;
     renderer.render(view, false);
     assert.deepEqual([renderer['layoutWidth'], renderer['layoutHeight']], [224, 288]);
+});
+
+test('native title and score screens use full-canvas dimensions, layers, cursor orientation and supplied text coordinates', t => {
+    const oldWindow = Object.getOwnPropertyDescriptor(globalThis, 'window');
+    Object.defineProperty(globalThis, 'window', { configurable: true, value: { devicePixelRatio: 1 } });
+    t.after(() => { if (oldWindow) Object.defineProperty(globalThis, 'window', oldWindow); else Reflect.deleteProperty(globalThis, 'window'); });
+    const { renderer, view, screenWallLayer } = setup(t);
+    const drawAnimationCalls: unknown[][] = [];
+    const textCalls: unknown[][] = [];
+    Object.assign(renderer, {
+        app: { render() {}, canvas: { getBoundingClientRect: () => ({ left: 20, top: 30, width: 224, height: 288 }) } },
+        displayPixelRatio: 1,
+        resizeCanvas() {},
+        drawAnimation(name: string, frame: number, position: { x: number; y: number }, scale: { x: number; y: number }, _pool: Sprite[], _parent: Container, used: number) {
+            drawAnimationCalls.push([name, frame, position, scale]);
+            return used;
+        },
+        drawBitmapText(text: string, x: number, y: number, color: number, _pool: Sprite[], count = 0, _parent?: Container, scale = 1, alpha = 1) {
+            textCalls.push([text, x, y, color, scale, alpha]);
+            return count + text.length;
+        },
+    });
+    const screen = {
+        kind: 'title' as const, maze: view.maze, background: view,
+        texts: [{ text: 'TITLE', x: 48, y: 16, color: 0xffffff, alpha: 0.75 }],
+        pac: { x: 104, y: 120, character: 'ms' as const, frame: 3 }, fade: 0.25,
+    };
+    renderer.renderScreen(screen);
+    assert.deepEqual([renderer['layoutWidth'], renderer['layoutHeight'], renderer['boardTop']], [224, 248, 0]);
+    assert.deepEqual(drawAnimationCalls.at(-1), ['ms-char-anim', 3, { x: 104, y: 120 }, { x: -0.125, y: 0.125 }]);
+    assert.deepEqual(textCalls.at(-1), ['TITLE', 48, 16, 0xffffff, 1, 0.75]);
+    assert.equal(renderer['screenLayer'].visible, true);
+    assert.ok(screenWallLayer.children.length > 1);
+    const cachedWallSprite = screenWallLayer.children[1];
+    renderer.renderScreen(screen);
+    assert.equal(screenWallLayer.children[1], cachedWallSprite, 'static screen maze sprites are reused across frames');
+    assert.ok(drawAnimationCalls.some(([name]) => name === 'dot-anim' || name === 'power-anim'));
+    assert.equal(graphicsFillAlpha(renderer['screenWash']), 0.75);
+    assert.equal(graphicsFillAlpha(renderer['screenFade']), 0.25);
+    assert.deepEqual(renderer.screenPoint(132, 174), { x: 112, y: 124 }, 'screen coordinates retain the full canvas origin, including score-area pixels');
+    assert.equal(renderer.screenPoint(19, 30), null);
+
+    drawAnimationCalls.length = 0;
+    textCalls.length = 0;
+    renderer.renderScreen({ ...screen, kind: 'score', background: undefined, texts: [{ text: 'ENTER NAME', x: 72, y: 144, color: 0xffffff }] });
+    assert.deepEqual([renderer['layoutWidth'], renderer['layoutHeight'], renderer['boardTop']], [224, 288, 24]);
+    assert.deepEqual(textCalls.at(-1), ['ENTER NAME', 72, 144, 0xffffff, 1, 1]);
+    assert.equal(renderer['wallLayer'].visible, false);
+    assert.deepEqual(renderer.screenPoint(132, 174), { x: 112, y: 144 });
+    assert.equal(renderer.screenToGame(132, 174), null);
+});
+
+test('title composition caches distinct foreground and background wall sprites across animation frames', t => {
+    const oldWindow = Object.getOwnPropertyDescriptor(globalThis, 'window');
+    Object.defineProperty(globalThis, 'window', { configurable: true, value: { devicePixelRatio: 1 } });
+    t.after(() => { if (oldWindow) Object.defineProperty(globalThis, 'window', oldWindow); else Reflect.deleteProperty(globalThis, 'window'); });
+    const { renderer, view, wallLayer, screenWallLayer } = setup(t);
+    Object.assign(renderer, { app: { render() {} }, displayPixelRatio: 1, resizeCanvas() {} });
+    const screen = {
+        kind: 'title' as const, maze: parseMazeResource('title-maze-front'), background: view,
+        texts: [{ text: 'START GAME', x: 48, y: 16, color: 0xffffff }],
+        pac: { x: 40, y: 32, character: 'mr' as const, frame: 0 }, fade: 0,
+    };
+    assert.notEqual(screen.maze.id, view.maze.id);
+    const buildLayers: Container[] = [];
+    const renderMazeLayer = renderer['renderMazeLayer'].bind(renderer);
+    renderer['renderMazeLayer'] = (maze, layer, winningFlash) => {
+        buildLayers.push(layer);
+        renderMazeLayer(maze, layer, winningFlash);
+    };
+    renderer.renderScreen(screen);
+    assert.deepEqual(buildLayers, [wallLayer, screenWallLayer]);
+    const backgroundSprites = [...wallLayer.children];
+    const foregroundSprites = [...screenWallLayer.children];
+    assert.ok(backgroundSprites.length > 1);
+    assert.ok(foregroundSprites.length > 1);
+    for (let frame = 1; frame <= 60; frame++) {
+        view.animation.dotTicks = frame;
+        view.animation.ghostTicks = frame;
+        renderer.renderScreen({ ...screen, pac: { ...screen.pac, frame: frame % 4 } });
+        assert.equal(wallLayer.children.length, backgroundSprites.length);
+        assert.equal(screenWallLayer.children.length, foregroundSprites.length);
+        backgroundSprites.forEach((sprite, index) => assert.equal(wallLayer.children[index], sprite));
+        foregroundSprites.forEach((sprite, index) => assert.equal(screenWallLayer.children[index], sprite));
+    }
+    assert.deepEqual(buildLayers, [wallLayer, screenWallLayer], 'each static maze is built exactly once, not alternated through one cache');
+    assert.equal(renderer['mazeCache']?.id, view.maze.id);
+    assert.equal(renderer['screenMazeCache']?.id, screen.maze.id);
+});
+
+test('score entry dims complete pushed gameplay below its foreground and preserves full-canvas coordinates', t => {
+    const oldWindow = Object.getOwnPropertyDescriptor(globalThis, 'window');
+    Object.defineProperty(globalThis, 'window', { configurable: true, value: { devicePixelRatio: 1 } });
+    t.after(() => { if (oldWindow) Object.defineProperty(globalThis, 'window', oldWindow); else Reflect.deleteProperty(globalThis, 'window'); });
+    const { renderer, view, actorPool, livesPool, screenActorPool, screenWallLayer } = setup(t);
+    Object.assign(renderer, {
+        app: { render() {}, canvas: { getBoundingClientRect: () => ({ left: 20, top: 30, width: 448, height: 576 }) } },
+        displayPixelRatio: 1,
+        resizeCanvas() {},
+    });
+    view.pac.visible = true;
+    view.pac.position = { x: 100, y: 120 };
+    const screen = {
+        kind: 'score' as const, maze: parseMazeResource('high-score-maze'), background: view,
+        texts: [{ text: 'NAME', x: 72, y: 144, color: 0xffffff }],
+        pac: { x: 52, y: 184, character: 'mr' as const, frame: 0 }, fade: 1,
+    };
+    renderer.renderScreen(screen);
+    assert.deepEqual([renderer['boardTop'], renderer['layoutWidth'], renderer['layoutHeight']], [24, screen.maze.width * 8, screen.maze.height * 8 + 40]);
+    assert.equal(renderer['hudLayer'].visible, true);
+    assert.equal(renderer['overlayLayer'].visible, true);
+    assert.ok(renderer['hudTextPool'].length > 0);
+    assert.ok(livesPool.length > 0);
+    assert.equal(actorPool[0].y, 144, 'background Pac retains normal gameplay score-area translation');
+    assert.deepEqual([screenActorPool[0].x, screenActorPool[0].y], [52, 184]);
+    assert.deepEqual([renderer['screenTextPool'][0].x, renderer['screenTextPool'][0].y], [72, 144]);
+    assert.equal(graphicsFillAlpha(renderer['screenWash']), 0.875);
+    assert.deepEqual(renderer['screenLayer'].children, [renderer['screenWash'], screenWallLayer, renderer['screenDotLayer'], renderer['screenActorLayer'], renderer['screenTextLayer'], renderer['screenFade']]);
+    assert.equal(renderer['screenFade'].context.instructions.length, 0, 'title fade must not darken score-entry foreground');
+    assert.deepEqual(renderer.screenPoint(164, 318), { x: 72, y: 144 });
+    assert.deepEqual(renderer.screenPoint(20, 30), { x: 0, y: 0 });
+
+    const cachedForeground = [...screenWallLayer.children];
+    const originalDrawScreenMaze = renderer['drawScreenMaze'].bind(renderer);
+    let foregroundDraws = 0;
+    renderer['drawScreenMaze'] = maze => {
+        foregroundDraws++;
+        originalDrawScreenMaze(maze);
+    };
+    for (const backgroundFade of [0, 1 / 64, 0.875 - 1 / 64]) {
+        renderer.renderScreen({ ...screen, backgroundFade, showForeground: false });
+        assert.equal(graphicsFillAlpha(renderer['screenWash']), backgroundFade);
+        assert.equal(renderer['hudLayer'].visible, true);
+        assert.equal(renderer['wallLayer'].visible, true);
+        for (const layer of [screenWallLayer, renderer['screenDotLayer'], renderer['screenActorLayer'], renderer['screenTextLayer']]) {
+            assert.equal(layer.visible, false);
+        }
+        assert.equal(foregroundDraws, 0, 'foreground rendering is skipped while the pushed game fades');
+        assert.deepEqual(renderer.screenPoint(164, 318), { x: 72, y: 144 });
+    }
+    renderer.renderScreen({ ...screen, backgroundFade: 0.875, showForeground: true });
+    assert.equal(foregroundDraws, 1);
+    assert.equal(graphicsFillAlpha(renderer['screenWash']), 0.875);
+    for (const layer of [screenWallLayer, renderer['screenDotLayer'], renderer['screenActorLayer'], renderer['screenTextLayer']]) {
+        assert.equal(layer.visible, true);
+    }
+    assert.deepEqual(screenWallLayer.children, cachedForeground, 'foreground returns using its existing maze cache');
+    for (const backgroundFade of [0.875, 0.875 - 1 / 64, 1 / 64, 0]) {
+        renderer.renderScreen({ ...screen, backgroundFade, showForeground: false });
+        assert.equal(graphicsFillAlpha(renderer['screenWash']), backgroundFade);
+        assert.equal(renderer['screenActorLayer'].visible, false, 'ending score entry hides the cursor immediately');
+        assert.equal(renderer['screenTextLayer'].visible, false);
+        assert.equal(screenWallLayer.visible, false);
+        assert.equal(foregroundDraws, 1);
+    }
+
+    renderer.renderScreen({ ...screen, kind: 'title', fade: 1 });
+    assert.equal(renderer['hudLayer'].visible, false);
+    assert.equal(renderer['overlayLayer'].visible, false);
+    assert.equal(actorPool[0].y, 120);
+    assert.equal(graphicsFillAlpha(renderer['screenWash']), 0.75);
+    assert.equal(graphicsFillAlpha(renderer['screenFade']), 1);
+    for (const fade of [1 - 1 / 64, 1 / 64, 0, 1 / 64, 1]) {
+        renderer.renderScreen({ ...screen, kind: 'title', fade });
+        if (fade === 0) assert.equal(renderer['screenFade'].context.instructions.length, 0);
+        else assert.equal(graphicsFillAlpha(renderer['screenFade']), fade);
+    }
+    renderer.renderScreen(screen);
+    assert.equal(actorPool[0].y, 144, 'returning from title invalidates the background maze offset');
+    assert.equal(renderer['mazeCache']?.boardTop, 24);
+    renderer.renderScreen({ ...screen, background: undefined });
+    assert.equal(renderer['hudLayer'].visible, false);
+    assert.equal(renderer['overlayLayer'].visible, false);
+    assert.equal(renderer['wallLayer'].visible, false);
+    assert.equal(renderer['screenWash'].context.instructions.length, 0);
+});
+
+test('bitmap text supports native pause scaling, alpha, and line breaks', t => {
+    const { draw } = setup(t);
+    const pool: Sprite[] = [];
+    const parent = new Container();
+    try {
+        const used = draw('drawBitmapText', 'A\nB', 10, 20, 0xff0000, pool, 0, parent, 2, 0.5) as number;
+        assert.equal(used, 2);
+        assert.deepEqual(pool.map(sprite => ({ x: sprite.x, y: sprite.y, tint: sprite.tint, alpha: sprite.alpha, width: sprite.width })), [
+            { x: 10, y: 20, tint: 0xff0000, alpha: 0.5, width: 16 },
+            { x: 10, y: 36, tint: 0xff0000, alpha: 0.5, width: 16 },
+        ]);
+    } finally {
+        parent.destroy({ children: true });
+    }
+});
+
+test('pause overlay uses a half-black wash and native three-layer scaled text at the ghost start tile', t => {
+    const { draw, renderer, view } = setup(t);
+    const labels: Array<{ text: string; x: number; y: number; tint: number; scale: number; alpha: number }> = [];
+    Object.assign(renderer, { overlayTextPool: [], layoutWidth: 224, layoutHeight: 288, boardTop: 24 });
+    renderer['drawBitmapText'] = (text, x, y, tint, _pool, count = 0, _parent, scale = 1, alpha = 1) => {
+        labels.push({ text, x, y, tint, scale, alpha });
+        return count + text.length;
+    };
+    const doorRow = view.maze.tiles.findIndex(row => row.some(tile => tile.kind === 'door'));
+    const doorColumn = view.maze.tiles[doorRow].findIndex(tile => tile.kind === 'door');
+    draw('drawOverlay', view, true);
+    assert.deepEqual(labels, [
+        { text: 'PAUSED', x: (doorColumn - 5) * 8 - 0.5, y: (doorRow + 3) * 8 + 23.5, tint: 0, scale: 2, alpha: 1 },
+        { text: 'PAUSED', x: (doorColumn - 5) * 8 + 0.5, y: (doorRow + 3) * 8 + 24.5, tint: 0xffffff, scale: 2, alpha: 1 },
+        { text: 'PAUSED', x: (doorColumn - 5) * 8, y: (doorRow + 3) * 8 + 24, tint: 0xff0000, scale: 2, alpha: 0.5 },
+    ]);
+    assert.equal(graphicsFillAlpha(renderer['pauseFade']), 0.5);
 });
 
 test('held pointer draws the original orange arrow with native handle, angle, scale, opacity and Pac-relative position', t => {
