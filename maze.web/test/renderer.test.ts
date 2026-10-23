@@ -64,6 +64,22 @@ test('all sixteen native maze variants render every wall/door through the origin
     }
 });
 
+test('transparent native maze colors remain transparent in wall layers', t => {
+    const { draw, view, wallLayer } = setup(t);
+    const maze = { ...view.maze, borderColor: 0x00112233, fillColor: 0x00445566, backgroundColor: 0x00778899 };
+    draw('rebuildStaticMaze', maze, maze.id, false);
+
+    let spriteIndex = 1;
+    for (const tile of maze.tiles.flat()) {
+        if (!['wall', 'ghostWall', 'door'].includes(tile.kind)) continue;
+        const [background, fill, border] = wallLayer.children.slice(spriteIndex, spriteIndex + 3) as Sprite[];
+        const door = tile.kind === 'door';
+        assert.deepEqual([background.alpha, fill.alpha, border.alpha], door ? [0, 1, 1] : [0, 0, 0]);
+        spriteIndex += 3;
+    }
+    assert.equal(spriteIndex, wallLayer.children.length);
+});
+
 test('pellets honor off-center handles, linear native pulse, rotation and one-eighth maze scale', t => {
     const { draw, view, dotPool, frames } = setup(t);
     draw('drawDots', view);

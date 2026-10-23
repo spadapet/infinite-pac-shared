@@ -145,7 +145,7 @@ export class InputController {
         this.heldGamepad.clear();
         const connected = new Set<number>();
         for (const pad of navigator.getGamepads?.() ?? []) {
-            if (!pad || !pad.connected || pad.mapping !== 'standard') continue;
+            if (!pad || !pad.connected || (pad.mapping !== 'standard' && !isXboxGamepad(pad))) continue;
             connected.add(pad.index);
             const previous = this.buttons.get(pad.index);
             const start = pad.buttons[9]?.pressed ?? false;
@@ -173,6 +173,10 @@ export class InputController {
         if (!this.actions.active() && this.gamepadMoving && !this.heldKeys.size && !this.heldGamepad.size) this.actions.move(null);
         this.gamepadMoving = this.heldGamepad.size > 0;
     }
+}
+
+function isXboxGamepad(pad: Gamepad): boolean {
+    return /x-?box|xinput/i.test(pad.id);
 }
 
 function directionVector(direction: Direction): Vec {

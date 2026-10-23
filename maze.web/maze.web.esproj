@@ -1,18 +1,21 @@
 <Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/1.0.7173973">
   <PropertyGroup>
-	<ProjectGuid>{D9DA44B4-50B5-460E-B9E3-0731C87A7E97}</ProjectGuid>
-	<StartupCommand>npm run dev</StartupCommand>
-	<BuildCommand>npm run build</BuildCommand>
-	<TestCommand>npm test</TestCommand>
-	<CleanCommand>npm run clean</CleanCommand>
-	<ShouldRunBuildScript>true</ShouldRunBuildScript>
-	<ShouldRunNpmInstall>true</ShouldRunNpmInstall>
-	<BuildOutputFolder>$(MSBuildProjectDirectory)\dist</BuildOutputFolder>
-	<DefaultItemExcludes>$(DefaultItemExcludes);public\assets\**;test-results\**;playwright-report\**</DefaultItemExcludes>
+    <ProjectGuid>{D9DA44B4-50B5-460E-B9E3-0731C87A7E97}</ProjectGuid>
+    <StartupCommand>npm run dev</StartupCommand>
+    <BuildCommand>npm run build</BuildCommand>
+    <TestCommand>npm test</TestCommand>
+    <CleanCommand>npm run clean</CleanCommand>
+    <ShouldRunBuildScript>true</ShouldRunBuildScript>
+    <ShouldRunNpmInstall>true</ShouldRunNpmInstall>
+    <BuildOutputFolder>$(MSBuildProjectDirectory)\dist</BuildOutputFolder>
+    <DefaultItemExcludes>$(DefaultItemExcludes);public\assets\**;test-results\**;playwright-report\**</DefaultItemExcludes>
   </PropertyGroup>
   <ItemGroup>
-	<None Include="..\maze\assets\*.png;..\maze\assets\*.wav;..\maze\assets\*.json;..\maze\assets\main.ico">
-	  <Link>assets\%(Filename)%(Extension)</Link>
-	</None>
+    <None Include="..\maze\assets\*.png;..\maze\assets\*.wav;..\maze\assets\*.json;..\maze\assets\main.ico">
+      <Link>assets\%(Filename)%(Extension)</Link>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include=".github\instructions\" />
   </ItemGroup>
 </Project>

@@ -116,7 +116,7 @@ async function loadSpriteFrames(): Promise<SpriteAtlas> {
 }
 
 function colorAlpha(color: number): number {
-    return color > 0xffffff ? ((color >>> 24) & 0xff) / 255 : 1;
+    return ((color >>> 24) & 0xff) / 255;
 }
 
 export function sampleDotAnimation(tick: number, tileX: number, tileY: number): { offsetY: number; brightness: number } {
@@ -367,11 +367,12 @@ export class GameRenderer {
                 if (tile.kind === 'wall' || tile.kind === 'ghostWall' || tile.kind === 'door') {
                     const spriteIndex = findWallSprite(maze, x, y);
                     const door = tile.kind === 'door';
-                    const fillAlpha = winningFlash && !door ? 0 : 1;
+                    const fillAlpha = winningFlash && !door ? 0 : door ? 1 : colorAlpha(maze.fillColor);
                     const borderTint = winningFlash && !door ? WHITE : door ? GHOST_DOOR_COLOR : maze.borderColor & 0xffffff;
-                    this.addWallSprite('wall-bg-sprites', spriteIndex, left, top, maze.backgroundColor & 0xffffff, winningFlash ? 0 : 1);
+                    const borderAlpha = winningFlash || door ? 1 : colorAlpha(maze.borderColor);
+                    this.addWallSprite('wall-bg-sprites', spriteIndex, left, top, maze.backgroundColor & 0xffffff, winningFlash ? 0 : colorAlpha(maze.backgroundColor));
                     this.addWallSprite('wall-fill-sprites', spriteIndex, left, top, door ? GHOST_DOOR_COLOR : winningFlash ? 0 : maze.fillColor & 0xffffff, fillAlpha);
-                    this.addWallSprite('wall-border-sprites', spriteIndex, left, top, borderTint);
+                    this.addWallSprite('wall-border-sprites', spriteIndex, left, top, borderTint, borderAlpha);
                 } else if (!winningFlash) {
                     floor.rect(left, top, TILE_PIXELS, TILE_PIXELS).fill({
                         color: maze.backgroundColor & 0xffffff,

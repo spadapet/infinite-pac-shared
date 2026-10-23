@@ -181,8 +181,8 @@ function resolveReference(values: JsonRecord, value: unknown): unknown {
 function colorNumber(values: JsonRecord, reference: unknown): number {
     const color = resolveReference(values, reference);
     if (!Array.isArray(color)) return 0;
-    const [red = 0, green = 0, blue = 0] = color.map(Number);
-    return ((Math.round(red * 255) << 16) | (Math.round(green * 255) << 8) | Math.round(blue * 255)) >>> 0;
+    const [red = 0, green = 0, blue = 0, alpha = 1] = color.map(Number);
+    return ((Math.round(alpha * 255) << 24) | (Math.round(red * 255) << 16) | (Math.round(green * 255) << 8) | Math.round(blue * 255)) >>> 0;
 }
 
 function parsedTile(character: string, previous: string, next: string): Tile {

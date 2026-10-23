@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import paletteResources from '../../maze/assets/Values.Maze.res.json';
 import { Game, parseMazeResource } from '../src/game';
 import type { GameOptions } from '../src/types';
 
@@ -34,7 +35,29 @@ test('all native maze resources parse into mirrored 28-by-31 browser mazes', () 
         assert.ok(maze.tiles.flat().some(tile => tile.kind === 'dot'));
         assert.ok(maze.tiles.flat().some(tile => tile.zone === 'ghostSlow'));
         assert.ok(maze.borderColor > 0);
-        assert.equal(maze.backgroundColor, 0x101026);
+        assert.equal(maze.backgroundColor, 0xff101026);
+    }
+});
+
+test('native maze palette preserves RGBA including transparent colors', () => {
+    const source = paletteResources as { 'res:values': Record<string, number[] | string>; values_maze: { global: Record<string, Record<string, unknown>> } };
+    for (const name of ['mr-maze-0-0', 'ms-maze-3-1', 'title-maze-front', 'title-maze-back', 'high-score-maze']) {
+        const maze = parseMazeResource(name);
+        const resource = source.values_maze.global[name];
+        const resolve = (value: unknown): number[] => {
+            while (typeof value === 'string' && value.startsWith('res:')) value = source['res:values'][value.slice(4)];
+            return value as number[];
+        };
+        const rgba = (value: unknown) => {
+            const [r, g, b, a] = resolve(value);
+            return ((Math.round(a * 255) << 24) | (Math.round(r * 255) << 16) | (Math.round(g * 255) << 8) | Math.round(b * 255)) >>> 0;
+        };
+        assert.deepEqual([maze.borderColor, maze.fillColor, maze.backgroundColor],
+            [rgba(resource.borderColor), rgba(resource.fillColor), rgba(resource.backgroundColor)], name);
+        if (name.startsWith('title-maze-') || name === 'high-score-maze') {
+            assert.equal(maze.fillColor >>> 24, 0);
+            assert.equal(maze.backgroundColor >>> 24, 0);
+        }
     }
 });
 

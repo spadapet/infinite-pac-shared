@@ -29,21 +29,24 @@ function setup(t: TestContext) {
         t.after(() => { if (previous) Object.defineProperty(globalThis, name, previous); else Reflect.deleteProperty(globalThis, name); });
     }
     const moves: (Direction | Vec | null)[] = [];
+    let actions = 0;
+    let pauses = 0;
     let active = true;
     let direction: Direction = 'left';
     const host = new ElementStub();
     const controller = new InputController(host, {
-        active: () => active, move: value => moves.push(value), action() {}, pause() {}, mute() {}, fullscreen() {},
+        active: () => active, move: value => moves.push(value), action: () => { actions++; }, pause: () => { pauses++; }, mute() {}, fullscreen() {},
         direction: () => direction,
     });
     const key = (type: string, value: string, code: string, repeat = false) => window.dispatchEvent(new KeyEvent(type, value, code, repeat));
     const pointer = (type: string, x: number, y: number, id = 1, button = 0) => host.dispatchEvent(new PointerEventStub(type, x, y, id, button));
     return { window, document, host, moves, controller, key, pointer, setActive: (value: boolean) => { active = value; },
-        setDirection: (value: Direction) => { direction = value; }, setPads: (value: Gamepad[]) => { pads = value; } };
+        setDirection: (value: Direction) => { direction = value; }, setPads: (value: Gamepad[]) => { pads = value; },
+        get actionCount() { return actions; }, get pauseCount() { return pauses; } };
 }
 
-function pad(pressed: number[] = [], axes = [0, 0], index = 0): Gamepad {
-    return { index, connected: true, mapping: 'standard', id: `test-${index}`, timestamp: 0, axes,
+function pad(pressed: number[] = [], axes = [0, 0], index = 0, id = `test-${index}`, mapping: Gamepad['mapping'] = 'standard'): Gamepad {
+    return { index, connected: true, mapping, id, timestamp: 0, axes,
         buttons: Array.from({ length: 16 }, (_, button) => ({ pressed: pressed.includes(button), touched: pressed.includes(button), value: pressed.includes(button) ? 1 : 0 })),
         vibrationActuator: { playEffect: async () => 'complete', reset: async () => 'complete' } };
 }
@@ -122,6 +125,30 @@ test('D-pad and analog stick preserve all four diagonals independently', t => {
     setPads([pad()]);
     controller.poll();
     assert.equal(moves.at(-1), null);
+});
+
+test('Xbox controllers with an unmapped Bluetooth profile use the standard Xbox control indices', t => {
+    const harness = setup(t);
+    const { controller, moves, setPads } = harness;
+    setPads([pad([0], [0.8, -0.9], 0, 'Xbox Wireless Controller', '')]);
+    controller.poll();
+    assert.deepEqual(moves.at(-1), { x: 1, y: -1 });
+    assert.equal(harness.actionCount, 1, 'A is the standard Xbox action button');
+
+    setPads([pad([9], [0, 0], 0, 'Xbox Wireless Controller', '')]);
+    controller.poll();
+    assert.equal(harness.pauseCount, 1, 'Start is the standard Xbox pause button');
+
+    setPads([pad([12, 15], [0, 0], 0, 'Xbox Wireless Controller', '')]);
+    controller.poll();
+    assert.deepEqual(moves.at(-1), { x: 1, y: -1 });
+});
+
+test('unmapped non-Xbox gamepads remain ignored rather than guessing their button layout', t => {
+    const { controller, moves, setPads } = setup(t);
+    setPads([pad([0], [0.8, -0.9], 0, 'Unknown Bluetooth Controller', '')]);
+    controller.poll();
+    assert.deepEqual(moves, []);
 });
 
 test('stick uses native 0.5625 press and 0.5 release hysteresis on each axis', t => {
