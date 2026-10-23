@@ -10,6 +10,8 @@ The native C++ game is in `maze`, built on `ff_game_library`. `maze.web` is its 
 
 The application boots directly into the native title screen. `MR.PAC` and `MS.LILA` select both character graphics and matching maze set; never reintroduce independent maze/character selectors. Existing browser settings use the saved maze set as the selected game. Three difficulties, alternating two-player games, fruit, ghost modes, extra lives, high scores, and the original artwork/sounds are supported. Title and high-score screens use the original maze resources, bitmap font, animated Pac cursor, layout, colors, and fades through WebGL. The title background reuses the gameplay simulation with native empty difficulty, Ms. scatter behavior, no remaining pellets, no state transitions, and no audio. Native title navigation/effect sounds play after browser audio activation. The pause screen uses the original dimming, doubled red text and offset black/white shadows. Transparent HTML hit regions provide mouse/touch targeting without replacing those graphics. The About dialog and browser capability/error notices remain HTML adaptations. Browser fullscreen, audio, and vibration follow device permissions/capabilities; audio starts after interaction.
 
+The title background must leave Pac inactive, matching native `TitleScreen::GetMazePlayer()` returning an invalid player. Only the foreground menu-selection Pac cursor is visible. Ms. mode supplies ghost scatter behavior; it must not introduce a roaming Ms. Pac in the background.
+
 Do not create empty files or recreate `bubble-animation.ts`. Bubble animations belong to the shared native animation player.
 
 ## Development, builds and tests

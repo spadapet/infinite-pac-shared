@@ -16,6 +16,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include=".github\instructions\" />
+    <None Include=".github\instructions\maze-web.instructions.md" />
   </ItemGroup>
 </Project>

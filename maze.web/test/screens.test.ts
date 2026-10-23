@@ -35,8 +35,15 @@ test('title background reuses native ghost movement and empty difficulty without
     const game = Game.titleBackground(() => 0.3);
     const start = game.view.ghosts.map(ghost => ghost.position);
     assert.equal(game.view.character, 'ms');
-    assert.equal(game['players'][0].run.pac.x, 112);
-    for (let i = 0; i < 2000; i++) game.advance();
+    assert.equal(game['players'][0].run.pac.active, false);
+    assert.equal(game.view.pac.visible, false);
+    const pacPosition = game.view.pac.position;
+    for (let i = 0; i < 2000; i++) {
+        game.advance();
+        assert.equal(game.view.pac.visible, false);
+        assert.deepEqual(game.view.pac.position, pacPosition);
+        assert.equal(game.view.ghosts.every(ghost => ghost.state === 'scatter'), true);
+    }
     assert.equal(game.view.state, 'playing');
     assert.equal(game.view.gameOverDone, false);
     assert.notDeepEqual(game.view.ghosts.map(ghost => ghost.position), start);

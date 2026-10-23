@@ -370,6 +370,7 @@ export class Game {
         run.state = 'playing';
         run.readyPhase = 'ready';
         run.playIntro = false;
+        run.pac.active = false;
         for (const row of run.maze.tiles) for (const tile of row) {
             if (tile.kind === 'dot' || tile.kind === 'power') tile.kind = 'path';
         }
