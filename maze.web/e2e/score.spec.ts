@@ -5,10 +5,11 @@ import ts from 'typescript';
 // Exercise the real browser entry point and storage with deterministic game-over events.
 // Rendering, audio and movement are covered by the full-game browser tests.
 async function scorePage(page: Page): Promise<void> {
-    const [html, main, storage] = await Promise.all([
+    const [html, main, storage, vibration] = await Promise.all([
         readFile(new URL('../index.html', import.meta.url), 'utf8'),
         readFile(new URL('../src/main.ts', import.meta.url), 'utf8'),
         readFile(new URL('../src/storage.ts', import.meta.url), 'utf8'),
+        readFile(new URL('../src/vibration.ts', import.meta.url), 'utf8'),
     ]);
     const compile = (source: string) => ts.transpileModule(source, {
         compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext },
@@ -16,6 +17,7 @@ async function scorePage(page: Page): Promise<void> {
     const modules: Record<string, string> = {
         '/score-main.js': compile(main.replace("import './style.css';", '')),
         '/storage': compile(storage),
+        '/vibration': compile(vibration),
         '/game': `export class Game {
             view = { state: 'playing', score: 0, tick: 0, highScore: 0, level: 1, player: 1,
                 pac: { direction: 'left', position: { x: 0, y: 0 } } };

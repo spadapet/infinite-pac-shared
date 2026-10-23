@@ -443,7 +443,7 @@ export class Game {
             case 'dying':
                 if (run.stateTick === 30) {
                     this.sound('die');
-                    this.events.push({ type: 'vibrate', duration: 1250 });
+                    this.events.push({ type: 'vibrate', duration: 1250, strongMagnitude: 0.375, weakMagnitude: 0 });
                 }
                 if (run.stateTick > 120) this.setState(run, 'dead');
                 break;
@@ -687,6 +687,7 @@ export class Game {
             const next = this.ghostDecideDirection(fruit, run, point(dx, dy), null, true);
             if (next) { dx = next.x; dy = next.y; }
             this.sound('fruit-bounce');
+            this.events.push({ type: 'vibrate', duration: 100, strongMagnitude: 0.5, weakMagnitude: 0 });
         }
         fruit.x += dx; fruit.y += dy; fruit.dx = dx; fruit.dy = dy;
         if (this.checkTunnel(fruit, run.maze)) this.resetFruit(fruit);
@@ -865,17 +866,16 @@ export class Game {
         }
         if (run.dotCount === 0) this.setState(run, 'winning');
         player.score += power ? 50 : 10;
-        const vibratesForDot = run.dotEffect === 0;
         if (power) {
             this.scareGhosts(run, true);
             run.pac.advancePosition -= 3 * FIXED;
-            this.events.push({ type: 'vibrate', duration: 500 });
         } else {
             run.pac.advancePosition -= FIXED;
-            if (vibratesForDot) this.events.push({ type: 'vibrate', duration: 100 });
         }
         if (run.state === 'winning') this.sound('level-win');
         else {
+            if (power) this.events.push({ type: 'vibrate', duration: 500, strongMagnitude: 0, weakMagnitude: 1 });
+            else if (!run.dotEffect) this.events.push({ type: 'vibrate', duration: 100, strongMagnitude: 0, weakMagnitude: 0.5 });
             this.sound(`eat-dot-${run.dotEffect ? '2' : '1'}`);
             run.dotEffect = run.dotEffect ? 0 : 1;
         }
@@ -890,7 +890,7 @@ export class Game {
         player.score += score;
         run.points.push({ x: ghost.x, y: ghost.y, value: score, remaining: 54, color: 0x00ffff });
         this.sound('eat-ghost');
-        this.events.push({ type: 'vibrate', duration: 750 });
+        this.events.push({ type: 'vibrate', duration: 750, strongMagnitude: 0.75, weakMagnitude: 0 });
         this.addParticles(run, point(ghost.x, ghost.y), 30, 13);
     }
 
@@ -900,7 +900,7 @@ export class Game {
         player.score += score;
         run.points.push({ x: run.fruit.x, y: run.fruit.y, value: score, remaining: 120, color: 0xffb8ff });
         this.sound('eat-fruit');
-        this.events.push({ type: 'vibrate', duration: 500 });
+        this.events.push({ type: 'vibrate', duration: 500, strongMagnitude: 0, weakMagnitude: 1 });
         this.addParticles(run, point(run.fruit.x, run.fruit.y), 20, 13);
         this.resetFruit(run.fruit);
     }

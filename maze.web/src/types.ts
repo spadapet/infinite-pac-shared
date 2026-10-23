@@ -58,4 +58,4 @@ export type GameEvent =
     | { type: 'stopSound'; name: string }
     | { type: 'stopSounds' }
     | { type: 'gameOver'; player: number; score: number; level: number }
-    | { type: 'vibrate'; duration: number };
+    | { type: 'vibrate'; duration: number; strongMagnitude: number; weakMagnitude: number };

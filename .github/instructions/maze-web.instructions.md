@@ -54,6 +54,8 @@ Audio references, volume, speed, and loop flags come from `Assets.Audio.res.json
 
 ## Controls
 
+The Vibration option enables Gamepad API dual-rumble on the first connected controller exposing a usable vibration actuator, including Xbox controllers over Bluetooth when the browser/OS exposes haptics. Pulses retain native low/high motor strengths and durations: alternate dots (0/0.5, 100 ms), power pellets and fruit (0/1, 500 ms), moving-fruit bounces (0.5/0, 100 ms), ghosts (0.75/0, 750 ms), and death (0.375/0, 1,250 ms). Overlapping pulses keep the strongest unexpired value per motor. Muting audio does not disable rumble. Pause, focus loss, navigation, score entry, disconnection and disabling vibration cancel it; haptics failures are reported without stopping gameplay. Devices without usable controller haptics retain `navigator.vibrate` where available. Browser, controller firmware and Bluetooth support can limit physical fidelity; automated tests verify API calls, not physical motor output.
+
 Arrow keys/WASD, standard gamepad stick/D-pad, press-and-drag mouse/touch joystick on the maze, or the touch direction buttons control Pac. P/Escape pauses, M toggles sound, and F toggles fullscreen. A gamepad's A button starts/resumes and Start pauses. Losing focus or hiding the tab pauses the game without accumulating simulation time.
 
 Keyboard and standard gamepads are sampled as simultaneous held axes across devices, with native Up-over-Down and Left-over-Right priority. Xbox controllers are also accepted when a browser leaves their Bluetooth profile unmapped, using the standard Xbox control indices. Sticks use the native per-direction press threshold of 0.5625 and release below 0.5; neither sticks nor D-pads discard diagonals.

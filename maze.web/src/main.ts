@@ -4,6 +4,7 @@ import { GameRenderer } from './renderer';
 import { GameAudio } from './audio';
 import { GameStorage, scoreName } from './storage';
 import { InputController } from './input';
+import { GameVibration } from './vibration';
 import type { GameOptions, GameEvent } from './types';
 
 function element<T extends HTMLElement>(id: string, type: { new(): T }): T {
@@ -21,6 +22,7 @@ function failure(error: unknown): void { report(error instanceof Error ? error.m
 const storage = new GameStorage({ getItem: key => localStorage.getItem(key), setItem: (key, value) => localStorage.setItem(key, value) }, report);
 let settings = storage.settings;
 const audio = new GameAudio();
+const vibration = new GameVibration(report);
 audio.setMuted(!settings.sound);
 const host = element('game', HTMLElement);
 const menu = element('menu', HTMLElement);
@@ -104,6 +106,7 @@ function readOptions(): void {
         throw new Error('Invalid game options');
     }
     settings = { ...settings, character, mazeSet, difficulty, players, vibration: vibrationInput.checked };
+    if (!settings.vibration) vibration.stop();
     storage.saveSettings(settings);
 }
 async function startGame(): Promise<void> {
@@ -142,6 +145,7 @@ async function startGame(): Promise<void> {
 }
 function showMenu(): void {
     audio.stopAll();
+    vibration.stop();
     mode = 'menu';
     paused = false;
     endedAt = 0;
@@ -158,6 +162,7 @@ function showMenu(): void {
 function setPaused(value: boolean): void {
     if (mode !== 'game' || game.view.state === 'gameover' || !scoreEntry.hidden || (!value && graphicsLost)) return;
     paused = value;
+    if (value) vibration.stop();
     accumulator = 0;
     pauseMenu.hidden = !value;
     pauseButton.textContent = value ? 'Resume' : 'Pause';
@@ -196,6 +201,7 @@ function showNextScore(): void {
         return;
     }
     paused = true;
+    vibration.stop();
     void audio.setPaused(true).catch(failure);
     scoreEntry.hidden = false;
     pauseMenu.hidden = true;
@@ -209,7 +215,7 @@ function handleEvents(): void {
     for (const event of game.drainEvents()) {
         if (event.type === 'gameOver' && storage.qualifies(options, event.score)) pendingScores.push(event);
         else if (event.type === 'vibrate') {
-            if (settings.vibration && navigator.vibrate) navigator.vibrate(Math.min(event.duration, 1000));
+            if (settings.vibration && !paused && !graphicsLost) vibration.play(event);
         } else audio.handle(event);
     }
     if (pendingScores.length && scoreEntry.hidden) showNextScore();
@@ -271,8 +277,10 @@ element('score-form', HTMLFormElement).addEventListener('submit', event => {
     pendingScores.shift();
     showNextScore();
 });
-document.addEventListener('visibilitychange', () => { if (document.hidden) setPaused(true); });
-window.addEventListener('blur', () => setPaused(true));
+document.addEventListener('visibilitychange', () => { if (document.hidden) { vibration.stop(); setPaused(true); } });
+window.addEventListener('blur', () => { vibration.stop(); setPaused(true); });
+window.addEventListener('pagehide', () => vibration.stop());
+window.addEventListener('gamepaddisconnected', () => vibration.stop());
 host.addEventListener('webglcontextlost', () => {
     graphicsLost = true;
     setPaused(true);
@@ -329,6 +337,7 @@ async function boot(): Promise<void> {
             requestAnimationFrame(frame);
         } catch (error) {
             audio.stopAll();
+            vibration.stop();
             pauseButton.disabled = true;
             failure(error);
         }
