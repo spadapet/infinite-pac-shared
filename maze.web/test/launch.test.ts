@@ -2,26 +2,26 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-test('Visual Studio builds and deploys the web startup project in every solution configuration', async () => {
+test('Visual Studio builds incrementally and deploys Vite in every solution configuration', async () => {
     const [solution, project] = await Promise.all([
-        readFile(new URL('../../maze.sln', import.meta.url), 'utf8'),
+        readFile(new URL('../../maze.slnx', import.meta.url), 'utf8'),
         readFile(new URL('../maze.web.esproj', import.meta.url), 'utf8'),
     ]);
-    const projectGuid = project.match(/<ProjectGuid>(\{[A-F\d-]+\})<\/ProjectGuid>/i)?.[1];
-    assert.ok(projectGuid, 'The web project must declare its solution GUID');
-    assert.ok(solution.includes(`"maze.web", "maze.web\\maze.web.esproj", "${projectGuid}"`));
+    const webProject = solution.match(/<Project Path="maze\.web\/maze\.web\.esproj">([\s\S]*?)<\/Project>/)?.[1];
+    assert.ok(webProject, 'The solution must include the web project');
+    assert.match(webProject, /<Build\s*\/>/, 'Build must remain enabled');
+    assert.match(webProject, /<Deploy\s*\/>/, 'Deploy must remain enabled so F5 starts Vite before Edge');
+    assert.match(webProject, /<BuildType Solution="Profile\|\*" Project="Release"\s*\/>/);
+    assert.deepEqual([...solution.matchAll(/<BuildType Name="([^"]+)"/g)].map(match => match[1]), ['Debug', 'Profile', 'Release']);
     assert.match(project, /<StartupCommand>npm run dev<\/StartupCommand>/);
-
-    const configurationSection = solution.match(/GlobalSection\(SolutionConfigurationPlatforms\)[\s\S]*?EndGlobalSection/)?.[0];
-    assert.ok(configurationSection, 'The solution must declare configurations');
-    const configurations = [...configurationSection.matchAll(/^\s*([^=|\r\n]+\|[^=\r\n]+?)\s*=\s*[^\r\n]+/gm)].map(match => match[1].trim());
-    assert.ok(configurations.length > 0);
-    const lines = solution.split(/\r?\n/).map(line => line.trim());
-    for (const configuration of configurations) {
-        const activePrefix = `${projectGuid}.${configuration}.ActiveCfg = `;
-        const active = lines.find(line => line.startsWith(activePrefix))?.slice(activePrefix.length);
-        assert.ok(active, `The web project must map ${configuration}`);
-        assert.ok(lines.includes(`${projectGuid}.${configuration}.Build.0 = ${active}`), `Build must be enabled for ${configuration}`);
-        assert.ok(lines.includes(`${projectGuid}.${configuration}.Deploy.0 = ${active}`), `Deploy must be enabled for ${configuration} so F5 starts Vite before Edge`);
-    }
+    assert.match(project, /<BuildCommand>npm run build<\/BuildCommand>/);
+    assert.match(project, /<ShouldRunBuildScript>false<\/ShouldRunBuildScript>/);
+    const target = project.match(/<Target Name="BuildWebAssets"[\s\S]*?<\/Target>/)?.[0];
+    assert.ok(target, 'The SDK build must be replaced with an incremental production target');
+    assert.match(target, /BeforeTargets="CoreCompile"/);
+    assert.match(target, /Inputs="@\(WebBuildInput\);/);
+    assert.match(target, /Outputs="\$\(IntermediateOutputPath\)web-build\.stamp"/);
+    assert.match(project, /<WebBuildMissingOutput Include="@\(WebBuildExpectedOutput\)" Condition="!Exists\('%\(Identity\)'\)"/);
+    assert.match(target, /<Exec Command="\$\(BuildCommand\)"/);
+    assert.match(project, /WriteOnlyWhenDifferent="true"/);
 });

@@ -11,6 +11,7 @@ body { margin: 0; overflow: hidden; }
 #pause-menu { position: absolute; inset: 0; pointer-events: none; }
 .play-control { position: absolute; top: max(8px, env(safe-area-inset-top)); right: max(8px, env(safe-area-inset-right)); width: 32px; height: 32px; padding: 0; border: 1px solid #ffffff80; background: #ffffff20; color: #ffffff80; cursor: pointer; pointer-events: auto; }
 .play-control:hover { color: white; border-color: white; background: #ffffff40; }
+.play-control:focus { border: 3px solid white; outline: none; color: white; }
 .play-control:active { background: #ffffff80; }
 .play-control svg { display: block; width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1; }
 #resume, #home { width: 48px; height: 48px; }
@@ -18,6 +19,15 @@ body { margin: 0; overflow: hidden; }
 #status { flex: none; min-height: 36px; max-height: 30dvh; overflow: auto; overflow-wrap: anywhere; text-align: center; padding: 8px; background: #000d; font-size: 13px; line-height: 20px; }
 #status:empty { visibility: hidden; }
 #status.error { color: #ffb7a5; }
-dialog { max-width: min(90vw, 420px); border: 1px solid #888; background: black; color: white; }
-dialog::backdrop { background: #000c; }
+#about-screen { position: absolute; inset: 0; display: flex; flex-direction: column; background: black; padding: clamp(12px, 3vmin, 28px); }
+.about-content { flex: 1; min-height: 0; overflow: auto; width: 100%; max-width: 640px; margin: 0 auto; padding: 8px; line-height: 1.5; }
+.about-footer { flex: none; width: 100%; max-width: 640px; margin: 0 auto; padding: 0 8px 8px; }
+.about-content h1 { color: #ffe600; font-size: clamp(26px, 5vmin, 40px); margin: 0 0 16px; }
+.about-content h2 { font-size: 20px; margin: 24px 0 12px; }
+.about-content li { margin-bottom: 12px; }
+.about-content a { color: #a3caff; }
+.about-content a, #about-back { scroll-margin: 16px; }
+.about-content a:focus, #about-back:focus { outline: 3px solid white; outline-offset: 4px; }
+.about-help { color: #bbb; font-size: 14px; }
+#about-back { padding: 10px 24px; border: 1px solid white; background: #222; color: white; font: inherit; cursor: pointer; }
 button:disabled { cursor: default; }

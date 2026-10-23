@@ -1,11 +1,11 @@
-<Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/1.0.7173973">
+﻿<Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/1.0.7173973">
   <PropertyGroup>
     <ProjectGuid>{D9DA44B4-50B5-460E-B9E3-0731C87A7E97}</ProjectGuid>
     <StartupCommand>npm run dev</StartupCommand>
     <BuildCommand>npm run build</BuildCommand>
     <TestCommand>npm test</TestCommand>
     <CleanCommand>npm run clean</CleanCommand>
-    <ShouldRunBuildScript>true</ShouldRunBuildScript>
+    <ShouldRunBuildScript>false</ShouldRunBuildScript>
     <ShouldRunNpmInstall>true</ShouldRunNpmInstall>
     <BuildOutputFolder>$(MSBuildProjectDirectory)\dist</BuildOutputFolder>
     <DefaultItemExcludes>$(DefaultItemExcludes);public\assets\**;test-results\**;playwright-report\**</DefaultItemExcludes>
@@ -18,4 +18,28 @@
   <ItemGroup>
     <None Include=".github\instructions\maze-web.instructions.md" />
   </ItemGroup>
+  <Target Name="PrepareWebBuildInputs">
+    <ItemGroup>
+      <WebBuildInput Include="src\**\*;test\**\*;e2e\**\*;scripts\**\*;public\**\*;*.json;*.ts;index.html;maze.web.esproj;..\maze\assets\*.png;..\maze\assets\*.wav;..\maze\assets\*.json;..\maze\assets\main.ico" Exclude="public\assets\**\*" />
+    </ItemGroup>
+    <MakeDir Directories="$(IntermediateOutputPath)" />
+    <WriteLinesToFile File="$(IntermediateOutputPath)web-build.inputs" Lines="@(WebBuildInput->'%(FullPath)')" Overwrite="true" WriteOnlyWhenDifferent="true" />
+    <ReadLinesFromFile File="$(IntermediateOutputPath)web-build.outputs" Condition="Exists('$(IntermediateOutputPath)web-build.outputs')">
+      <Output TaskParameter="Lines" ItemName="WebBuildPreviousOutput" />
+    </ReadLinesFromFile>
+    <ItemGroup>
+      <WebBuildExpectedOutput Include="$(BuildOutputFolder)\index.html;@(WebBuildPreviousOutput)" />
+      <WebBuildMissingOutput Include="@(WebBuildExpectedOutput)" Condition="!Exists('%(Identity)')" />
+    </ItemGroup>
+    <!-- Copied assets retain source timestamps; compare inputs with the build stamp, not those outputs. -->
+    <Delete Files="$(IntermediateOutputPath)web-build.stamp" Condition="'@(WebBuildMissingOutput)' != '' Or !Exists('$(IntermediateOutputPath)web-build.outputs')" />
+  </Target>
+  <Target Name="BuildWebAssets" BeforeTargets="CoreCompile" DependsOnTargets="RunNpmInstall;GeneratePackageJsonProps;EvaluateNPMScripts;PrepareWebBuildInputs" Inputs="@(WebBuildInput);$(IntermediateOutputPath)web-build.inputs;$(NpmInstallCheck)" Outputs="$(IntermediateOutputPath)web-build.stamp" Condition="'$(DesignTimeBuild)' != 'true'">
+    <Exec Command="$(BuildCommand)" WorkingDirectory="$(MSBuildProjectDirectory)" />
+    <ItemGroup>
+      <WebBuildOutput Include="$(BuildOutputFolder)\**\*" />
+    </ItemGroup>
+    <WriteLinesToFile File="$(IntermediateOutputPath)web-build.outputs" Lines="@(WebBuildOutput->'%(FullPath)')" Overwrite="true" WriteOnlyWhenDifferent="true" />
+    <Touch Files="$(IntermediateOutputPath)web-build.stamp" AlwaysCreate="true" />
+  </Target>
 </Project>

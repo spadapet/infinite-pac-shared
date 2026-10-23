@@ -7,8 +7,16 @@
     <meta name="description" content="Infinite Pac, recreated for the web with the original graphics and sound.">
     <link rel="icon" href="./assets/main.ico">
     <title>Infinite Pac</title>
+    <style>
+        #loading { position: fixed; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; margin: 0; padding-bottom: 16dvh; background: black; color: white; font: 600 clamp(28px, 6vw, 44px) 'Segoe UI', system-ui, sans-serif; }
+        #loading[hidden] { display: none; }
+        #loading-spinner { width: 48px; height: 48px; border: 4px solid #ffffff40; border-top-color: #ffe600; border-radius: 50%; animation: loading-spin 0.9s linear infinite; }
+        @keyframes loading-spin { to { transform: rotate(360deg); } }
+        @media (prefers-reduced-motion: reduce) { #loading-spinner { animation: none; } }
+    </style>
 </head>
 <body>
+    <div id="loading" role="status" aria-live="polite"><span>Loading...</span><span id="loading-spinner" aria-hidden="true"></span></div>
     <main id="app">
         <section id="cabinet" aria-label="Infinite Pac">
             <div id="game" role="application" aria-label="Infinite Pac" tabindex="0"></div>
@@ -28,14 +36,25 @@
                 <button id="resume" class="play-control" type="button" aria-label="Resume game"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 10L34 23L14 38Z"/></svg></button>
             </section>
             <section id="score-entry" class="screen-controls" aria-label="New high score" hidden></section>
-            <dialog id="about-dialog">
-                <h1>Infinite Pac</h1>
-                <p>Original game and assets &copy; Peter Spada.</p>
-                <p>WebGL recreation using the original graphics, audio, and gameplay.</p>
-                <form method="dialog"><button>Back</button></form>
-            </dialog>
+            <section id="about-screen" aria-label="About Infinite Pac" hidden>
+                <div id="about-content" class="about-content">
+                    <h1>Infinite Pac</h1>
+                    <p>Code, graphics, and audio by Peter Spada.</p>
+                    <p>More info at <a href="http://peterspada.com">peterspada.com</a></p>
+                    <h2>Web technology credits</h2>
+                    <ul>
+                        <li><a href="https://pixijs.com">PixiJS</a></li>
+                        <li><a href="https://www.typescriptlang.org">TypeScript</a></li>
+                        <li><a href="https://vite.dev">Vite</a></li>
+                    </ul>
+                    <p>Powered by browser WebGL, Web Audio, and Gamepad APIs.</p>
+                </div>
+                <footer class="about-footer">
+                    <button id="about-back" type="button">Back to menu</button>
+                </footer>
+            </section>
         </section>
-        <div id="status" role="status" aria-live="polite">Loading original game assets...</div>
+        <div id="status" role="status" aria-live="polite"></div>
     </main>
     <script type="module" src="./src/main.ts"></script>
 </body>

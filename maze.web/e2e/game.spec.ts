@@ -47,6 +47,35 @@ test('WebGL game loads original assets, plays, pauses and resumes without browse
     expect(missing).toEqual([]);
 });
 
+test('Pause, Home and Resume show a three-pixel white border only while focused', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('#menu')).toBeVisible({ timeout: 30_000 });
+    await page.getByRole('button', { name: 'Play Mr. Pac', exact: true }).click();
+    await expect(page.locator('#menu')).toBeHidden();
+    const pause = page.locator('#pause');
+    await pause.focus();
+    await expect(pause).toBeFocused();
+    await expect(pause).toHaveCSS('border-top-width', '3px');
+    await expect(pause).toHaveCSS('border-top-color', 'rgb(255, 255, 255)');
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#pause-menu')).toBeVisible();
+    const home = page.locator('#home');
+    const resume = page.locator('#resume');
+    await home.focus();
+    const bounds = await home.boundingBox();
+    await expect(home).toBeFocused();
+    await expect(home).toHaveCSS('border-top-width', '3px');
+    await expect(home).toHaveCSS('border-top-color', 'rgb(255, 255, 255)');
+    await page.keyboard.press('Tab');
+    await expect(resume).toBeFocused();
+    await expect(resume).toHaveCSS('border-top-width', '3px');
+    await expect(resume).toHaveCSS('border-top-color', 'rgb(255, 255, 255)');
+    await expect(home).toHaveCSS('border-top-width', '1px');
+    expect(await home.boundingBox()).toEqual(bounds);
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#pause-menu')).toBeHidden();
+});
+
 test('options and sound persist and both character/maze sets start correctly', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('#menu')).toBeVisible({ timeout: 30_000 });

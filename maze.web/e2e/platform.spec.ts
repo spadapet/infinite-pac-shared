@@ -12,6 +12,7 @@ test('a browser without WebGL receives an explicit startup error', async ({ page
     });
     await page.goto('/');
     await expect(page.locator('#status')).toContainText('WebGL hardware rendering is required', { timeout: 30_000 });
+    await expect(page.locator('#loading')).toBeHidden();
     await expect(page.locator('#menu')).toBeHidden();
 });
 

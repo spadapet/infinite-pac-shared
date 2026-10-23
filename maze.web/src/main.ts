@@ -37,6 +37,10 @@ const host = element('game', HTMLElement);
 const menu = element('menu', HTMLElement);
 const pauseMenu = element('pause-menu', HTMLElement);
 const scoreEntry = element('score-entry', HTMLElement);
+const aboutScreen = element('about-screen', HTMLElement);
+const aboutContent = element('about-content', HTMLElement);
+const aboutBack = element('about-back', HTMLButtonElement);
+const aboutActions = Array.from(aboutScreen.querySelectorAll<HTMLAnchorElement | HTMLButtonElement>('a, button'));
 const pauseButton = element('pause', HTMLButtonElement);
 const soundButton = element('sound', HTMLButtonElement);
 const titleButtons = ['start', 'start-ms', 'players', 'difficulty', 'sound', 'vibration', 'fullscreen', 'about'].map(id => element(id, HTMLButtonElement));
@@ -150,6 +154,7 @@ function showMenu(): void {
     title = new TitleScreen(settings);
     selectedGame = settings.mazeSet;
     menu.hidden = false;
+    aboutScreen.hidden = true;
     pauseMenu.hidden = true;
     scoreEntry.hidden = true;
     pauseButton.disabled = true;
@@ -170,9 +175,24 @@ function setPaused(value: boolean): void {
     if (!value) { void unlockSound().catch(failure); host.focus({ preventScroll: true }); }
 }
 function togglePause(): void {
-    if (mode === 'menu' || element('about-dialog', HTMLDialogElement).open) return;
+    if (mode === 'menu') return;
     setPaused(!paused);
 }
+function showAbout(): void {
+    menu.hidden = true;
+    aboutScreen.hidden = false;
+    aboutBack.focus({ preventScroll: true });
+    aboutContent.scrollTop = 0;
+    accumulator = 0;
+}
+function closeAbout(): void {
+    aboutScreen.hidden = true;
+    menu.hidden = false;
+    accumulator = 0;
+    lastTime = 0;
+    host.focus({ preventScroll: true });
+}
+aboutBack.addEventListener('click', closeAbout);
 function toggleSound(): void {
     settings.sound = !settings.sound;
     audio.setMuted(!settings.sound);
@@ -248,7 +268,7 @@ async function menuEffect(name: 'eat-dot-1' | 'eat-dot-2' | 'fruit-bounce'): Pro
     } catch (error) { failure(error); }
 }
 async function executeTitle(index: number, left = false): Promise<void> {
-    if (mode !== 'menu' || starting || graphicsLost) return;
+    if (mode !== 'menu' || starting || graphicsLost || !aboutScreen.hidden) return;
     if (index < 2) {
         title.selected = index;
         selectedGame = index === 0 ? 'mr' : 'ms';
@@ -264,12 +284,18 @@ async function executeTitle(index: number, left = false): Promise<void> {
     if (index === 4) toggleSound();
     if (index === 5) { settings.vibration = !settings.vibration; if (!settings.vibration) vibration.stop(); }
     if (index === 6) fullscreen();
-    if (index === 7) element('about-dialog', HTMLDialogElement).showModal();
+    if (index === 7) showAbout();
     saveSettings();
     await menuEffect('fruit-bounce');
 }
 function navigateScreen(direction: Direction): void {
-    if (starting || graphicsLost || scoreClosing || element('about-dialog', HTMLDialogElement).open) return;
+    if (!aboutScreen.hidden) {
+        const selected = aboutActions.findIndex(control => control === document.activeElement);
+        const offset = direction === 'up' || direction === 'left' ? -1 : 1;
+        aboutActions[(selected + offset + aboutActions.length) % aboutActions.length].focus();
+        return;
+    }
+    if (starting || graphicsLost || scoreClosing) return;
     if (scoreScreen) { scoreScreen.move(direction); return; }
     if (mode !== 'menu') return;
     if (direction === 'left' || direction === 'right') {
@@ -291,7 +317,12 @@ function finishScore(save: boolean): void {
     if (graphicsLost) showNextScore();
 }
 function action(): void {
-    if (scoreClosing || graphicsLost || element('about-dialog', HTMLDialogElement).open) return;
+    if (!aboutScreen.hidden) {
+        const selected = aboutActions.find(control => control === document.activeElement) ?? aboutBack;
+        selected.click();
+        return;
+    }
+    if (scoreClosing || graphicsLost) return;
     if (scoreScreen) { if (scoreScreen.execute()) finishScore(true); }
     else if (mode === 'menu') void executeTitle(title.selected);
     else if (paused) setPaused(false);
@@ -317,7 +348,16 @@ pauseButton.addEventListener('click', togglePause);
 element('resume', HTMLButtonElement).addEventListener('click', () => setPaused(false));
 element('home', HTMLButtonElement).addEventListener('click', showMenu);
 document.addEventListener('keydown', event => {
-    if (element('about-dialog', HTMLDialogElement).open) { event.stopImmediatePropagation(); return; }
+    if (!aboutScreen.hidden) {
+        const directions: Record<string, Direction> = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' };
+        if (event.key === 'Escape' || event.key === 'Enter' || event.key === ' ' || directions[event.key]) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            if (directions[event.key]) navigateScreen(directions[event.key]);
+            else if (!event.repeat) { if (event.key === 'Escape') closeAbout(); else action(); }
+        }
+        return;
+    }
     if (mode !== 'menu' && !scoreScreen) return;
     if (scoreClosing) { event.preventDefault(); event.stopImmediatePropagation(); return; }
     const directions: Record<string, Direction> = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' };
@@ -376,7 +416,7 @@ async function boot(): Promise<void> {
         action,
         menuActive: () => mode === 'menu' || !!scoreScreen,
         navigate: navigateScreen,
-        cancel: () => { if (scoreScreen) finishScore(false); else if (mode === 'game') { if (paused) setPaused(false); else showMenu(); } },
+        cancel: () => { if (!aboutScreen.hidden) closeAbout(); else if (scoreScreen) finishScore(false); else if (mode === 'game') { if (paused) setPaused(false); else showMenu(); } },
         pause: togglePause,
         start: () => { if (mode === 'menu') action(); else togglePause(); },
         mute: toggleSound,
@@ -390,7 +430,7 @@ async function boot(): Promise<void> {
             const elapsed = lastTime ? Math.min(now - lastTime, 100) : 0;
             lastTime = now;
             input.poll();
-            if (!graphicsLost && !document.hidden && !element('about-dialog', HTMLDialogElement).open
+            if (!graphicsLost && !document.hidden && aboutScreen.hidden
                 && (mode === 'menu' || scoreScreen || (!paused && !soundLoading))) {
                 accumulator += elapsed;
                 while (accumulator >= 1000 / 60) {
@@ -418,7 +458,8 @@ async function boot(): Promise<void> {
                 showForeground: !scoreClosing && scoreFade === 0.875 });
             else renderer.render(view, paused, input.joystick);
             layoutScreenControls();
-            host.dataset.state = mode === 'menu' ? 'menu' : scoreScreen ? 'score' : paused ? 'paused' : view.state;
+            element('loading', HTMLElement).hidden = true;
+            host.dataset.state = !aboutScreen.hidden ? 'about' : mode === 'menu' ? 'menu' : scoreScreen ? 'score' : paused ? 'paused' : view.state;
             host.dataset.character = mode === 'menu' ? settings.character : options.character;
             host.dataset.mazeSet = mode === 'menu' ? settings.mazeSet : options.mazeSet;
             host.dataset.selection = String(scoreScreen?.selected ?? title.selected);
@@ -433,9 +474,13 @@ async function boot(): Promise<void> {
             audio.stopAll();
             vibration.stop();
             pauseButton.disabled = true;
+            element('loading', HTMLElement).hidden = true;
             failure(error);
         }
     }
     requestAnimationFrame(frame);
 }
-void boot().catch(error => report(`The game could not start. WebGL hardware rendering is required. ${error instanceof Error ? error.message : String(error)}`));
+void boot().catch(error => {
+    element('loading', HTMLElement).hidden = true;
+    report(`The game could not start. WebGL hardware rendering is required. ${error instanceof Error ? error.message : String(error)}`);
+});

@@ -154,3 +154,175 @@ animation) are not listed.
 - Winning flash timing and dot hiding.
 - HUD positions, colours and the 1UP blink.
 - The 8-slice touch map and the 20 px dead zone.
+
+## Performance improvement backlog (2026-10-23)
+
+This section records a separate review of the current web implementation. The older parity
+findings above are historical and were not revalidated by this performance review. These are
+optimization candidates, not claims that the game currently misses its frame budget. No
+performance changes have been implemented as part of recording this backlog.
+
+### Baseline and design constraints
+
+- Instrumentation of the production build in headless Edge, using WebGL2/software rendering
+  at a 1280 x 720 viewport, measured 3 draw calls per ordinary gameplay frame, 3 while paused,
+  and 5 on the title screen. About still submitted 5 behind its opaque HTML screen. These are
+  submission counts, not hardware GPU timings; other devices and game states can differ.
+- The initial Mr. Pac board has 510 wall/door tiles and 278 dots/power pellets. Each wall/door
+  uses three sprites (background, fill, border), totaling 1,530 wall sprites, not draw calls.
+- Wall backgrounds share `edges-bg.png`; fills and borders share `edges.png`. PixiJS batches
+  compatible sprites across ordinary containers and texture frames, including different texture
+  sources within the device's batch limit. Tint and alpha differences do not inherently split
+  sprite batches. The gameplay capture had a background draw, a floor-geometry draw, and one
+  large sprite batch. Reducing draw calls is not the first priority.
+- Keep sprite pooling, shared texture sources, decoded audio-buffer reuse, and the static-maze
+  cache. The 36 sprite-source images contain about 1.76 MiB of RGBA8 base-level pixel data;
+  this excludes framebuffer, driver, and other memory overhead.
+- Preserve the fixed 60 Hz simulation, native animation curves, drawing order, ghost tie-breaking,
+  random-number consumption, input semantics, graphics recovery, and browser lifecycle behavior.
+- Measure CPU preparation time, allocation/GC behavior, draw calls, buffer uploads, and memory
+  before/after changes. Use actual hardware for GPU timing. Do not add an ECS, workers, or a
+  custom renderer without evidence that the complexity is warranted.
+
+### P1. Skip completely covered or unchanged canvas rendering
+
+- **Where:** `main.ts` frame loop; `renderer.ts` `render()` and `renderScreen()`.
+- **Issue:** About freezes simulation but continues preparing/rendering the covered title.
+  Paused gameplay also repaints unchanged dots, actors, HUD, and overlays every animation frame.
+- **Fix idea:** Keep controller polling independent of rendering. Skip canvas preparation while
+  covered; redraw paused scenes only when presentation is dirty. At high display refresh rates,
+  avoid duplicate presentation work when no simulation or UI state has changed.
+- **Watch out:** Resize, DPR changes, context recovery, pause/resume, visibility changes, and
+  returning from About must invalidate presentation. Keep input, status messages, and browser
+  shortcuts responsive. Do not change simulation timing to reduce rendering frequency.
+- **Validate:** Count submissions while covered/paused; verify redraw after every invalidation,
+  controller-only return, high-refresh displays, and no visible stale frames.
+
+### P2. Share dot animation samples by phase
+
+- **Where:** `renderer.ts` `drawMazeDots()`; `native-animation.ts` `sampleAnimation()`.
+- **Issue:** Every visible dot independently searches/interpolates the same animation tracks and
+  allocates sampling results. Ordinary dots have four phase groups; power pellets share one phase.
+- **Fix idea:** Sample the four ordinary phases and one power phase once per relevant render/tick,
+  then reuse the read-only results. The initial board can use 5 samples instead of 278.
+- **Watch out:** Derive grouping from the native loop length and tile phase; preserve fractional
+  frames, offsets, brightness, scale, rotation, and ready/death/winning visibility behavior.
+  Shared sampled values must not be mutated by individual sprites.
+- **Validate:** Compare sampled visuals over a complete animation cycle and all phase groups;
+  measure sample counts and allocation reduction for gameplay and foreground screen dots.
+
+### P3. Avoid full GameView snapshots for scalar queries
+
+- **Where:** `game.ts` `get view()`; `main.ts` input callbacks and frame loop.
+- **Issue:** The getter creates actor/position objects, arrays for scores, particles and points,
+  and a fruit-history copy. It is also called merely to read state, direction, or completion.
+- **Fix idea:** Expose cheap scalar queries and create one presentation snapshot when needed.
+  Consider revision-based snapshot reuse only if simpler accessors do not remove enough work.
+- **Watch out:** Invalidate any cached snapshot on all observable mutations, including input and
+  player/level transitions. `main.ts` currently assigns `view.highScore`; do not accidentally
+  persist that mutation in a shared snapshot. Preserve test and renderer ownership expectations.
+- **Validate:** Count snapshots/allocations per update and render; run multiplayer, score-entry,
+  pause/interruption, progression, and input regressions.
+
+### P4. Make DOM layout, labels, and diagnostics change-driven
+
+- **Where:** `main.ts` `layoutScreenControls()` and frame-loop `dataset` writes.
+- **Issue:** Every frame reads layout bounds and writes mostly unchanged positions, transforms,
+  accessibility labels, sound attributes, and diagnostic strings.
+- **Fix idea:** Recompute hit-region geometry on resize/screen changes, update labels on settings
+  changes, and avoid writing unchanged values. Consider an explicit diagnostic mode for rapidly
+  changing telemetry rather than unconditional production DOM updates.
+- **Watch out:** Batch layout reads before writes. Preserve alignment after fullscreen, DPR,
+  orientation, and canvas-size changes. Existing browser tests depend on `data-*` diagnostics;
+  provide deliberate test wiring if gating them. Do not remove accessibility updates.
+- **Validate:** Measure DOM mutations/layout work and verify hit targets, focus, fullscreen,
+  mobile orientation, settings labels, and diagnostic-dependent tests.
+
+### P5. Retain wall geometry through winning flashes
+
+- **Where:** `renderer.ts` maze cache keys, `rebuildStaticMaze()`, and `renderMazeLayer()`.
+- **Issue:** Winning-flash transitions invalidate the cache, destroy/recreate wall sprites, and
+  rerun wall-pattern matching even though geometry has not changed.
+- **Fix idea:** Separate geometry invalidation from palette/flash changes. Retain wall sprites
+  and update tint, alpha, visibility, and floor appearance without rebuilding the maze.
+- **Watch out:** Doors have special color/alpha rules. Preserve background/fill transparency,
+  flash timing, final wall hiding, board offsets, and separate foreground/background caches.
+- **Validate:** Assert stable sprite identity/count across flashes, compare rendered flash states,
+  and verify real maze changes and multiplayer switches still rebuild correctly.
+
+### P6. Pre-resolve sprite rendering descriptors
+
+- **Where:** `renderer.ts` `paintSprite()` and `drawAnimation()`.
+- **Issue:** Repeated name regex parsing, map lookups, anchor calculations, and trigonometry occur
+  while painting dots, glyphs, and actors.
+- **Fix idea:** Resolve names to reusable descriptors containing texture, anchor, and base scale.
+  Reuse rotation calculations where appropriate, especially for unrotated sprites.
+- **Watch out:** Keep animation-local offsets, mirrored scales, rotation composition, and native
+  sprite handles exact. Cache lifetime must follow texture ownership and renderer destruction;
+  unknown sprite references must continue to produce explicit errors.
+- **Validate:** Compare representative rotated/mirrored actors, glyphs, dots, bubbles, and joystick
+  arrows; measure painting CPU time and allocations rather than assuming map caching helps.
+
+### P7. Give dots stable tile-associated sprites
+
+- **Where:** `renderer.ts` `drawMazeDots()` and dot pools.
+- **Issue:** All maze tiles are scanned each render and surviving dots are packed into sequential
+  pool slots. Consuming an early dot can shift many later sprite assignments.
+- **Fix idea:** Keep tile-associated sprites or a live-dot list with precomputed positions/phases;
+  hide consumed dots and update only surviving dots' animated properties.
+- **Watch out:** Handle two players' independent boards, level replacement, title/score mazes,
+  global dot hiding, and cache reset without resurrecting consumed pellets. Avoid an unbounded
+  cache of past levels. This is lower priority than phase-shared animation sampling.
+- **Validate:** Consume dots at the beginning/middle/end of the list, switch players, die/restart,
+  complete levels, and verify stable identities and correct visible counts.
+
+### P8. Update persistent text and score snapshots only when changed
+
+- **Where:** `renderer.ts` HUD/bitmap text; `screens.ts` screen view construction;
+  `storage.ts` `scores()`; `main.ts` high-score lookup.
+- **Issue:** Static glyphs are repainted and score strings are formatted repeatedly. `scores()`
+  copies the full in-memory table, sometimes twice per menu frame; it is not reading localStorage.
+- **Fix idea:** Retain static labels and formatted values until changed. Add a cheap top-score
+  query or cache immutable score snapshots by revision; update blinking/fading elements separately.
+- **Watch out:** Preserve score-table encapsulation, sorting/category changes, ties, failed-write
+  behavior, player blink, hover fade, score-entry edits, and incoming/outgoing screen fades.
+- **Validate:** Count formatting/copy work; run score persistence/ranking and screen-transition
+  regressions, including unchanged labels with changing alpha.
+
+### P9. Reuse simple background and fade geometry
+
+- **Where:** `renderer.ts` `renderScreen()` and `drawOverlay()`.
+- **Issue:** Background rectangles, screen washes, and pause fades are cleared/reconstructed
+  repeatedly although only their alpha, visibility, or dimensions may change.
+- **Fix idea:** Retain rectangles or solid-color sprites and update only changed properties.
+- **Watch out:** Preserve blend behavior, drawing order, exact pause/score dimming, title fade,
+  canvas resizing, and WebGL context recovery. A different primitive can change batch boundaries.
+- **Validate:** Compare fade endpoints/intermediate frames and draw-call counts after replacement.
+
+### P10. Benchmark native/capped render resolution or logical-resolution static caching
+
+- **Where:** `renderer.ts` `resizeCanvas()` and static maze layers.
+- **Issue:** Drawing-buffer size follows display scale times DPR, increasing rasterization and
+  framebuffer memory on large/high-DPI displays despite the low-resolution source art.
+- **Fix idea:** Experiment with native/capped-resolution rendering plus nearest-neighbor display
+  scaling, or cache only static walls/floor at logical resolution.
+- **Watch out:** This is an experiment, not a predetermined improvement. Extra render targets,
+  passes, and compositing may cost more than they save when gameplay already takes 3 draw calls.
+  Caching adds texture memory. Preserve pixel alignment, fractional scaling, shadows, sprite
+  rounding, fullscreen behavior, and context recovery; avoid screen-resolution maze caches.
+- **Validate:** Benchmark real low/high-DPI hardware, inspect screenshots at integer/fractional
+  scales, and compare GPU time, framebuffer/texture memory, and total preparation cost.
+
+### P11. Reduce smaller input, AI, and particle allocations if profiling warrants it
+
+- **Where:** `input.ts` `advance()`/`poll()`; `game.ts` ghost decisions and particle updates.
+- **Issue:** Small Sets/arrays/points are created for input and movement decisions; particles are
+  allocated individually and removed using `splice()`.
+- **Fix idea:** Reuse input state, calculate candidate distances with fewer temporary points,
+  and consider stable particle compaction or a bounded reusable pool.
+- **Watch out:** Only four ghosts and small particle populations are involved. Avoid complexity
+  for negligible gains. Preserve direction priority, stick hysteresis, button edges/repeat,
+  ghost tie-breaking, random-number consumption, particle ordering, and exact expiry timing.
+  Do not use unordered removal where it changes rendering or gameplay behavior.
+- **Validate:** Profile before optimizing; run deterministic movement/ghost/particle regressions
+  and keyboard, touch, and multi-controller input tests. Check pool growth during a long session.
