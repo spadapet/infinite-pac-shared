@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync } from 'node:fs';
-import { animationDefinition, nativeAnimations, nativeSprites, sampleAnimation } from '../src/native-animation';
+import { AnimationSampler, animationDefinition, nativeAnimations, nativeSprites, sampleAnimation } from '../src/native-animation';
 
 const sprite = (name: string, frame: number) => sampleAnimation(name, frame)[0].sprite;
 
@@ -102,4 +102,47 @@ test('sprite definitions retain repeat offsets, off-center handles, signed wall 
     assert.ok(first && second);
     assert.equal(second.rect.x - first.rect.x, first.rect.width);
     assert.equal(second.rect.y, first.rect.y);
+});
+
+test('retained samplers preserve every native animation and reuse output objects, vectors and colors after warmup', () => {
+    for (const [name, animation] of nativeAnimations) {
+        const sampler = new AnimationSampler(name);
+        const result = sampler.sample(0);
+        const outputs = [...result];
+        const positions = outputs.map(visual => visual.position);
+        const scales = outputs.map(visual => visual.scale);
+        const colors = outputs.map(visual => visual.color);
+        for (let frame = -1; frame <= animation.length * 2; frame += 0.125) {
+            const actual = sampler.sample(frame);
+            assert.equal(actual, result, `${name}: output array`);
+            assert.deepEqual(actual, sampleAnimation(name, frame), `${name}: frame ${frame}`);
+            for (let index = 0; index < actual.length; index++) {
+                assert.equal(actual[index], outputs[index], `${name}: visual ${index}`);
+                assert.equal(actual[index].position, positions[index]);
+                assert.equal(actual[index].scale, scales[index]);
+                assert.equal(actual[index].color, colors[index]);
+            }
+        }
+        sampler.sample(0);
+        assert.equal(result[0], outputs[0], `${name}: reuses outputs even after a one-shot expires`);
+    }
+});
+
+test('independent samplers and snapshot samples never share mutable animation storage', () => {
+    const first = new AnimationSampler('power-anim');
+    const second = new AnimationSampler('power-anim');
+    const snapshot = sampleAnimation('power-anim', 0.5);
+    const a = first.sample(0.5);
+    const b = second.sample(1.5);
+    assert.deepEqual(a[0].scale, { x: 3.5, y: 3.5 });
+    assert.deepEqual(a[0].color, [1, 1, 1, 0.75]);
+    assert.equal(a[0].rotation, -90);
+    assert.equal(b[0].rotation, -270);
+    second.sample(0);
+    first.sample(1);
+    assert.deepEqual(snapshot[0].scale, { x: 3.5, y: 3.5 });
+    assert.equal(snapshot[0].rotation, -90);
+    assert.equal(a[0].rotation, -180);
+    assert.equal(b[0].rotation, 0);
+    assert.notEqual(a[0].color, b[0].color);
 });

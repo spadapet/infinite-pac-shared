@@ -52,6 +52,8 @@ let scoreInterrupted = false;
 let selectedGame = settings.mazeSet;
 let renderer: GameRenderer;
 let game = new Game(settings);
+const presentationView = game.view;
+let titleScores = storage.scores(settings);
 let options: GameOptions = { ...settings };
 let mode: 'menu' | 'game' = 'menu';
 let paused = false;
@@ -62,6 +64,8 @@ let soundLoading: Promise<void> | undefined;
 let soundError: string | undefined;
 let starting = false;
 let graphicsLost = false;
+let presentationDirty = true;
+let presentationPixelRatio = 0;
 const pendingScores: Extract<GameEvent, { type: 'gameOver' }>[] = [];
 
 function updateSoundButton(): void {
@@ -105,6 +109,7 @@ for (const event of ['pointerdown', 'keydown']) document.addEventListener(event,
 function saveSettings(): void {
     settings.character = settings.mazeSet;
     storage.saveSettings(settings);
+    titleScores = storage.scores(settings);
     updateSoundButton();
 }
 async function startGame(): Promise<void> {
@@ -128,6 +133,7 @@ function beginGame(): void {
     game = new Game(options);
     pendingScores.length = 0;
     mode = 'game';
+    presentationDirty = true;
     paused = false;
     starting = false;
     accumulator = 0;
@@ -145,6 +151,7 @@ function showMenu(): void {
     vibration.stop();
     void audio.setPaused(false).catch(failure);
     mode = 'menu';
+    presentationDirty = true;
     paused = false;
     starting = false;
     pendingScores.length = 0;
@@ -152,6 +159,7 @@ function showMenu(): void {
     scoreClosing = false;
     scoreInterrupted = false;
     title = new TitleScreen(settings);
+    titleScores = storage.scores(settings);
     selectedGame = settings.mazeSet;
     menu.hidden = false;
     aboutScreen.hidden = true;
@@ -165,8 +173,9 @@ function showMenu(): void {
 }
 function setPaused(value: boolean): void {
     if (value && scoreScreen) scoreInterrupted = true;
-    if (mode !== 'game' || game.view.state === 'gameover' || scoreScreen || (!value && graphicsLost)) return;
+    if (mode !== 'game' || game.state === 'gameover' || scoreScreen || (!value && graphicsLost)) return;
     paused = value;
+    presentationDirty = true;
     if (value) vibration.stop();
     accumulator = 0;
     pauseMenu.hidden = !value;
@@ -226,7 +235,7 @@ function showNextScore(): void {
         lastTime = 0;
         pauseButton.disabled = false;
         pauseButton.hidden = false;
-        if (game.view.gameOverDone) showMenu();
+        if (game.gameOverDone) showMenu();
         else if (document.hidden || graphicsLost || interrupted) setPaused(true);
         else { void audio.setPaused(false).catch(failure); void unlockSound().catch(failure); host.focus({ preventScroll: true }); }
         return;
@@ -404,14 +413,16 @@ host.addEventListener('webglcontextlost', () => {
 }, true);
 host.addEventListener('webglcontextrestored', () => {
     graphicsLost = false;
+    presentationDirty = true;
     element('resume', HTMLButtonElement).disabled = false;
     if (!status.classList.contains('error')) setStatus('Graphics recovered. Resume when you are ready.');
 }, true);
 
 async function boot(): Promise<void> {
     renderer = await GameRenderer.create(host);
+    new ResizeObserver(() => { presentationDirty = true; }).observe(host);
     const input = new InputController(host, {
-        active: () => mode === 'game' && !paused && !graphicsLost && game.view.state !== 'gameover',
+        active: () => mode === 'game' && !paused && !graphicsLost && game.state !== 'gameover',
         move: direction => game.press(direction),
         action,
         menuActive: () => mode === 'menu' || !!scoreScreen,
@@ -421,7 +432,7 @@ async function boot(): Promise<void> {
         start: () => { if (mode === 'menu') action(); else togglePause(); },
         mute: toggleSound,
         fullscreen,
-        direction: () => game.view.pac.direction,
+        direction: () => game.direction,
     });
     if (!status.classList.contains('error')) setStatus('');
     showMenu();
@@ -446,29 +457,33 @@ async function boot(): Promise<void> {
                         input.advance();
                         game.advance();
                         handleEvents();
-                        if (game.view.gameOverDone) { showMenu(); break; }
+                        if (game.gameOverDone) { showMenu(); break; }
                         if (paused) { accumulator = 0; break; }
                     }
                 }
             } else accumulator = 0;
-            const view = game.view;
-            view.highScore = Math.max(view.highScore, storage.scores(mode === 'game' ? options : settings)[0]?.score ?? 0);
-            if (mode === 'menu') renderer.renderScreen(title.view(settings, storage.scores(settings), !!document.fullscreenElement));
-            else if (scoreScreen) renderer.renderScreen({ ...scoreScreen.view(view), backgroundFade: scoreFade,
-                showForeground: !scoreClosing && scoreFade === 0.875 });
-            else renderer.render(view, paused, input.joystick);
-            layoutScreenControls();
-            element('loading', HTMLElement).hidden = true;
-            host.dataset.state = !aboutScreen.hidden ? 'about' : mode === 'menu' ? 'menu' : scoreScreen ? 'score' : paused ? 'paused' : view.state;
-            host.dataset.character = mode === 'menu' ? settings.character : options.character;
-            host.dataset.mazeSet = mode === 'menu' ? settings.mazeSet : options.mazeSet;
-            host.dataset.selection = String(scoreScreen?.selected ?? title.selected);
-            host.dataset.name = scoreScreen?.name ?? '';
-            host.dataset.score = String(view.score);
-            host.dataset.tick = String(view.tick);
-            host.dataset.position = `${view.pac.position.x},${view.pac.position.y}`;
-            host.dataset.level = String(view.level);
-            host.dataset.player = String(view.player);
+            if (aboutScreen.hidden && !document.hidden && (!paused || scoreScreen || presentationDirty || presentationPixelRatio !== window.devicePixelRatio)) {
+                const view = game.readView(presentationView);
+                view.highScore = Math.max(view.highScore, storage.topScore(mode === 'game' ? options : settings));
+                if (mode === 'menu') renderer.renderScreen(title.view(settings, titleScores, !!document.fullscreenElement));
+                else if (scoreScreen) renderer.renderScreen({ ...scoreScreen.view(view), backgroundFade: scoreFade,
+                    showForeground: !scoreClosing && scoreFade === 0.875 });
+                else renderer.render(view, paused, input.joystick);
+                layoutScreenControls();
+                element('loading', HTMLElement).hidden = true;
+                host.dataset.state = mode === 'menu' ? 'menu' : scoreScreen ? 'score' : paused ? 'paused' : view.state;
+                host.dataset.character = mode === 'menu' ? settings.character : options.character;
+                host.dataset.mazeSet = mode === 'menu' ? settings.mazeSet : options.mazeSet;
+                host.dataset.selection = String(scoreScreen?.selected ?? title.selected);
+                host.dataset.name = scoreScreen?.name ?? '';
+                host.dataset.score = String(view.score);
+                host.dataset.tick = String(view.tick);
+                host.dataset.position = `${view.pac.position.x},${view.pac.position.y}`;
+                host.dataset.level = String(view.level);
+                host.dataset.player = String(view.player);
+                presentationDirty = false;
+                presentationPixelRatio = window.devicePixelRatio;
+            } else if (!aboutScreen.hidden) host.dataset.state = 'about';
             requestAnimationFrame(frame);
         } catch (error) {
             audio.stopAll();

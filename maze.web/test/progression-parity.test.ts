@@ -446,13 +446,13 @@ function hudRecorder() {
         text.push(value);
         return (count ?? 0) + value.length;
     };
-    renderer['drawAnimation'] = (_name, _frame, _position, _scale, _pool, _layer, count) => {
+    renderer['drawAnimation'] = (_name, _frame, _x, _y, _scaleX, _scaleY, _pool, _layer, count) => {
         lives++;
         return count + 1;
     };
     renderer['hideSprites'] = () => {};
     renderer['obtainSprite'] = () => Object.create(null) as ReturnType<GameRenderer['obtainSprite']>;
-    renderer['paintSprite'] = (_sprite, name, position) => { fruits.push({ name, x: position.x }); };
+    renderer['paintSprite'] = (_sprite, name, x) => { fruits.push({ name, x }); };
     return {
         draw: (game: Game) => {
             text.length = 0;

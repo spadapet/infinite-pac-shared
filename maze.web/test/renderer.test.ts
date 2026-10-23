@@ -2,7 +2,7 @@ import { test, type TestContext } from 'node:test';
 import assert from 'node:assert/strict';
 import { Container, Graphics, Rectangle, Sprite, Texture, TextureSource } from 'pixi.js';
 import { Game, parseMazeResource } from '../src/game';
-import { nativeSprites } from '../src/native-animation';
+import { AnimationSampler, animationDefinition, nativeSprites, sampleAnimation } from '../src/native-animation';
 import { GameRenderer } from '../src/renderer';
 
 function graphicsFillAlpha(graphics: Graphics): unknown {
@@ -36,6 +36,8 @@ function setup(t: TestContext) {
     overlayLayer.addChild(pauseFade);
     const renderer: GameRenderer = Object.create(GameRenderer.prototype);
     Object.assign(renderer, { textures: { frames }, boardTop: 24, layoutWidth: 224, layoutHeight: 288,
+        spriteDescriptors: new Map(), animationSamplers: new Map(),
+        dotSamplers: [], powerSampler: new AnimationSampler('power-anim'),
         actorPool, actorLayer, dotPool, dotLayer, wallLayer, background, livesPool, fruitPool, pointTextPool, hudLayer, hudTextPool: [], joystickPool, joystickLayer,
         screenDotPool, screenActorPool, screenTextPool, screenLayer, screenWallLayer, screenDotLayer, screenActorLayer, screenTextLayer, screenWash, screenFade, pauseFade,
         overlayLayer, overlayTextPool: [], particleLayer: new Container(), bubblePool: [], destroyed: false, contextLost: false, mazeCache: null });
@@ -75,6 +77,48 @@ test('all sixteen native maze variants render every wall/door through the origin
                 draw('drawDots', view);
             }
         }
+    }
+});
+
+test('dots share exact-phase samples and retain sprite and descriptor identities over a full cycle', t => {
+    const { renderer, draw, view, dotPool } = setup(t);
+    draw('drawDots', view);
+    const sprites = [...dotPool];
+    const descriptors = [...renderer['spriteDescriptors'].entries()];
+    const samplers = renderer['dotSamplers'].filter(sampler => sampler !== undefined);
+    const phases = new Set<number>();
+    for (let y = 0; y < view.maze.height; y++) for (let x = 0; x < view.maze.width; x++) {
+        if (view.maze.tiles[y][x].kind === 'dot') phases.add(Math.floor(x / 2) + Math.floor(y / 2));
+    }
+    assert.equal(samplers.length, phases.size);
+    assert.ok(samplers.length + 1 < sprites.length / 5, 'sample groups reduce actual sampling by more than 80%');
+    const samples = [...samplers, renderer['powerSampler']].map(sampler => t.mock.method(sampler, 'sample'));
+    const dot = animationDefinition('dot-anim');
+    const power = animationDefinition('power-anim');
+    for (let tick = 0; tick <= 160; tick++) {
+        view.animation.dotTicks = tick;
+        draw('drawDots', view);
+        let index = 0;
+        for (let y = 0; y < view.maze.height; y++) for (let x = 0; x < view.maze.width; x++) {
+            const tile = view.maze.tiles[y][x];
+            if (tile.kind !== 'dot' && tile.kind !== 'power') continue;
+            const isPower = tile.kind === 'power';
+            const animation = isPower ? power : dot;
+            const frame = tick * animation.fps / 60 + (isPower ? animation.length / 2 : Math.floor(x / 2) + Math.floor(y / 2));
+            const expected = sampleAnimation(isPower ? 'power-anim' : 'dot-anim', frame)[0];
+            const sprite = dotPool[index];
+            assert.equal(sprite, sprites[index++]);
+            assert.ok(Math.abs(sprite.x - (x * 8 + 4 + expected.position.x * 0.125)) < 1e-10);
+            assert.ok(Math.abs(sprite.y - (24 + y * 8 + 4 + expected.position.y * 0.125)) < 1e-10);
+            assert.ok(Math.abs(sprite.rotation - expected.rotation * Math.PI / 180) < 1e-10);
+            assert.ok(Math.abs(sprite.alpha - expected.color[3]) < 1e-10);
+            assert.ok(Math.abs(sprite.scale.x - expected.scale.x * 0.125 * nativeSprites.get(expected.sprite)!.scale.x) < 1e-10);
+            assert.equal(sprite.tint, Math.round(expected.color[0] * 255) << 16 | Math.round(expected.color[1] * 255) << 8 | Math.round(expected.color[2] * 255));
+        }
+        assert.equal(index, sprites.length);
+        for (const sample of samples) assert.equal(sample.mock.callCount(), tick, 'unchanged frame zero is already sampled');
+        assert.equal(renderer['spriteDescriptors'].size, descriptors.length);
+        for (const [name, descriptor] of descriptors) assert.equal(renderer['spriteDescriptors'].get(name), descriptor);
     }
 });
 
@@ -197,8 +241,8 @@ test('native title and score screens use full-canvas dimensions, layers, cursor 
         app: { render() {}, canvas: { getBoundingClientRect: () => ({ left: 20, top: 30, width: 224, height: 288 }) } },
         displayPixelRatio: 1,
         resizeCanvas() {},
-        drawAnimation(name: string, frame: number, position: { x: number; y: number }, scale: { x: number; y: number }, _pool: Sprite[], _parent: Container, used: number) {
-            drawAnimationCalls.push([name, frame, position, scale]);
+        drawAnimation(name: string, frame: number, x: number, y: number, scaleX: number, scaleY: number, _pool: Sprite[], _parent: Container, used: number) {
+            drawAnimationCalls.push([name, frame, { x, y }, { x: scaleX, y: scaleY }]);
             return used;
         },
         drawBitmapText(text: string, x: number, y: number, color: number, _pool: Sprite[], count = 0, _parent?: Container, scale = 1, alpha = 1) {
@@ -220,7 +264,7 @@ test('native title and score screens use full-canvas dimensions, layers, cursor 
     const cachedWallSprite = screenWallLayer.children[1];
     renderer.renderScreen(screen);
     assert.equal(screenWallLayer.children[1], cachedWallSprite, 'static screen maze sprites are reused across frames');
-    assert.ok(drawAnimationCalls.some(([name]) => name === 'dot-anim' || name === 'power-anim'));
+    assert.ok(renderer['screenDotPool'].some(sprite => sprite.visible), 'foreground dots use shared phase samples');
     assert.equal(graphicsFillAlpha(renderer['screenWash']), 0.75);
     assert.equal(graphicsFillAlpha(renderer['screenFade']), 0.25);
     assert.deepEqual(renderer.screenPoint(132, 174), { x: 112, y: 124 }, 'screen coordinates retain the full canvas origin, including score-area pixels');

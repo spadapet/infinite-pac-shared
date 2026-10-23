@@ -24,7 +24,11 @@ async function scorePage(page: Page): Promise<void> {
         '/native-animation': 'export function animationDefinition() { return { fps: 45 }; }',
         '/game': `export function parseMazeResource(id) { return { id, width: 28, height: 31, tiles: [] }; }
         export class Game {
-            static titleBackground() { return { advance() {}, drainEvents() { return []; }, view: {} }; }
+            static titleBackground() { return { advance() {}, drainEvents() { return []; }, view: {}, readView() { return this.view; } }; }
+            get state() { return this.view.state; }
+            get direction() { return this.view.pac.direction; }
+            get gameOverDone() { return this.view.gameOverDone; }
+            readView() { return this.view; }
             view = { state: 'playing', score: 0, tick: 0, highScore: 0, level: 1, player: 1, gameOverDone: false,
                 pac: { direction: 'left', position: { x: 0, y: 0 } } };
             events = [];

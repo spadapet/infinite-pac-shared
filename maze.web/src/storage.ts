@@ -57,6 +57,8 @@ export class GameStorage {
 
     scores(options: GameOptions): HighScore[] { return (this.data.scores[this.category(options)] ?? []).map(entry => ({ ...entry })); }
 
+    topScore(options: GameOptions): number { return this.data.scores[this.category(options)]?.[0]?.score ?? 0; }
+
     qualifies(options: GameOptions, score: number): boolean {
         const scores = this.scores(options);
         return integer(score) && score > 0 && (scores.length < 10 || score > scores[scores.length - 1].score);

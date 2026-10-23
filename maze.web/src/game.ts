@@ -383,56 +383,99 @@ export class Game {
             lastDotSeconds: 4, fruitType: 0 } : difficultyFor(this.options, level);
     }
 
-    get view(): GameView {
+    get state(): GameState { return this.gameOver ? 'gameover' : this.players[this.currentPlayer].run.state; }
+    get gameOverDone(): boolean { return this.gameOverCounter > 120; }
+    get direction(): Direction { return directionName(this.players[this.currentPlayer].run.pac); }
+
+    get view(): GameView { return this.readView(); }
+
+    // An optional caller-owned view is overwritten in place; view still returns an independent snapshot.
+    readView(target?: GameView): GameView {
         const player = this.players[this.currentPlayer];
         const run = player.run;
-        const ghosts = run.ghosts.flatMap((ghost, index) => ghost.active && ghost.move !== 'eaten' && ghost.move !== 'waiting' ? [{
-            index,
-            position: { x: ghost.x, y: ghost.y },
-            direction: directionName(ghost),
-            eyeDirection: ghost.house === 'outside' && (ghost.pressX || ghost.pressY)
-                ? VECTOR_DIRECTIONS[`${ghost.pressX},${ghost.pressY}`] : directionName(ghost),
-            state: this.ghostViewState(ghost, run),
-        }] : []);
-        return {
-            state: this.gameOver ? 'gameover' : run.state,
-            tick: this.tickCount,
-            stateTick: run.stateTick,
-            playerReady: run.state === 'ready' && run.readyPhase === 'player',
-            beforeReady: run.state === 'ready' && run.readyPhase === 'before',
-            playerGameOver: player.gameOver && !this.gameOver,
-            gameOverDone: this.gameOverCounter > 120,
-            switchingPlayer: this.switchCountdown > 0,
-            animation: { ...run.animation },
-            level: player.level + 1,
-            score: player.score,
-            scores: this.players.map(item => item.score),
-            highScore: Math.max(...this.players.map(item => item.score)),
-            lives: player.lives,
-            player: this.currentPlayer + 1,
-            playerCount: this.players.length,
-            character: this.options.character,
-            maze: run.maze,
-            pac: {
-                position: { x: run.pac.x, y: run.pac.y },
-                direction: directionName(run.pac),
-                powered: run.ghosts.some(ghost => ghost.active && ['scared', 'eaten', 'waiting'].includes(ghost.move)),
-                moving: !run.pac.stuck && (run.pac.dx !== 0 || run.pac.dy !== 0),
-                visible: run.pac.active && run.ghostEatenCountdown === 0 && (run.state !== 'ready' || run.readyPhase === 'ready'),
-            },
-            ghosts,
-            fruit: run.fruit.active ? { position: { x: run.fruit.x, y: run.fruit.y }, type: run.fruit.type, moving: run.fruit.dx !== 0 || run.fruit.dy !== 0 } : null,
-            points: run.points.map(display => ({
-                position: { x: display.x, y: display.y }, value: display.value, remaining: display.remaining, color: display.color,
-            })),
-            particles: run.particles.map(particle => ({
-                position: { x: particle.x, y: particle.y },
-                animation: particle.animation,
-                frame: particle.frame,
-                scale: particle.scale,
-            })),
-            fruitHistory: run.fruitHistory.slice(),
+        const view: GameView = target ?? {
+            state: this.state, tick: 0, stateTick: 0, playerReady: false, beforeReady: false, playerGameOver: false,
+            gameOverDone: false, switchingPlayer: false, animation: { ...run.animation }, level: 0, score: 0,
+            scores: [], highScore: 0, lives: 0, player: 0, playerCount: 0, character: this.options.character,
+            maze: run.maze, pac: { position: { x: 0, y: 0 }, direction: this.direction, powered: false, moving: false, visible: false },
+            ghosts: [], fruit: null, points: [], particles: [], fruitHistory: [],
         };
+        view.state = this.state;
+        view.tick = this.tickCount;
+        view.stateTick = run.stateTick;
+        view.playerReady = run.state === 'ready' && run.readyPhase === 'player';
+        view.beforeReady = run.state === 'ready' && run.readyPhase === 'before';
+        view.playerGameOver = player.gameOver && !this.gameOver;
+        view.gameOverDone = this.gameOverDone;
+        view.switchingPlayer = this.switchCountdown > 0;
+        Object.assign(view.animation, run.animation);
+        view.level = player.level + 1;
+        view.score = player.score;
+        view.highScore = 0;
+        for (let index = 0; index < this.players.length; index++) {
+            view.scores[index] = this.players[index].score;
+            view.highScore = Math.max(view.highScore, view.scores[index]);
+        }
+        view.scores.length = this.players.length;
+        view.lives = player.lives;
+        view.player = this.currentPlayer + 1;
+        view.playerCount = this.players.length;
+        view.character = this.options.character;
+        view.maze = run.maze;
+        view.pac.position.x = run.pac.x;
+        view.pac.position.y = run.pac.y;
+        view.pac.direction = this.direction;
+        view.pac.powered = false;
+        view.pac.moving = !run.pac.stuck && (run.pac.dx !== 0 || run.pac.dy !== 0);
+        view.pac.visible = run.pac.active && run.ghostEatenCountdown === 0 && (run.state !== 'ready' || run.readyPhase === 'ready');
+        let ghostCount = 0;
+        for (let index = 0; index < run.ghosts.length; index++) {
+            const ghost = run.ghosts[index];
+            if (ghost.active && (ghost.move === 'scared' || ghost.move === 'eaten' || ghost.move === 'waiting')) view.pac.powered = true;
+            if (!ghost.active || ghost.move === 'eaten' || ghost.move === 'waiting') continue;
+            const output = view.ghosts[ghostCount] ?? (view.ghosts[ghostCount] = {
+                index, position: { x: 0, y: 0 }, direction: 'left', eyeDirection: 'left', state: 'chase',
+            });
+            output.index = index;
+            output.position.x = ghost.x;
+            output.position.y = ghost.y;
+            output.direction = directionName(ghost);
+            output.eyeDirection = ghost.house === 'outside' && (ghost.pressX || ghost.pressY)
+                ? VECTOR_DIRECTIONS[`${ghost.pressX},${ghost.pressY}`] : output.direction;
+            output.state = this.ghostViewState(ghost, run);
+            ghostCount++;
+        }
+        view.ghosts.length = ghostCount;
+        if (run.fruit.active) {
+            const fruit = view.fruit ?? (view.fruit = { position: { x: 0, y: 0 }, type: 0, moving: false });
+            fruit.position.x = run.fruit.x;
+            fruit.position.y = run.fruit.y;
+            fruit.type = run.fruit.type;
+            fruit.moving = run.fruit.dx !== 0 || run.fruit.dy !== 0;
+        } else view.fruit = null;
+        for (let index = 0; index < run.points.length; index++) {
+            const point = run.points[index];
+            const output = view.points[index] ?? (view.points[index] = { position: { x: 0, y: 0 }, value: 0, remaining: 0, color: 0 });
+            output.position.x = point.x;
+            output.position.y = point.y;
+            output.value = point.value;
+            output.remaining = point.remaining;
+            output.color = point.color;
+        }
+        view.points.length = run.points.length;
+        for (let index = 0; index < run.particles.length; index++) {
+            const particle = run.particles[index];
+            const output = view.particles[index] ?? (view.particles[index] = { position: { x: 0, y: 0 }, animation: 0, frame: 0, scale: 1 });
+            output.position.x = particle.x;
+            output.position.y = particle.y;
+            output.animation = particle.animation;
+            output.frame = particle.frame;
+            output.scale = particle.scale;
+        }
+        view.particles.length = run.particles.length;
+        for (let index = 0; index < run.fruitHistory.length; index++) view.fruitHistory[index] = run.fruitHistory[index];
+        view.fruitHistory.length = run.fruitHistory.length;
+        return view;
     }
 
     advance(): void {

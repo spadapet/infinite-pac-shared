@@ -60,7 +60,7 @@ test('controller opens About, navigates all links, and returns with A, B or Star
 test('keyboard and pointer About navigation show creator credits and working website link without a popup', async ({ page }) => {
     await boot(page);
     await page.getByRole('button', { name: 'ABOUT', exact: true }).click();
-    await expect(page.locator('#about-screen')).toContainText('Game, programming, graphics, and audio by Peter Spada.');
+    await expect(page.locator('#about-screen')).toContainText('Code, graphics, and audio by Peter Spada.');
     await expect(page.locator('#about-content li')).toHaveText(['PixiJS', 'TypeScript', 'Vite']);
     await expect(page.getByRole('link', { name: 'peterspada.com', exact: true })).toHaveAttribute('href', 'http://peterspada.com');
     await expect(page.getByRole('link', { name: 'PixiJS', exact: true })).toHaveAttribute('href', 'https://pixijs.com');
@@ -76,7 +76,7 @@ test('keyboard and pointer About navigation show creator credits and working web
     await page.keyboard.press('Enter');
     await expect(page.locator('#about-screen')).toBeHidden();
     await page.getByRole('button', { name: 'ABOUT', exact: true }).click();
-    await page.getByRole('button', { name: 'Back to title', exact: true }).click();
+    await page.getByRole('button', { name: 'Back to menu', exact: true }).click();
     await expect(page.locator('#about-screen')).toBeHidden();
     await page.getByRole('button', { name: 'ABOUT', exact: true }).click();
     await page.route('http://peterspada.com/', route => route.fulfill({ contentType: 'text/html', body: '<h1>Website link reached</h1>' }));
@@ -107,7 +107,7 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 844, height: 390 }
 }
 
 test.describe('touch About screen', () => {
-    test.use({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 600 } });
+    test.use({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 400 } });
     test('tap opens and closes About and a touch swipe scrolls credits', async ({ page }) => {
         await boot(page);
         await page.locator('#about').tap();

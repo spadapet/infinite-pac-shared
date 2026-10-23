@@ -111,3 +111,22 @@ test('legacy browser scores migrate names without losing scores or blank-name re
         { name: '', score: 800, level: 1, date: 'old' },
     ]);
 });
+
+test('top-score scalar query follows category and in-memory updates without cloning a table', t => {
+    const store = new GameStorage(memory(), assert.fail);
+    assert.equal(store.topScore(options), 0);
+    store.addScore(options, { name: 'first', score: 100, level: 1, date: '' });
+    store.addScore({ ...options, mazeSet: 'ms' }, { name: 'other', score: 500, level: 1, date: '' });
+    const scores = t.mock.method(store, 'scores', () => { throw new Error('Scalar query must not copy scores'); });
+    for (let frame = 0; frame < 100; frame++) {
+        assert.equal(store.topScore(options), 100);
+        assert.equal(store.topScore({ ...options, character: 'ms', players: 2 }), 100);
+        assert.equal(store.topScore({ ...options, mazeSet: 'ms' }), 500);
+        assert.equal(store.topScore({ ...options, difficulty: 'hard' }), 0);
+    }
+    assert.equal(scores.mock.callCount(), 0);
+    scores.mock.restore();
+    store.addScore(options, { name: 'next', score: 200, level: 1, date: '' });
+    assert.equal(store.topScore(options), 200);
+    assert.equal(store.topScore({ ...options, mazeSet: 'ms' }), 500);
+});

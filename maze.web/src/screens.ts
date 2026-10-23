@@ -33,6 +33,7 @@ export const titleLabels = (settings: Settings, fullscreen: boolean): string[] =
 export class TitleScreen {
     readonly maze = parseMazeResource('title-maze-front');
     readonly background = Game.titleBackground();
+    private readonly backgroundView = this.background.view;
     selected: number;
     hover = -1;
     readonly hoverOpacity = titleRows.map(() => 0);
@@ -78,7 +79,7 @@ export class TitleScreen {
             });
         }
         const character = this.selected === 1 ? 'ms' : 'mr';
-        return { kind: 'title', maze: this.maze, background: this.background.view, texts,
+        return { kind: 'title', maze: this.maze, background: this.background.readView(this.backgroundView), texts,
             pac: { x: 44, y: titleRows[this.selected], character, frame: Math.max(0, this.ticks - 1) * animationDefinition(`${character}-char-anim`).fps / 60 }, fade: this.fade };
     }
 }

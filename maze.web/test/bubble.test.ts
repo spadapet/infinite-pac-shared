@@ -43,6 +43,7 @@ test('renderer uses a textured 4-to-6.4-pixel bubble with the original handle an
     const renderer = Object.create(GameRenderer.prototype);
     Object.assign(renderer, {
         textures: { frames: new Map([['char-sprites.bubble', [texture]]]) },
+        spriteDescriptors: new Map(), animationSamplers: new Map(),
         particleLayer: layer,
         bubblePool: pool,
         boardTop: 24,

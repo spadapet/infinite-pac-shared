@@ -1,5 +1,5 @@
 import { Application, Assets, Container, Graphics, Rectangle, Sprite, Texture, WebGLRenderer } from 'pixi.js';
-import { animationDefinition, nativeSprites, sampleAnimation, type AnimationVisual } from './native-animation';
+import { AnimationSampler, animationDefinition, nativeSprites, sampleAnimation, type AnimationVisual } from './native-animation';
 import type { NativeScreenView } from './screens';
 import type { GameView, JoystickView, MazeView, Tile, Vec } from './types';
 
@@ -13,6 +13,10 @@ type SpriteFrames = Map<string, Texture[]>;
 type SpriteAtlas = { frames: SpriteFrames };
 type RenderableSprite = Sprite;
 type WallPattern = readonly [number, string, string, string];
+interface SpriteDescriptor { texture: Texture; anchorX: number; anchorY: number; scaleX: number; scaleY: number }
+const WHITE_COLOR = [1, 1, 1, 1] as const;
+const FRUIT_BOUNCE_OFFSETS = [2, 1.4142, 0, -1.4142, -2];
+const EYE_DIRECTIONS: Record<string, Vec> = { up: { x: 0, y: -1 }, down: { x: 0, y: 1 }, left: { x: -1, y: 0 }, right: { x: 1, y: 0 } };
 
 const WALL_MATCHES: ReadonlyArray<WallPattern> = [
     [0, 'WWW', 'WWW', 'WWW'], [1, ' WW', '.WW', ' WW'], [2, ' . ', 'WWW', 'WWW'],
@@ -138,6 +142,10 @@ export class GameRenderer {
     private readonly mount: HTMLDivElement;
     private readonly resizeObserver: ResizeObserver;
     private readonly textures: SpriteAtlas;
+    private readonly spriteDescriptors = new Map<string, SpriteDescriptor>();
+    private readonly animationSamplers = new Map<string, AnimationSampler>();
+    private readonly dotSamplers: AnimationSampler[] = [];
+    private readonly powerSampler = new AnimationSampler('power-anim');
     private readonly background = new Graphics();
     private readonly wallLayer = new Container();
     private readonly dotLayer = new Container();
@@ -395,7 +403,7 @@ export class GameRenderer {
             this.drawScreenMaze(maze);
             this.drawScreenDots(maze);
             const actorCount = this.drawAnimation(`${screen.pac.character}-char-anim`, screen.pac.frame,
-                { x: screen.pac.x, y: screen.pac.y }, { x: -0.125, y: 0.125 }, this.screenActorPool, this.screenActorLayer, 0);
+                screen.pac.x, screen.pac.y, -0.125, 0.125, this.screenActorPool, this.screenActorLayer, 0);
             this.hideSprites(this.screenActorPool, actorCount);
             let textCount = 0;
             for (const text of screen.texts) {
@@ -443,6 +451,9 @@ export class GameRenderer {
         }
         this.mazeCache = null;
         this.screenMazeCache = null;
+        this.spriteDescriptors.clear();
+        this.animationSamplers.clear();
+        this.dotSamplers.length = 0;
         this.lastView = null;
         this.lastScreen = null;
     }
@@ -465,13 +476,9 @@ export class GameRenderer {
         this.app.canvas.style.top = `${(bounds.height - height) / 2}px`;
     }
 
-    private frames(group: string, name: string): Texture[] {
-        return this.textures.frames.get(`${group}.${name}`) ?? [];
-    }
-
     private frame(group: string, name: string, index = 0): Texture | undefined {
-        const frames = this.frames(group, name);
-        return frames.length ? frames[index % frames.length] : undefined;
+        const frames = this.textures.frames.get(`${group}.${name}`);
+        return frames?.length ? frames[index % frames.length] : undefined;
     }
 
     private rebuildStaticMaze(maze: MazeView, colorKey: string, winningFlash: boolean): void {
@@ -528,33 +535,45 @@ export class GameRenderer {
 
     private addWallSprite(group: string, index: number, x: number, y: number, tint: number, alpha = 1, layer: Container = this.wallLayer): void {
         const sprite = createSprite(Texture.EMPTY);
-        this.paintSprite(sprite, `${group}.${String(index).padStart(2, '0')}`, { x, y }, { x: 0.125, y: 0.125 });
+        this.paintSprite(sprite, `${group}.${String(index).padStart(2, '0')}`, x, y, 0.125, 0.125);
         sprite.tint = tint & 0xffffff;
         sprite.alpha = alpha;
         layer.addChild(sprite);
     }
 
-    private paintSprite(sprite: Sprite, name: string, position: Vec, scale: Vec, rotation = 0, visual?: AnimationVisual): void {
-        const def = nativeSprites.get(name);
-        const match = /^(.*?)\.(.*?)(?:\[(\d+)\])?$/.exec(name);
-        const texture = match ? this.frame(match[1], match[2], Number(match[3] ?? 0)) : undefined;
-        if (!def || !texture) throw new Error(`Missing native sprite: ${name}`);
-        sprite.texture = texture;
-        sprite.anchor.set(def.handle.x / def.rect.width, def.handle.y / def.rect.height);
+    private paintSprite(sprite: Sprite, name: string, x: number, y: number, scaleX: number, scaleY: number, rotation = 0, visual?: AnimationVisual): void {
+        let descriptor = this.spriteDescriptors.get(name);
+        if (!descriptor) {
+            const def = nativeSprites.get(name);
+            const match = /^(.*?)\.(.*?)(?:\[(\d+)\])?$/.exec(name);
+            const texture = match ? this.frame(match[1], match[2], Number(match[3] ?? 0)) : undefined;
+            if (!def || !texture) throw new Error(`Missing native sprite: ${name}`);
+            descriptor = { texture, anchorX: def.handle.x / def.rect.width, anchorY: def.handle.y / def.rect.height, scaleX: def.scale.x, scaleY: def.scale.y };
+            this.spriteDescriptors.set(name, descriptor);
+        }
+        sprite.texture = descriptor.texture;
+        sprite.anchor.set(descriptor.anchorX, descriptor.anchorY);
         const angle = rotation * Math.PI / 180;
-        const localX = (visual?.position.x ?? 0) * scale.x;
-        const localY = (visual?.position.y ?? 0) * scale.y;
-        sprite.position.set(position.x + localX * Math.cos(angle) - localY * Math.sin(angle), position.y + localX * Math.sin(angle) + localY * Math.cos(angle));
-        sprite.scale.set(scale.x * (visual?.scale.x ?? 1) * def.scale.x, scale.y * (visual?.scale.y ?? 1) * def.scale.y);
+        const localX = (visual?.position.x ?? 0) * scaleX;
+        const localY = (visual?.position.y ?? 0) * scaleY;
+        const cosine = rotation === 0 ? 1 : Math.cos(angle), sine = rotation === 0 ? 0 : Math.sin(angle);
+        sprite.position.set(x + localX * cosine - localY * sine, y + localX * sine + localY * cosine);
+        sprite.scale.set(scaleX * (visual?.scale.x ?? 1) * descriptor.scaleX, scaleY * (visual?.scale.y ?? 1) * descriptor.scaleY);
         sprite.rotation = angle + (visual?.rotation ?? 0) * Math.PI / 180;
-        const color = visual?.color ?? [1, 1, 1, 1];
+        const color = visual?.color ?? WHITE_COLOR;
         sprite.tint = Math.round(color[0] * 255) << 16 | Math.round(color[1] * 255) << 8 | Math.round(color[2] * 255);
         sprite.alpha = color[3];
     }
 
-    private drawAnimation(name: string, frame: number, position: Vec, scale: Vec, pool: RenderableSprite[], parent: Container, used: number, rotation = 0): number {
-        for (const visual of sampleAnimation(name, frame)) {
-            this.paintSprite(this.obtainSprite(pool, parent, used++), visual.sprite, position, scale, rotation, visual);
+    private drawAnimation(name: string, frame: number, x: number, y: number, scaleX: number, scaleY: number, pool: RenderableSprite[], parent: Container, used: number, rotation = 0): number {
+        let sampler = this.animationSamplers.get(name);
+        if (!sampler) this.animationSamplers.set(name, sampler = new AnimationSampler(name));
+        return this.drawVisuals(sampler.sample(frame), x, y, scaleX, scaleY, pool, parent, used, rotation);
+    }
+
+    private drawVisuals(visuals: readonly AnimationVisual[], x: number, y: number, scaleX: number, scaleY: number, pool: RenderableSprite[], parent: Container, used: number, rotation = 0): number {
+        for (const visual of visuals) {
+            this.paintSprite(this.obtainSprite(pool, parent, used++), visual.sprite, x, y, scaleX, scaleY, rotation, visual);
         }
         return used;
     }
@@ -566,7 +585,7 @@ export class GameRenderer {
             const sprite = this.obtainSprite(this.joystickPool, this.joystickLayer, used++);
             const rotation = Math.atan2(joystick.offset.y, joystick.offset.x) * 180 / Math.PI;
             this.paintSprite(sprite, 'char-sprites.move-arrow',
-                this.boardPosition(view.pac.position), { x: scale, y: scale }, rotation);
+                view.pac.position.x, view.pac.position.y + this.boardTop, scale, scale, rotation);
             sprite.alpha = Math.max(0.25, Math.min(0.75, 1 / scale));
         }
         this.hideSprites(this.joystickPool, used);
@@ -584,15 +603,20 @@ export class GameRenderer {
     private drawMazeDots(maze: MazeView, dotTicks: number, layer: Container, pool: RenderableSprite[], visible = true): void {
         let used = 0;
         if (visible) {
+            const dot = animationDefinition('dot-anim');
+            const power = animationDefinition('power-anim');
+            const powerFrame = dotTicks * power.fps / 60 + power.length / 2;
             for (let y = 0; y < maze.height; y++) {
                 for (let x = 0; x < maze.width; x++) {
                     const tile = tileAt(maze, x, y);
                     if (tile?.kind !== 'dot' && tile?.kind !== 'power') continue;
-                    const power = tile.kind === 'power';
-                    const name = power ? 'power-anim' : 'dot-anim';
-                    const animation = animationDefinition(name);
-                    const frame = dotTicks * animation.fps / 60 + (power ? animation.length / 2 : Math.floor(x / 2) + Math.floor(y / 2));
-                    used = this.drawAnimation(name, frame, { x: x * TILE_PIXELS + 4, y: this.boardTop + y * TILE_PIXELS + 4 }, { x: 0.125, y: 0.125 }, pool, layer, used);
+                    // Keep the full offset: modulo grouping can change eight-bit tint rounding.
+                    const phase = Math.floor(x / 2) + Math.floor(y / 2);
+                    const sampler = tile.kind === 'power' ? this.powerSampler
+                        : this.dotSamplers[phase] ?? (this.dotSamplers[phase] = new AnimationSampler('dot-anim'));
+                    const frame = tile.kind === 'power' ? powerFrame : dotTicks * dot.fps / 60 + phase;
+                    if (sampler.frame !== frame) sampler.sample(frame);
+                    used = this.drawVisuals(sampler.visuals, x * TILE_PIXELS + 4, this.boardTop + y * TILE_PIXELS + 4, 0.125, 0.125, pool, layer, used);
                 }
             }
         }
@@ -601,12 +625,12 @@ export class GameRenderer {
 
     private drawActors(view: GameView, layer: Container = this.actorLayer, pool: RenderableSprite[] = this.actorPool): void {
         this.actorCursor = 0;
-        const ghostsVisible = !view.beforeReady && !view.playerReady && ['ready', 'playing', 'caught'].includes(view.state);
+        const ghostsVisible = !view.beforeReady && !view.playerReady && (view.state === 'ready' || view.state === 'playing' || view.state === 'caught');
         if (ghostsVisible && view.fruit) {
             const sprite = this.obtainSprite(pool, layer, this.actorCursor++);
-            const pos = this.boardPosition(view.fruit.position);
-            if (view.fruit.moving) pos.y += fruitBounceOffset(view.fruit.position);
-            this.paintSprite(sprite, `char-sprites.fruit[${view.fruit.type}]`, pos, { x: 0.125, y: 0.125 });
+            const position = view.fruit.position;
+            const y = position.y + this.boardTop + (view.fruit.moving ? fruitBounceOffset(position) : 0);
+            this.paintSprite(sprite, `char-sprites.fruit[${view.fruit.type}]`, position.x, y, 0.125, 0.125);
         }
         if (ghostsVisible) {
             for (const ghost of view.ghosts) {
@@ -614,16 +638,16 @@ export class GameRenderer {
             }
         }
         if (view.pac.visible) {
-            const pos = this.boardPosition(view.pac.position);
+            const x = view.pac.position.x, y = view.pac.position.y + this.boardTop;
             const rotation = view.pac.direction === 'up' ? 90 : view.pac.direction === 'down' ? 270 : 0;
-            const scale = { x: view.pac.direction === 'right' ? -0.125 : 0.125, y: 0.125 };
+            const scaleX = view.pac.direction === 'right' ? -0.125 : 0.125;
             if (view.pac.powered) {
                 const frame = view.animation.totalTicks * animationDefinition('power-aura-anim').fps / 60;
-                this.actorCursor = this.drawAnimation('power-aura-anim', frame, pos, scale, pool, layer, this.actorCursor, rotation);
+                this.actorCursor = this.drawAnimation('power-aura-anim', frame, x, y, scaleX, 0.125, pool, layer, this.actorCursor, rotation);
             }
-            const dying = ['dying', 'dead', 'gameover'].includes(view.state);
+            const dying = view.state === 'dying' || view.state === 'dead' || view.state === 'gameover';
             const name = `${view.character}-${dying ? 'death' : view.pac.powered ? 'power' : 'char'}-anim`;
-            this.actorCursor = this.drawAnimation(name, dying ? view.animation.deathFrame : view.animation.pacFrame, pos, scale, pool, layer, this.actorCursor, rotation);
+            this.actorCursor = this.drawAnimation(name, dying ? view.animation.deathFrame : view.animation.pacFrame, x, y, scaleX, 0.125, pool, layer, this.actorCursor, rotation);
         }
         if (ghostsVisible) {
             for (const ghost of view.ghosts) {
@@ -636,24 +660,23 @@ export class GameRenderer {
     private drawGhost(view: GameView, ghost: GameView['ghosts'][number], layer: Container = this.actorLayer, pool: RenderableSprite[] = this.actorPool): void {
         const type = ghost.state === 'scared' ? 'scared' : ghost.state === 'flash' ? 'flash' : ghost.state === 'eyes' ? 'eyes' : 'move';
         const name = `ghost-${ghost.index + 1}-${type}-anim`;
-        const pos = this.boardPosition(ghost.position);
-        const scale = { x: 0.125, y: 0.125 };
+        const x = ghost.position.x, y = ghost.position.y + this.boardTop;
         const frame = view.animation.ghostTicks * animationDefinition(name).fps / 60;
-        this.actorCursor = this.drawAnimation(name, frame, pos, scale, pool, layer, this.actorCursor);
+        this.actorCursor = this.drawAnimation(name, frame, x, y, 0.125, 0.125, pool, layer, this.actorCursor);
         if (type === 'move' || type === 'eyes') {
             const pupils = `ghost-${ghost.index + 1}-pupils-anim`;
-            const eye = directionVector(ghost.eyeDirection);
+            const eye = EYE_DIRECTIONS[ghost.eyeDirection];
             this.actorCursor = this.drawAnimation(pupils, view.animation.ghostTicks * animationDefinition(pupils).fps / 60,
-                { x: pos.x + eye.x, y: pos.y + eye.y }, scale, pool, layer, this.actorCursor);
+                x + eye.x, y + eye.y, 0.125, 0.125, pool, layer, this.actorCursor);
         }
     }
 
     private drawParticles(view: GameView): void {
         let used = 0;
-        if (!view.playerReady && ['ready', 'playing', 'caught'].includes(view.state)) {
+        if (!view.playerReady && (view.state === 'ready' || view.state === 'playing' || view.state === 'caught')) {
             for (const particle of view.particles) {
-                used = this.drawAnimation(`bubble-${particle.animation + 1}-anim`, particle.frame, this.boardPosition(particle.position),
-                    { x: particle.scale, y: particle.scale }, this.bubblePool, this.particleLayer, used);
+                used = this.drawAnimation(`bubble-${particle.animation + 1}-anim`, particle.frame,
+                    particle.position.x, particle.position.y + this.boardTop, particle.scale, particle.scale, this.bubblePool, this.particleLayer, used);
             }
         }
         this.hideSprites(this.bubblePool, used);
@@ -677,34 +700,38 @@ export class GameRenderer {
         let lifeCount = 0;
         for (let i = 0; i < Math.min(5, Math.max(0, view.lives - (view.playerReady || view.beforeReady ? 0 : 1))); i++) {
             lifeCount = this.drawAnimation(`${view.character}-char-anim`, 0,
-                { x: 24 + i * TILE_PIXELS * 2, y: bottom + HUD_BOTTOM - 8 }, { x: 0.125 * 0.875, y: 0.125 * 0.875 },
+                24 + i * TILE_PIXELS * 2, bottom + HUD_BOTTOM - 8, 0.125 * 0.875, 0.125 * 0.875,
                 this.livesPool, this.hudLayer, lifeCount);
         }
         this.hideSprites(this.livesPool, lifeCount);
 
         let fruitCount = 0;
-        const history = view.fruitHistory.slice(-8);
-        for (let i = history.length - 1; i >= 0; i--) {
+        const history = view.fruitHistory;
+        for (let i = history.length - 1; i >= Math.max(0, history.length - 8); i--) {
             const sprite = this.obtainSprite(this.fruitPool, this.hudLayer, fruitCount++);
             this.paintSprite(sprite, `char-sprites.fruit[${history[i]}]`,
-                { x: this.layoutWidth - 24 - (history.length - 1 - i) * TILE_PIXELS * 2, y: bottom + HUD_BOTTOM - 8 },
-                { x: 0.125 * 0.875, y: 0.125 * 0.875 });
+                this.layoutWidth - 24 - (history.length - 1 - i) * TILE_PIXELS * 2, bottom + HUD_BOTTOM - 8,
+                0.125 * 0.875, 0.125 * 0.875);
         }
         this.hideSprites(this.fruitPool, fruitCount);
 
         let pointCount = 0;
-        for (const point of view.state === 'playing' ? view.points : []) {
+        if (view.state === 'playing') for (const point of view.points) {
             const digits = String(Math.max(0, Math.trunc(point.value)));
-            const glyphs = [...digits].map(digit => this.frame('small-font-sprites', digit));
-            if (glyphs.some(texture => !texture)) continue;
-            const glyphWidths = glyphs.map(texture => texture!.frame.width * 0.125);
-            const totalWidth = glyphWidths.reduce((sum, width) => sum + width, 0) + Math.max(0, glyphWidths.length - 1);
-            const maxHeight = Math.max(...glyphs.map(texture => texture!.frame.height * 0.125));
+            let totalWidth = Math.max(0, digits.length - 1), maxHeight = 0;
+            let valid = true;
+            for (let i = 0; i < digits.length; i++) {
+                const texture = this.frame('small-font-sprites', digits[i]);
+                if (!texture) { valid = false; break; }
+                totalWidth += texture.frame.width * 0.125;
+                maxHeight = Math.max(maxHeight, texture.frame.height * 0.125);
+            }
+            if (!valid) continue;
             let x = Math.floor(point.position.x - totalWidth / 2);
             const top = Math.floor(point.position.y + this.boardTop - maxHeight / 2);
-            for (let i = 0; i < glyphs.length; i++) {
-                const texture = glyphs[i]!;
-                const width = glyphWidths[i];
+            for (let i = 0; i < digits.length; i++) {
+                const texture = this.frame('small-font-sprites', digits[i])!;
+                const width = texture.frame.width * 0.125;
                 const height = texture.frame.height * 0.125;
                 const sprite = this.obtainSprite(this.pointTextPool, this.hudLayer, pointCount++);
                 sprite.anchor.set(0);
@@ -727,8 +754,14 @@ export class GameRenderer {
         else if (view.playerReady) text = 'PLAYER ONE';
         else if (view.state === 'ready' && !view.beforeReady) text = 'READY!';
         else if (view.state === 'gameover' || view.playerGameOver) text = 'GAME OVER';
-        const doorRow = view.maze.tiles.findIndex(row => row.some(tile => tile.kind === 'door'));
-        const doorColumn = view.maze.tiles[doorRow].findIndex(tile => tile.kind === 'door');
+        let doorRow = -1, doorColumn = -1;
+        findDoor: for (let row = 0; row < view.maze.height; row++) for (let column = 0; column < view.maze.width; column++) {
+            if (view.maze.tiles[row][column].kind !== 'door') continue;
+            doorRow = row;
+            doorColumn = column;
+            break findDoor;
+        }
+        if (doorRow < 0) throw new Error(`Maze '${view.maze.id}' has no ghost door for overlay positioning.`);
         const y = this.boardTop + (doorRow - 1 + (view.playerReady ? 0 : 6)) * TILE_PIXELS;
         const gameOver = view.state === 'gameover' || view.playerGameOver;
         const tint = view.playerReady ? 0x00ffff : gameOver ? 0xff0000 : 0xffff00;
@@ -760,7 +793,7 @@ export class GameRenderer {
             const sprite = this.obtainSprite(pool, parent, startIndex);
             const texture = this.frame('font-sprites', char);
             if (texture) {
-                this.paintSprite(sprite, `font-sprites.${char}`, { x, y }, { x: 0.125 * scale, y: 0.125 * scale });
+                this.paintSprite(sprite, `font-sprites.${char}`, x, y, 0.125 * scale, 0.125 * scale);
                 sprite.tint = tint;
                 sprite.alpha = alpha;
                 sprite.visible = true;
@@ -788,25 +821,11 @@ export class GameRenderer {
         for (let i = used; i < pool.length; i++) pool[i].visible = false;
     }
 
-    private boardPosition(position: Vec): Vec {
-        return { x: position.x, y: position.y + this.boardTop };
     }
-}
 
-function fruitBounceOffset(position: Vec): number {
-    const offsets = [2, 1.4142, 0, -1.4142, -2];
+    function fruitBounceOffset(position: Vec): number {
     const centerX = Math.round((position.x - TILE_PIXELS / 2) / TILE_PIXELS) * TILE_PIXELS + TILE_PIXELS / 2;
     const centerY = Math.round((position.y - TILE_PIXELS / 2) / TILE_PIXELS) * TILE_PIXELS + TILE_PIXELS / 2;
     const distance = position.x === centerX ? Math.abs(position.y - centerY) : position.y === centerY ? Math.abs(position.x - centerX) : undefined;
-    return distance === undefined ? 0 : offsets[Math.trunc(distance) % offsets.length];
-}
-
-function directionVector(direction: string): Vec {
-    switch (direction) {
-        case 'up': return { x: 0, y: -1 };
-        case 'down': return { x: 0, y: 1 };
-        case 'left': return { x: -1, y: 0 };
-        case 'right': return { x: 1, y: 0 };
-        default: return { x: 0, y: 0 };
-    }
+    return distance === undefined ? 0 : FRUIT_BOUNCE_OFFSETS[Math.trunc(distance) % FRUIT_BOUNCE_OFFSETS.length];
 }

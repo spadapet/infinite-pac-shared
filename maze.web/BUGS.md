@@ -159,8 +159,8 @@ animation) are not listed.
 
 This section records a separate review of the current web implementation. The older parity
 findings above are historical and were not revalidated by this performance review. These are
-optimization candidates, not claims that the game currently misses its frame budget. No
-performance changes have been implemented as part of recording this backlog.
+optimization candidates, not claims that the game currently misses its frame budget. Status
+notes below track the first allocation-focused implementation pass; unmarked entries remain open.
 
 ### Baseline and design constraints
 
@@ -186,6 +186,10 @@ performance changes have been implemented as part of recording this backlog.
 
 ### P1. Skip completely covered or unchanged canvas rendering
 
+- **Status: implemented for About, hidden tabs, and unchanged paused gameplay.** Controller
+  polling remains active; resize, DPR changes, pause/resume, and graphics recovery invalidate
+  frozen presentation. Browser tests count actual WebGL submissions and exercise invalidation.
+  Avoiding duplicate active-scene preparation on high-refresh displays remains open.
 - **Where:** `main.ts` frame loop; `renderer.ts` `render()` and `renderScreen()`.
 - **Issue:** About freezes simulation but continues preparing/rendering the covered title.
   Paused gameplay also repaints unchanged dots, actors, HUD, and overlays every animation frame.
@@ -200,6 +204,15 @@ performance changes have been implemented as part of recording this backlog.
 
 ### P2. Share dot animation samples by phase
 
+- **Status: implemented with exact integer-offset groups and reusable AnimationSampler buffers.**
+  The initial Mr. Pac board now needs 29 samples per changed dot tick instead of 278 (about 90%
+  fewer); unchanged frames reuse prior samples. Keep full tile offsets rather than reducing them
+  modulo four: regression tests found that modulo grouping changes floating-point rounding of
+  eight-bit tint values. The proposed five-sample variant below is therefore not used.
+  All actor/effect samplers also reuse their output array, visual objects, vectors, and colors
+  after warmup. The allocating `sampleAnimation()` convenience API still returns an independent
+  sample; rendering uses retained samplers instead. Resource references/tracks resolve once per
+  sampler, and sprite identities survive one-shot expiry/restart.
 - **Where:** `renderer.ts` `drawMazeDots()`; `native-animation.ts` `sampleAnimation()`.
 - **Issue:** Every visible dot independently searches/interpolates the same animation tracks and
   allocates sampling results. Ordinary dots have four phase groups; power pellets share one phase.
@@ -213,6 +226,13 @@ performance changes have been implemented as part of recording this backlog.
 
 ### P3. Avoid full GameView snapshots for scalar queries
 
+- **Status: implemented.** Input and completion checks use scalar `state`, `direction`, and
+  `gameOverDone` accessors. Gameplay and title-background rendering use caller-owned
+  `readView(target)` buffers that overwrite existing arrays, actors, positions, and animation
+  values. `game.view` still returns an independent snapshot for callers needing that ownership.
+  Reuse does not cache simulation state, so there is no revision-invalidation scheme to maintain;
+  every read resets presentation-only high-score overrides. New/returning entities may allocate
+  when an output list grows; particle spawn/despawn pooling remains P11 work.
 - **Where:** `game.ts` `get view()`; `main.ts` input callbacks and frame loop.
 - **Issue:** The getter creates actor/position objects, arrays for scores, particles and points,
   and a fruit-history copy. It is also called merely to read state, direction, or completion.
@@ -252,6 +272,11 @@ performance changes have been implemented as part of recording this backlog.
 
 ### P6. Pre-resolve sprite rendering descriptors
 
+- **Status: implemented.** A renderer-lifetime descriptor cache resolves each encountered sprite
+  once; warm paints do not parse names or recalculate anchors/base scales. Scalar transform
+  arguments remove temporary position/scale objects from dots, actors, bubbles, cursor, icons,
+  and bitmap glyphs. Shared defaults/direction data avoid tiny repeated arrays/objects; missing
+  glyph lookup no longer allocates empty arrays. Caches are cleared on renderer destruction.
 - **Where:** `renderer.ts` `paintSprite()` and `drawAnimation()`.
 - **Issue:** Repeated name regex parsing, map lookups, anchor calculations, and trigonometry occur
   while painting dots, glyphs, and actors.
@@ -278,6 +303,11 @@ performance changes have been implemented as part of recording this backlog.
 
 ### P8. Update persistent text and score snapshots only when changed
 
+- **Status: partially implemented.** `topScore()` avoids copying tables for the HUD; the title
+  takes a score snapshot on settings changes/return from gameplay instead of every frame. Fruit
+  history rendering no longer slices its array, and popup digit layout uses two bounded passes
+  instead of constructing glyph/width arrays. Persistent text/glyph caching and change-driven
+  title/score-screen text construction remain open and are priority allocation follow-ups.
 - **Where:** `renderer.ts` HUD/bitmap text; `screens.ts` screen view construction;
   `storage.ts` `scores()`; `main.ts` high-score lookup.
 - **Issue:** Static glyphs are repainted and score strings are formatted repeatedly. `scores()`

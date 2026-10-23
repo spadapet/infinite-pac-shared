@@ -152,52 +152,112 @@ function adjustFrame(frame: number, start: number, length: number, loop: Bounds)
     return null;
 }
 
-function sampleTrack(track: Track, frame: number): KeyValue | null {
+function component(value: KeyValue, index: number): number {
+    return typeof value === 'number' ? value : number(value[index], 'interpolated component');
+}
+
+function interpolate(track: Track, index: number, t: number, axis: number): number {
+    const keys = track.values;
+    const a = component(keys[index].value, axis), b = component(keys[index + 1].value, axis);
+    if (!track.spline) return a + (b - a) * t;
+    const before = keys[index ? index - 1 : keys.length - 1];
+    const after = keys[index + 2 < keys.length ? index + 2 : 0];
+    const tangentA = track.tension * (b - component(before.value, axis));
+    const tangentB = track.tension * (component(after.value, axis) - a);
+    return (2 * t ** 3 - 3 * t ** 2 + 1) * a + (-2 * t ** 3 + 3 * t ** 2) * b + (t ** 3 - 2 * t ** 2 + t) * tangentA + (t ** 3 - t ** 2) * tangentB;
+}
+
+function sampleTrack(track: Track | undefined, frame: number, buffer: number[]): KeyValue | null {
+    if (!track) return null;
     const adjusted = adjustFrame(frame, track.start, track.length, track.loop);
     if (adjusted === null) return null;
     const keys = track.values;
-    let index = keys.findIndex(key => key.frame >= adjusted);
-    if (index < 0) return keys[keys.length - 1].value;
+    let index = 0;
+    while (index < keys.length && keys[index].frame < adjusted) index++;
+    if (index === keys.length) return keys[index - 1].value;
     if (index === 0 || keys[index].frame === adjusted) return keys[index].value;
     index--;
     const current = keys[index];
-    const next = keys[index + 1];
-    const t = (adjusted - current.frame) / (next.frame - current.frame);
     if (typeof current.value === 'string' || (Array.isArray(current.value) && typeof current.value[0] === 'string')) return current.value;
-    const component = (value: KeyValue, i: number): number => typeof value === 'number' ? value : number(value[i], 'interpolated component');
-    const interpolate = (i: number): number => {
-        const a = component(current.value, i), b = component(next.value, i);
-        if (!track.spline) return a + (b - a) * t;
-        const before = keys[index ? index - 1 : keys.length - 1];
-        const after = keys[index + 2 < keys.length ? index + 2 : 0];
-        const tangentA = track.tension * (b - component(before.value, i));
-        const tangentB = track.tension * (component(after.value, i) - a);
-        return (2 * t ** 3 - 3 * t ** 2 + 1) * a + (-2 * t ** 3 + 3 * t ** 2) * b + (t ** 3 - 2 * t ** 2 + t) * tangentA + (t ** 3 - t ** 2) * tangentB;
-    };
-    return typeof current.value === 'number' ? interpolate(0) : current.value.map((_, i) => interpolate(i));
+    const t = (adjusted - current.frame) / (keys[index + 1].frame - current.frame);
+    if (typeof current.value === 'number') return interpolate(track, index, t, 0);
+    for (let axis = 0; axis < current.value.length; axis++) buffer[axis] = interpolate(track, index, t, axis);
+    return buffer;
 }
 
-export function sampleAnimation(name: string, frame: number): AnimationVisual[] {
-    const animation = animationDefinition(name);
-    const adjusted = adjustFrame(frame, 0, animation.length, animation.loop);
-    if (adjusted === null) return [];
-    const sample = (key: string | undefined): KeyValue | null => {
-        if (!key) return null;
-        const track = animation.keys.get(key);
-        if (!track) throw new Error(`Missing animation track: ${name}.${key}`);
-        return sampleTrack(track, adjusted);
-    };
-    const result: AnimationVisual[] = [];
-    for (const visual of animation.visuals) {
-        const references = sample(visual.visual);
-        if (!references) continue;
-        const position = sample(visual.position), scale = sample(visual.scale), rotate = sample(visual.rotate), color = sample(visual.color);
-        const p = position ? vector(position, name) : [0, 0];
-        const s = scale ? vector(scale, name) : [1, 1];
-        const c = color ? vector(color, name) : [1, 1, 1, 1];
-        for (const ref of typeof references === 'string' ? [references] : Array.isArray(references) ? references : []) {
-            result.push({ sprite: string(ref, name).slice(4), position: { x: p[0], y: p[1] }, scale: { x: s[0], y: s[1] }, rotation: rotate === null ? 0 : number(rotate, name), color: c });
-        }
+interface SampleTracks {
+    sprite: Track;
+    position?: Track;
+    scale?: Track;
+    rotate?: Track;
+    color?: Track;
+    references: Map<KeyValue, readonly string[]>;
+    positionBuffer: number[];
+    scaleBuffer: number[];
+    colorBuffer: number[];
+}
+
+// Results belong to the sampler and remain valid only until its next sample().
+export class AnimationSampler {
+    private readonly animation: NativeAnimation;
+    private readonly tracks: SampleTracks[];
+    private readonly pool: (AnimationVisual & { color: number[] })[] = [];
+    private readonly result: AnimationVisual[] = [];
+    private sampledFrame: number | undefined;
+
+    constructor(readonly name: string) {
+        const animation = this.animation = animationDefinition(name);
+        this.tracks = animation.visuals.map(visual => {
+            const sprite = animation.keys.get(visual.visual)!;
+            const references = new Map<KeyValue, readonly string[]>();
+            for (const key of sprite.values) {
+                const refs = typeof key.value === 'string' ? [key.value] : key.value;
+                if (!Array.isArray(refs)) throw new Error(`Invalid sprite track: ${name}`);
+                references.set(key.value, refs.map(ref => string(ref, name).slice(4)));
+            }
+            return { sprite, position: visual.position ? animation.keys.get(visual.position) : undefined,
+                scale: visual.scale ? animation.keys.get(visual.scale) : undefined,
+                rotate: visual.rotate ? animation.keys.get(visual.rotate) : undefined,
+                color: visual.color ? animation.keys.get(visual.color) : undefined,
+                references, positionBuffer: [0, 0], scaleBuffer: [1, 1], colorBuffer: [1, 1, 1, 1] };
+        });
     }
-    return result;
+
+    get visuals(): readonly AnimationVisual[] { return this.result; }
+    get frame(): number | undefined { return this.sampledFrame; }
+
+    sample(frame: number): readonly AnimationVisual[] {
+        if (frame === this.sampledFrame) return this.result;
+        const adjusted = adjustFrame(frame, 0, this.animation.length, this.animation.loop);
+        let used = 0;
+        if (adjusted !== null) for (const tracks of this.tracks) {
+            const references = sampleTrack(tracks.sprite, adjusted, tracks.positionBuffer);
+            if (!references) continue;
+            const sprites = tracks.references.get(references);
+            if (!sprites) throw new Error(`Invalid sprite sample: ${this.name}`);
+            const position = sampleTrack(tracks.position, adjusted, tracks.positionBuffer);
+            const scale = sampleTrack(tracks.scale, adjusted, tracks.scaleBuffer);
+            const rotate = sampleTrack(tracks.rotate, adjusted, tracks.positionBuffer);
+            const color = sampleTrack(tracks.color, adjusted, tracks.colorBuffer);
+            for (const sprite of sprites) {
+                let output = this.pool[used];
+                if (!output) this.pool[used] = output = { sprite, position: { x: 0, y: 0 }, scale: { x: 1, y: 1 }, rotation: 0, color: [1, 1, 1, 1] };
+                output.sprite = sprite;
+                output.position.x = position ? component(position, 0) : 0;
+                output.position.y = position ? component(position, 1) : 0;
+                output.scale.x = scale ? component(scale, 0) : 1;
+                output.scale.y = scale ? component(scale, 1) : 1;
+                output.rotation = rotate === null ? 0 : number(rotate, this.name);
+                for (let axis = 0; axis < 4; axis++) output.color[axis] = color ? component(color, axis) : 1;
+                this.result[used++] = output;
+            }
+        }
+        this.result.length = used;
+        this.sampledFrame = frame;
+        return this.result;
+    }
+}
+
+export function sampleAnimation(name: string, frame: number): readonly AnimationVisual[] {
+    return new AnimationSampler(name).sample(frame);
 }
