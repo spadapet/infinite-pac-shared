@@ -66,6 +66,17 @@ function sounds(game: Game): string[] {
     return game.drainEvents().flatMap(event => event.type === 'sound' ? [event.name] : []);
 }
 
+test('player rules come from the selected maze-set fields rather than global naming conventions', t => {
+    const set = nativeSet({ character: 'mr', mazeSet: 'ms', difficulty: 'normal', players: 1 });
+    const original = { ...set };
+    t.after(() => Object.assign(set, original));
+    Object.assign(set, { lives: 2, firstLife: 1234, repeatLife: 5678, maxFreeLives: 4 });
+    const { player } = fixture({ mazeSet: 'ms' });
+    assert.deepEqual([player.lives, player.nextFreeLife, player.freeLifeRepeat, player.freeLivesLeft], [2, 1234, 5678, 4]);
+    const other = fixture({ mazeSet: 'mr' }).player;
+    assert.deepEqual([other.lives, other.nextFreeLife, other.freeLifeRepeat, other.freeLivesLeft], [3, 10000, 10000, 2]);
+});
+
 for (const character of characters) for (const mazeSet of characters) for (const difficulty of difficulties) {
     const label = `${character}/${mazeSet}/${difficulty}`;
     test(`${label}: native resource defaults, every expanded difficulty row, cyclic maze order and high-level saturation`, () => {
@@ -417,6 +428,11 @@ test('last surviving P2 still receives its120-update gameover hold and notificat
     game.advance();
     assert.equal(game['gameOver'], true);
     assert.equal(game.view.state, 'gameover');
+    assert.equal(game.view.gameOverDone, false, 'native switch initializes the counter at 1 then advances it to 2');
+    advance(game, 118);
+    assert.equal(game.view.gameOverDone, false, 'the native completion threshold is strictly greater than 120');
+    game.advance();
+    assert.equal(game.view.gameOverDone, true, 'counter 121 completes the 120-update hold, including the switch update');
 });
 
 function hudRecorder() {

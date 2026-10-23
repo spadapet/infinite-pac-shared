@@ -51,41 +51,53 @@ function pad(pressed: number[] = [], axes = [0, 0], index = 0, id = `test-${inde
         vibrationActuator: { playEffect: async () => 'complete', reset: async () => 'complete' } };
 }
 
-test('releasing Up immediately restores still-held Right without another keydown or OS repeat', t => {
+test('transient key changes between fixed updates never reach gameplay; held axes are sampled once per update', t => {
     const { key, moves, controller } = setup(t);
     key('keydown', 'ArrowRight', 'ArrowRight');
     key('keydown', 'ArrowUp', 'ArrowUp');
     key('keyup', 'ArrowUp', 'ArrowUp');
-    assert.deepEqual(moves, [{ x: 1, y: 0 }, { x: 1, y: -1 }, { x: 1, y: 0 }]);
+    assert.deepEqual(moves, [], 'keydown and keyup do not apply directions outside a simulation update');
+    controller.advance();
+    assert.deepEqual(moves, [{ x: 1, y: 0 }], 'only the direction still held at the fixed update is sampled');
     controller.poll();
-    assert.deepEqual(moves.at(-1), { x: 1, y: 0 });
+    assert.equal(moves.length, 1, 'render-frame polling does not apply a gameplay direction');
     key('keyup', 'ArrowRight', 'ArrowRight');
-    assert.equal(moves.at(-1), null, 'release cancels a buffered turn without stopping forward movement');
+    assert.deepEqual(moves, [{ x: 1, y: 0 }], 'keyup takes effect at the next fixed update');
+    controller.advance();
+    assert.equal(moves.at(-1), null, 'the released direction clears on the next simulation update');
 });
 
 test('arrows and WASD retain independent held states and native opposite-key priority', t => {
-    const { key, moves } = setup(t);
+    const { key, moves, controller } = setup(t);
     key('keydown', 'ArrowRight', 'ArrowRight');
     key('keydown', 'd', 'KeyD');
     key('keyup', 'ArrowRight', 'ArrowRight');
+    controller.advance();
     assert.deepEqual(moves.at(-1), { x: 1, y: 0 });
     key('keydown', 'ArrowLeft', 'ArrowLeft');
+    controller.advance();
     assert.deepEqual(moves.at(-1), { x: -1, y: 0 });
     key('keydown', 'd', 'KeyD', true);
+    controller.advance();
     assert.deepEqual(moves.at(-1), { x: -1, y: 0 }, 'repeat does not steal priority');
     key('keydown', 's', 'KeyS');
     key('keydown', 'w', 'KeyW');
+    controller.advance();
     assert.deepEqual(moves.at(-1), { x: -1, y: -1 });
     key('keyup', 'w', 'KeyW');
+    controller.advance();
     assert.deepEqual(moves.at(-1), { x: -1, y: 1 });
     key('keyup', 'ArrowLeft', 'ArrowLeft');
+    controller.advance();
     assert.deepEqual(moves.at(-1), { x: 1, y: 1 });
 });
 
-test('blur and hidden-tab transitions clear held keys, including releases during pause', t => {
+test('blur and hidden-tab transitions clear held keys without applying gameplay input between updates', t => {
     const { key, moves, controller, window, document, setActive } = setup(t);
     key('keydown', 'ArrowRight', 'ArrowRight');
+    assert.deepEqual(moves, []);
     window.dispatchEvent(new Event('blur'));
+    controller.advance();
     assert.equal(moves.at(-1), null);
     const afterBlur = moves.length;
     controller.poll();
@@ -94,17 +106,14 @@ test('blur and hidden-tab transitions clear held keys, including releases during
     setActive(false);
     key('keyup', 'ArrowUp', 'ArrowUp');
     setActive(true);
-    const afterPause = moves.length;
-    controller.poll();
-    assert.equal(moves.length, afterPause);
+    controller.advance();
+    assert.equal(moves.at(-1), null, 'releases during pause do not leave a stale turn');
     key('keydown', 'a', 'KeyA');
     document.hidden = true;
     document.dispatchEvent(new Event('visibilitychange'));
-    assert.equal(moves.at(-1), null);
     document.hidden = false;
-    const afterHidden = moves.length;
-    controller.poll();
-    assert.equal(moves.length, afterHidden);
+    controller.advance();
+    assert.equal(moves.at(-1), null);
 });
 
 test('D-pad and analog stick preserve all four diagonals independently', t => {
@@ -116,14 +125,19 @@ test('D-pad and analog stick preserve all four diagonals independently', t => {
         [[13, 14], [-0.8, 0.9], { x: -1, y: 1 }],
     ] as const) {
         setPads([pad([...buttons])]);
+        const beforePoll = moves.length;
         controller.poll();
+        assert.equal(moves.length, beforePoll, 'polling only records gamepad state');
+        controller.advance();
         assert.deepEqual(moves.at(-1), expected);
         setPads([pad([], [...axes])]);
         controller.poll();
+        controller.advance();
         assert.deepEqual(moves.at(-1), expected);
     }
     setPads([pad()]);
     controller.poll();
+    controller.advance();
     assert.equal(moves.at(-1), null);
 });
 
@@ -132,6 +146,8 @@ test('Xbox controllers with an unmapped Bluetooth profile use the standard Xbox 
     const { controller, moves, setPads } = harness;
     setPads([pad([0], [0.8, -0.9], 0, 'Xbox Wireless Controller', '')]);
     controller.poll();
+    assert.deepEqual(moves, []);
+    controller.advance();
     assert.deepEqual(moves.at(-1), { x: 1, y: -1 });
     assert.equal(harness.actionCount, 1, 'A is the standard Xbox action button');
 
@@ -141,6 +157,7 @@ test('Xbox controllers with an unmapped Bluetooth profile use the standard Xbox 
 
     setPads([pad([12, 15], [0, 0], 0, 'Xbox Wireless Controller', '')]);
     controller.poll();
+    controller.advance();
     assert.deepEqual(moves.at(-1), { x: 1, y: -1 });
 });
 
@@ -157,12 +174,11 @@ test('stick uses native 0.5625 press and 0.5 release hysteresis on each axis', t
         [0.55, null], [0.5625, { x: 1, y: 0 }], [0.5, { x: 1, y: 0 }],
         [0.499, null], [0.55, null], [-0.5625, { x: -1, y: 0 }],
     ] as const) {
-        const before = moves.length;
         setPads([pad([], [axis, 0])]);
         controller.poll();
+        controller.advance();
         if (expected) assert.deepEqual(moves.at(-1), expected);
-        else if (moves.length > before) assert.equal(moves.at(-1), null);
-        else assert.equal(moves.length, before);
+        else assert.equal(moves.at(-1), null);
     }
 });
 
@@ -171,14 +187,18 @@ test('keyboard, sticks, D-pad and multiple pads share native Up/Left priority', 
     key('keydown', 'ArrowRight', 'ArrowRight');
     setPads([pad([12])]);
     controller.poll();
+    controller.advance();
     assert.deepEqual(moves.at(-1), { x: 1, y: -1 });
     setPads([pad([13, 15], [0, 0], 0), pad([12, 14], [0, 0], 1)]);
     controller.poll();
+    controller.advance();
     assert.deepEqual(moves.at(-1), { x: -1, y: -1 });
     setPads([]);
     controller.poll();
+    controller.advance();
     assert.deepEqual(moves.at(-1), { x: 1, y: 0 }, 'disconnect restores the still-held keyboard direction');
     key('keyup', 'ArrowRight', 'ArrowRight');
+    controller.advance();
     assert.equal(moves.at(-1), null);
 });
 
@@ -186,49 +206,58 @@ test('D-pad and stick combine without dominant-axis selection; disconnect and pa
     const { controller, moves, setPads, setActive } = setup(t);
     setPads([pad([15], [0, -0.9])]);
     controller.poll();
+    controller.advance();
     assert.deepEqual(moves.at(-1), { x: 1, y: -1 });
     setActive(false);
     setPads([]);
     controller.poll();
-    assert.equal(moves.at(-1), null);
     setActive(true);
-    const count = moves.length;
-    controller.poll();
-    assert.equal(moves.length, count);
+    controller.advance();
+    assert.equal(moves.at(-1), null, 'a cleared gamepad direction is applied only on a simulation update');
 });
 
 test('pointer down defines a stationary joystick origin, never a target relative to Pac', t => {
     const { pointer, host, moves, controller } = setup(t);
     pointer('pointerdown', 500, 300);
-    assert.deepEqual(moves.at(-1), { x: 0, y: 0 });
+    assert.deepEqual(moves, [], 'pointer events do not sample gameplay directions');
     assert.equal(host.hasPointerCapture(1), true);
     pointer('pointermove', 560, 300);
+    assert.deepEqual(controller.joystick?.offset, { x: 60, y: 0 }, 'joystick presentation responds immediately');
+    assert.deepEqual(moves, []);
+    controller.advance();
     assert.deepEqual(moves.at(-1), { x: 1, y: 0 });
     pointer('pointermove', 530, 330);
-    assert.deepEqual(moves.at(-1), { x: 1, y: 1 }, 'offset is still relative to the initial down, not the last move');
-    assert.deepEqual(controller.joystick?.offset, { x: 30, y: 30 });
+    assert.deepEqual(controller.joystick?.offset, { x: 30, y: 30 }, 'offset is still relative to the initial down, not the last move');
+    controller.advance();
+    assert.deepEqual(moves.at(-1), { x: 1, y: 1 });
     pointer('pointermove', 500, 300);
+    controller.advance();
     assert.deepEqual(moves.at(-1), { x: 0, y: 0 }, 'moving back inside the dead zone clears the held turn');
 });
 
 test('pointer dead zone is radial, inclusive at 20 physical pixels, and accounts for display density', t => {
-    const { pointer, moves, window } = setup(t);
+    const { pointer, moves, controller, window } = setup(t);
     pointer('pointerdown', 100, 100);
     pointer('pointermove', 119, 100);
+    controller.advance();
     assert.deepEqual(moves.at(-1), { x: 0, y: 0 });
     pointer('pointermove', 120, 100);
+    controller.advance();
     assert.deepEqual(moves.at(-1), { x: 1, y: 0 });
     pointer('pointermove', 115, 115);
+    controller.advance();
     assert.deepEqual(moves.at(-1), { x: 1, y: 1 }, 'radial length, not dominant-axis length, crosses the threshold');
     window.devicePixelRatio = 2;
     pointer('pointermove', 110, 100);
+    controller.advance();
     assert.deepEqual(moves.at(-1), { x: 1, y: 0 });
     pointer('pointermove', 109.99, 100);
+    controller.advance();
     assert.deepEqual(moves.at(-1), { x: 0, y: 0 });
 });
 
 test('pointer angular sectors match all eight native directions, including diagonal boundaries', t => {
-    const { pointer, moves } = setup(t);
+    const { pointer, moves, controller } = setup(t);
     pointer('pointerdown', 200, 200);
     const sectors: [number, Vec][] = [
         [0, { x: 1, y: 0 }], [22.49, { x: 1, y: 0 }], [22.51, { x: 1, y: 1 }],
@@ -240,6 +269,7 @@ test('pointer angular sectors match all eight native directions, including diago
     ];
     for (const [angle, expected] of sectors) {
         pointer('pointermove', 200 + 100 * Math.cos(angle * Math.PI / 180), 200 + 100 * Math.sin(angle * Math.PI / 180));
+        controller.advance();
         assert.deepEqual(moves.at(-1), expected, `${angle} degrees`);
     }
 });
@@ -249,10 +279,13 @@ test('released diagonal keeps only an unconsumed turn and clears it on the next 
     setDirection('right');
     pointer('pointerdown', 100, 100);
     pointer('pointermove', 160, 40);
+    assert.deepEqual(controller.joystick?.offset, { x: 60, y: -60 });
+    assert.deepEqual(moves, [], 'dragging is presented immediately but sampled only by the fixed update');
+    controller.advance();
     assert.deepEqual(moves.at(-1), { x: 1, y: -1 });
     pointer('pointerup', 160, 40);
     assert.equal(controller.joystick, null);
-    assert.deepEqual(moves.at(-1), { x: 0, y: -1 });
+    assert.deepEqual(moves.at(-1), { x: 1, y: -1 }, 'release queues the pending turn without applying it');
     controller.advance();
     assert.deepEqual(moves.at(-1), { x: 0, y: -1 });
     setDirection('up');
@@ -268,16 +301,21 @@ test('keyboard and gamepad override the joystick until released, without moving 
     pointer('pointerdown', 100, 100);
     pointer('pointermove', 160, 100);
     key('keydown', 'ArrowUp', 'ArrowUp');
-    assert.deepEqual(moves.at(-1), { x: 0, y: -1 });
+    assert.deepEqual(moves, [], 'keyboard changes do not immediately override sampled gameplay input');
     pointer('pointermove', 160, 160);
+    assert.deepEqual(controller.joystick?.offset, { x: 60, y: 60 });
+    controller.advance();
     assert.deepEqual(moves.at(-1), { x: 0, y: -1 });
     key('keyup', 'ArrowUp', 'ArrowUp');
+    controller.advance();
     assert.deepEqual(moves.at(-1), { x: 1, y: 1 });
     setPads([pad([14])]);
     controller.poll();
+    controller.advance();
     assert.deepEqual(moves.at(-1), { x: -1, y: 0 });
     setPads([]);
     controller.poll();
+    controller.advance();
     assert.deepEqual(moves.at(-1), { x: 1, y: 1 });
     assert.deepEqual(controller.joystick?.offset, { x: 60, y: 60 });
 });
@@ -300,6 +338,7 @@ test('cancel, capture loss, blur, tab hiding and pause remove both the arrow and
     for (const end of ['pointercancel', 'lostpointercapture', 'blur', 'hidden', 'pause']) {
         pointer('pointerdown', 100, 100);
         pointer('pointermove', 100, 30);
+        controller.advance();
         if (end === 'blur') window.dispatchEvent(new Event('blur'));
         else if (end === 'hidden') {
             document.hidden = true;
@@ -309,10 +348,11 @@ test('cancel, capture loss, blur, tab hiding and pause remove both the arrow and
         else pointer(end, 100, 30);
         assert.equal(controller.joystick, null, end);
         assert.equal(host.hasPointerCapture(1), false, end);
-        assert.equal(moves.at(-1), null, end);
         setActive(true);
+        controller.advance();
+        assert.equal(moves.at(-1), null, `${end}: no stale turn after cancellation`);
         const count = moves.length;
         controller.advance();
-        assert.equal(moves.length, count, `${end}: no stale turn after resuming`);
+        assert.equal(moves.length, count + 1, `${end}: only the next fixed update samples the cleared state`);
     }
 });

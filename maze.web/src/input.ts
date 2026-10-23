@@ -18,7 +18,6 @@ export class InputController {
     private readonly buttons = new Map<number, { start: boolean; action: boolean; directions: Set<Direction> }>();
     private readonly heldKeys = new Map<string, Direction>();
     private readonly heldGamepad = new Set<Direction>();
-    private gamepadMoving = false;
 
     constructor(private readonly host: Pick<HTMLElement, 'addEventListener' | 'focus' | 'setPointerCapture' | 'hasPointerCapture' | 'releasePointerCapture'>, private readonly actions: InputActions) {
         window.addEventListener('keydown', event => {
@@ -29,7 +28,6 @@ export class InputController {
             if (direction && actions.active()) {
                 event.preventDefault();
                 this.heldKeys.set(event.code || key, direction);
-                this.advance();
             }
             else if (!event.repeat && (key === 'p' || key === 'Escape')) { event.preventDefault(); actions.pause(); }
             else if (!event.repeat && key === 'm') actions.mute();
@@ -40,19 +38,13 @@ export class InputController {
         });
         window.addEventListener('keyup', event => {
             const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
-            if (this.heldKeys.delete(event.code || key)) {
-                if (actions.active() && (this.heldKeys.size || this.heldGamepad.size || this.pointer || this.touchPress)) this.advance();
-                else actions.move(null);
-            }
+            this.heldKeys.delete(event.code || key);
         });
         const clearHeld = () => {
-            const held = this.heldKeys.size > 0 || this.gamepadMoving || !!this.pointer || !!this.touchPress;
             this.heldKeys.clear();
             this.heldGamepad.clear();
             for (const button of this.buttons.values()) button.directions.clear();
-            this.gamepadMoving = false;
             this.cancelPointer();
-            if (held) actions.move(null);
         };
         window.addEventListener('blur', clearHeld);
         document.addEventListener('visibilitychange', () => { if (document.hidden) clearHeld(); });
@@ -62,27 +54,23 @@ export class InputController {
             host.focus({ preventScroll: true });
             this.pointer = { id: event.pointerId, origin: { x: event.clientX, y: event.clientY }, position: { x: event.clientX, y: event.clientY } };
             host.setPointerCapture(event.pointerId);
-            this.advance();
         });
         host.addEventListener('pointermove', event => {
             if (!this.pointer || this.pointer.id !== event.pointerId || !actions.active()) return;
             event.preventDefault();
             this.pointer.position = { x: event.clientX, y: event.clientY };
-            this.advance();
         });
         host.addEventListener('pointerup', event => {
             if (this.pointer?.id !== event.pointerId) return;
             this.pointer.position = { x: event.clientX, y: event.clientY };
-            this.advance();
+            const joystick = this.joystick;
+            this.touchPress = joystick && joystick.length >= 20 ? pointerDirection(joystick.offset) : { x: 0, y: 0 };
             this.pointer = undefined;
             if (host.hasPointerCapture(event.pointerId)) host.releasePointerCapture(event.pointerId);
-            this.advance();
         });
         const cancelPointer = (event: PointerEvent) => {
             if (this.pointer?.id !== event.pointerId) return;
             this.cancelPointer();
-            actions.move(null);
-            if (actions.active()) this.advance();
         };
         host.addEventListener('pointercancel', cancelPointer);
         host.addEventListener('lostpointercapture', cancelPointer);
@@ -92,14 +80,12 @@ export class InputController {
                 const direction = button.dataset.direction;
                 if (actions.active() && (direction === 'up' || direction === 'left' || direction === 'down' || direction === 'right')) {
                     this.touchPress = directionVector(direction);
-                    this.advance();
                 }
             });
             button.addEventListener('click', () => {
                 const direction = button.dataset.direction;
                 if (actions.active() && (direction === 'up' || direction === 'left' || direction === 'down' || direction === 'right')) {
                     this.touchPress = directionVector(direction);
-                    this.advance();
                 }
             });
         });
@@ -137,7 +123,7 @@ export class InputController {
             if (direction.x === this.touchPress.x) this.touchPress.x = 0;
             if (direction.y === this.touchPress.y) this.touchPress.y = 0;
             this.actions.move({ ...this.touchPress });
-        } else if (this.gamepadMoving) this.actions.move(null);
+        } else this.actions.move(null);
     }
 
     poll(): void {
@@ -165,13 +151,7 @@ export class InputController {
             this.buttons.set(pad.index, { start, action, directions });
         }
         for (const index of this.buttons.keys()) if (!connected.has(index)) this.buttons.delete(index);
-        if (!this.actions.active() && (this.pointer || this.touchPress)) {
-            this.cancelPointer();
-            this.actions.move(null);
-        }
-        this.advance();
-        if (!this.actions.active() && this.gamepadMoving && !this.heldKeys.size && !this.heldGamepad.size) this.actions.move(null);
-        this.gamepadMoving = this.heldGamepad.size > 0;
+        if (!this.actions.active() && (this.pointer || this.touchPress)) this.cancelPointer();
     }
 }
 

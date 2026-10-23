@@ -35,6 +35,7 @@ export interface GameView {
     playerReady: boolean;
     beforeReady: boolean;
     playerGameOver: boolean;
+    gameOverDone: boolean;
     switchingPlayer: boolean;
     animation: { pacFrame: number; deathFrame: number; ghostTicks: number; dotTicks: number; totalTicks: number };
     level: number;

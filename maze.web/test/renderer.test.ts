@@ -23,7 +23,7 @@ function setup(t: TestContext) {
     const actorLayer = new Container(), dotLayer = new Container(), wallLayer = new Container(), hudLayer = new Container(), joystickLayer = new Container();
     const background = new Graphics();
     const renderer: GameRenderer = Object.create(GameRenderer.prototype);
-    Object.assign(renderer, { textures: { frames }, boardTop: 24, layoutWidth: 224, layoutHeight: 296,
+    Object.assign(renderer, { textures: { frames }, boardTop: 24, layoutWidth: 224, layoutHeight: 288,
         actorPool, actorLayer, dotPool, dotLayer, wallLayer, background, livesPool, fruitPool, pointTextPool, hudLayer, hudTextPool: [], joystickPool, joystickLayer });
     const draw = (method: string, ...args: unknown[]) => Reflect.apply(Reflect.get(GameRenderer.prototype, method), renderer, args);
     const game = new Game({ character: 'mr', mazeSet: 'mr', difficulty: 'easy', players: 1 }, () => 0);
@@ -149,8 +149,25 @@ test('status icons use original animation/sprite transforms and retain native si
     assert.equal(livesPool.length, 5);
     assert.ok(livesPool.every(sprite => sprite.width === 14 && sprite.height === 14));
     assert.deepEqual(livesPool.map(sprite => sprite.x), [24, 40, 56, 72, 88]);
+    assert.deepEqual(livesPool.map(sprite => sprite.y), [280, 280, 280, 280, 280]);
     assert.ok(fruitPool.every(sprite => sprite.width === 14 && sprite.height === 14));
     assert.deepEqual(fruitPool.map(sprite => sprite.x), [200, 184]);
+    assert.deepEqual(fruitPool.map(sprite => sprite.y), [280, 280]);
+});
+
+test('canvas height contains exactly two native status tiles', t => {
+    const oldWindow = Object.getOwnPropertyDescriptor(globalThis, 'window');
+    Object.defineProperty(globalThis, 'window', { configurable: true, value: { devicePixelRatio: 1 } });
+    t.after(() => { if (oldWindow) Object.defineProperty(globalThis, 'window', oldWindow); else Reflect.deleteProperty(globalThis, 'window'); });
+    const renderer = Object.create(GameRenderer.prototype) as GameRenderer;
+    Object.assign(renderer, {
+        app: { render() {} }, destroyed: false, contextLost: false, layoutWidth: 0, layoutHeight: 0, displayPixelRatio: 0,
+        wallLayer: { visible: true }, resizeCanvas() {}, rebuildStaticMaze() {}, drawDots() {}, drawActors() {},
+        drawParticles() {}, drawHud() {}, drawOverlay() {}, drawJoystick() {},
+    });
+    const view = new Game({ character: 'mr', mazeSet: 'mr', difficulty: 'easy', players: 1 }, () => 0).view;
+    renderer.render(view, false);
+    assert.deepEqual([renderer['layoutWidth'], renderer['layoutHeight']], [224, 288]);
 });
 
 test('held pointer draws the original orange arrow with native handle, angle, scale, opacity and Pac-relative position', t => {

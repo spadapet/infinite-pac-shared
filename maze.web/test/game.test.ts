@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import paletteResources from '../../maze/assets/Values.Maze.res.json';
 import { Game, parseMazeResource } from '../src/game';
+import { animationDefinition } from '../src/native-animation';
 import type { GameOptions } from '../src/types';
 
 const mazeNames = ['mr', 'ms'].flatMap(character =>
@@ -180,6 +181,40 @@ test('eating a frightened ghost awards chained score and sends it back as eyes',
     assert.ok(game.view.ghosts.some(ghost => ghost.state === 'eyes'), 'eyes appear after, not during, the eating freeze');
 });
 
+test('inactive Pac ignores pressed directions like native PlayingActor::SetPressDir', () => {
+    const game = new Game(options('mr', 1, 'easy'), () => 0);
+    const pac = game['players'][0].run.pac;
+    pac.active = false;
+    pac.canTurn = false;
+    game.press('up');
+    assert.deepEqual([pac.pressX, pac.pressY, pac.canTurn], [0, 0, false]);
+});
+
+test('point displays keep zero through the countdown update and expire on the next update', () => {
+    const game = new Game(options('mr', 1, 'easy'), () => 0);
+    const run = game['players'][0].run;
+    for (const [initial, lifetime] of [[54, 55], [120, 121]]) {
+        run.points = [{ x: 0, y: 0, value: 200, remaining: initial, color: 0x00ffff }];
+        for (let tick = 0; tick < lifetime - 1; tick++) game['updatePoints'](run);
+        assert.equal(run.points.length, 1, `${initial} countdown updates retain the popup at zero`);
+        assert.equal(run.points[0].remaining, 0);
+        game['updatePoints'](run);
+        assert.equal(run.points.length, 0, `popup expires on update ${lifetime}`);
+    }
+});
+
+test('Pac animation frame rate comes from the selected native character animation', () => {
+    for (const character of ['mr', 'ms'] as const) {
+        const game = new Game({ ...options('mr', 1, 'easy'), character }, () => 0);
+        const run = game['players'][0].run;
+        run.state = 'playing';
+        run.pac.stuck = false;
+        run.animation.pacTicks = 3;
+        game['advanceAnimation'](run);
+        assert.equal(run.animation.pacFrame, 3 * animationDefinition(`${character}-char-anim`).fps / 60);
+    }
+});
+
 test('death consumes a life and the final death emits game over exactly once', () => {
     const game = new Game(options('mr', 1, 'easy'), () => 0);
     startPlaying(game);
@@ -275,6 +310,26 @@ test('wall contact freezes the mouth pose without resetting it while dot and gho
     assert.equal(game.view.animation.pacFrame, before.animation.pacFrame);
     assert.equal(game.view.animation.ghostTicks, before.animation.ghostTicks + 20);
     assert.equal(game.view.animation.dotTicks, before.animation.dotTicks + 20);
+});
+
+test('Pac frame timing follows the selected normal or powered resource FPS', t => {
+    const game = new Game(options(), () => 0);
+    const run = game['players'][0].run;
+    run.state = 'playing';
+    run.pac.stuck = false;
+    const normal = animationDefinition('mr-char-anim');
+    const powered = animationDefinition('mr-power-anim');
+    const original = [normal.fps, powered.fps];
+    t.after(() => { normal.fps = original[0]; powered.fps = original[1]; });
+    normal.fps = 30;
+    powered.fps = 24;
+    run.animation.pacTicks = 8;
+    game['advanceAnimation'](run);
+    assert.equal(game.view.animation.pacFrame, 4);
+    run.ghosts[0].move = 'scared';
+    run.animation.pacTicks = 10;
+    game['advanceAnimation'](run);
+    assert.equal(game.view.animation.pacFrame, 4);
 });
 
 test('caught holds the mouth clock and dying advances smooth eighth-frame rotation after its delay', () => {

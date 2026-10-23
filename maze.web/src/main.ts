@@ -48,7 +48,6 @@ let mode: 'menu' | 'game' = 'menu';
 let paused = false;
 let lastTime = 0;
 let accumulator = 0;
-let endedAt = 0;
 let soundNeedsGesture = false;
 let soundLoading: Promise<void> | undefined;
 let soundError: string | undefined;
@@ -125,7 +124,6 @@ async function startGame(): Promise<void> {
         pendingScores.length = 0;
         mode = 'game';
         paused = false;
-        endedAt = 0;
         accumulator = 0;
         lastTime = 0;
         menu.hidden = true;
@@ -148,7 +146,6 @@ function showMenu(): void {
     vibration.stop();
     mode = 'menu';
     paused = false;
-    endedAt = 0;
     pendingScores.length = 0;
     menu.hidden = false;
     pauseMenu.hidden = true;
@@ -318,11 +315,8 @@ async function boot(): Promise<void> {
                     game.advance();
                     accumulator -= 1000 / 60;
                     handleEvents();
+                    if (game.view.gameOverDone) { showMenu(); accumulator = 0; break; }
                     if (paused) { accumulator = 0; break; }
-                }
-                if (game.view.state === 'gameover') {
-                    if (!endedAt) endedAt = now;
-                    else if (now - endedAt > 2500) showMenu();
                 }
             } else accumulator = 0;
             const view = game.view;

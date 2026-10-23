@@ -19,11 +19,12 @@ async function scorePage(page: Page): Promise<void> {
         '/storage': compile(storage),
         '/vibration': compile(vibration),
         '/game': `export class Game {
-            view = { state: 'playing', score: 0, tick: 0, highScore: 0, level: 1, player: 1,
+            view = { state: 'playing', score: 0, tick: 0, highScore: 0, level: 1, player: 1, gameOverDone: false,
                 pac: { direction: 'left', position: { x: 0, y: 0 } } };
             events = [];
             nextPlayer = null;
             transitionPending = false;
+            gameOverCounter = 0;
             constructor() { window.scoreHarness = this; }
             advance() {
                 this.view.tick++;
@@ -31,6 +32,11 @@ async function scorePage(page: Page): Promise<void> {
                     this.transitionPending = false;
                     this.view.state = this.nextPlayer === null ? 'gameover' : 'playing';
                     if (this.nextPlayer !== null) this.view.player = this.nextPlayer;
+                    else this.gameOverCounter = 1;
+                }
+                if (this.view.state === 'gameover') {
+                    this.gameOverCounter++;
+                    this.view.gameOverDone = this.gameOverCounter > 120;
                 }
             }
             drainEvents() {

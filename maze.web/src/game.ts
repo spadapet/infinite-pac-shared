@@ -167,6 +167,12 @@ function numberAt(value: unknown, index: number, fallback: number): number {
     return Array.isArray(value) ? Number(value[index] ?? fallback) : Number(value ?? fallback);
 }
 
+function requiredResourceNumber(values: JsonRecord, rules: JsonRecord, key: string): number {
+    const value = resolveReference(values, rules[key]);
+    if (typeof value !== 'number' || !Number.isFinite(value)) throw new Error(`Maze value '${key}' is missing or invalid.`);
+    return value;
+}
+
 function resolveReference(values: JsonRecord, value: unknown): unknown {
     const seen = new Set<string>();
     while (typeof value === 'string' && value.startsWith('res:')) {
@@ -325,6 +331,7 @@ export class Game {
     private currentPlayer = 0;
     private switchCountdown = 0;
     private gameOverCountdown = 0;
+    private gameOverCounter = 0;
     private gameOver = false;
     private mazeSerial = 0;
 
@@ -334,14 +341,22 @@ export class Game {
         }
         this.options = { ...options };
         this.random = random;
+        const values = resourceValues(mazesValues, 'res:values');
+        const rules = record(globalValues(mazesValues, 'values_mazes')[`${options.mazeSet}-mazes-${options.difficulty}`]);
+        const playerRules = {
+            lives: requiredResourceNumber(values, rules, 'lives'),
+            firstLife: requiredResourceNumber(values, rules, 'firstLife'),
+            repeatLife: requiredResourceNumber(values, rules, 'repeatLife'),
+            maxFreeLives: requiredResourceNumber(values, rules, 'maxFreeLives'),
+        };
         this.players = Array.from({ length: options.players }, (_, index) => {
             const player: PlayerRecord = {
                 score: 0,
-                lives: 3,
+                lives: playerRules.lives,
                 level: 0,
-                nextFreeLife: 10000,
-                freeLifeRepeat: options.difficulty === 'hard' ? 20000 : 10000,
-                freeLivesLeft: options.difficulty === 'easy' ? 3 : 2,
+                nextFreeLife: playerRules.firstLife,
+                freeLifeRepeat: playerRules.repeatLife,
+                freeLivesLeft: playerRules.maxFreeLives,
                 gameOver: false,
                 run: this.createLevel(0, index === 0),
             };
@@ -367,6 +382,7 @@ export class Game {
             playerReady: run.state === 'ready' && run.readyPhase === 'player',
             beforeReady: run.state === 'ready' && run.readyPhase === 'before',
             playerGameOver: player.gameOver && !this.gameOver,
+            gameOverDone: this.gameOverCounter > 120,
             switchingPlayer: this.switchCountdown > 0,
             animation: { ...run.animation },
             level: player.level + 1,
@@ -402,11 +418,17 @@ export class Game {
 
     advance(): void {
         this.tickCount++;
-        if (this.gameOver) return;
+        if (this.gameOver) {
+            this.gameOverCounter++;
+            return;
+        }
         if (this.switchCountdown > 0) {
             if (--this.switchCountdown > 0) return;
             this.advancePlayerSwitch();
-            if (this.gameOver) return;
+            if (this.gameOver) {
+                this.gameOverCounter++;
+                return;
+            }
         }
 
         const player = this.players[this.currentPlayer];
@@ -465,7 +487,9 @@ export class Game {
                 animation.deathFrame = Math.min(Math.max(0, animation.deathTicks - 30), 11 * 8) / 8;
                 animation.deathTicks++;
             } else if (run.state !== 'dead' && run.state !== 'gameover') {
-                animation.pacFrame = run.state === 'winning' ? 0 : animation.pacTicks * 45 / 60;
+                const powered = run.ghosts.some(ghost => ghost.active && ['scared', 'eaten', 'waiting'].includes(ghost.move));
+                const pacAnimation = animationDefinition(`${this.options.character}-${powered ? 'power' : 'char'}-anim`);
+                animation.pacFrame = run.state === 'winning' ? 0 : animation.pacTicks * pacAnimation.fps / 60;
                 if (run.state !== 'caught') animation.pacTicks++;
             }
         }
@@ -478,6 +502,7 @@ export class Game {
 
     press(direction: Direction | Vec | null): void {
         const run = this.players[this.currentPlayer].run;
+        if (!run.pac.active) return;
         const vector = direction === null ? point() : typeof direction === 'string' ? directionFor(direction) : direction;
         if (run.pac.pressX !== vector.x || run.pac.pressY !== vector.y) {
             run.pac.pressX = vector.x;
@@ -937,7 +962,8 @@ export class Game {
 
     private updatePoints(run: LevelRun): void {
         for (let index = run.points.length - 1; index >= 0; index--) {
-            if (--run.points[index].remaining <= 0) run.points.splice(index, 1);
+            if (run.points[index].remaining === 0) run.points.splice(index, 1);
+            else run.points[index].remaining--;
         }
     }
 
@@ -947,7 +973,7 @@ export class Game {
             const animation = animationDefinition(`bubble-${particle.animation + 1}-anim`);
             particle.y += particle.vy;
             particle.frame += animation.fps * particle.timeScale / 60;
-            if (particle.frame >= animation.length) run.particles.splice(index, 1);
+            if (particle.frame > animation.length) run.particles.splice(index, 1);
         }
     }
 
@@ -1135,6 +1161,7 @@ export class Game {
         }
         if (this.players[this.currentPlayer].gameOver) {
             this.gameOver = true;
+            this.gameOverCounter = 1;
             this.setState(this.players[this.currentPlayer].run, 'gameover');
         }
     }

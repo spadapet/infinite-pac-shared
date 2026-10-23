@@ -4,7 +4,7 @@ import type { GameView, JoystickView, MazeView, Tile, Vec } from './types';
 
 const TILE_PIXELS = 8;
 const HUD_TOP = 24;
-const HUD_BOTTOM = 24;
+const HUD_BOTTOM = 16;
 const GHOST_DOOR_COLOR = 0xffb8ff;
 const WHITE = 0xffffff;
 

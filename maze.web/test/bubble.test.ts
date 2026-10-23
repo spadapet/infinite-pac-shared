@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Container, Texture, TextureSource, Sprite } from 'pixi.js';
 import animations from '../../maze/assets/Assets.Anim.res.json';
-import { nativeSprites, sampleAnimation } from '../src/native-animation';
+import { animationDefinition, nativeSprites, sampleAnimation } from '../src/native-animation';
 import { Game } from '../src/game';
 import { GameRenderer } from '../src/renderer';
 
@@ -89,6 +89,20 @@ test('renderer uses a textured 4-to-6.4-pixel bubble with the original handle an
         layer.destroy({ children: true });
         texture.destroy(true);
     }
+});
+
+test('bubbles remain alive at exactly the native animation length and expire only after it', () => {
+    const game = new Game({ character: 'mr', mazeSet: 'mr', difficulty: 'easy', players: 1 }, () => 0);
+    const run = game['players'][0].run;
+    const animation = animationDefinition('bubble-1-anim');
+    const timeScale = 1;
+    const step = animation.fps * timeScale / 60;
+    run.particles.push({ x: 0, y: 0, vy: 0, animation: 0, frame: animation.length - step, scale: 1, timeScale });
+    game['advanceParticles'](run);
+    assert.equal(run.particles[0]?.frame, animation.length);
+    assert.equal(run.particles.length, 1, 'native SpriteAnimActor remains active at frame_length');
+    game['advanceParticles'](run);
+    assert.equal(run.particles.length, 0, 'the next frame exceeds frame_length and expires');
 });
 
 test('eating emits independent one-shot bubbles with native randomized scale, timing and drift', () => {
