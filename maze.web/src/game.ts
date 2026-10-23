@@ -45,6 +45,8 @@ interface Ghost extends Actor {
 interface Fruit extends Actor {
     type: number;
     exitTile: Point;
+    chosenRandom: Set<string>;
+    chosenExit: Set<string>;
 }
 
 interface PointDisplay {
@@ -374,7 +376,7 @@ export class Game {
             pac: {
                 position: { x: run.pac.x, y: run.pac.y },
                 direction: directionName(run.pac),
-                powered: run.ghostScaredCountdown > 0 || run.ghosts.some(ghost => ghost.active && ['scared', 'eaten', 'waiting'].includes(ghost.move)),
+                powered: run.ghosts.some(ghost => ghost.active && ['scared', 'eaten', 'waiting'].includes(ghost.move)),
                 moving: !run.pac.stuck && (run.pac.dx !== 0 || run.pac.dy !== 0),
                 visible: run.pac.active && run.ghostEatenCountdown === 0 && (run.state !== 'ready' || run.stateTick > run.playerReadyTicks || run.playerReadyTicks === 0),
             },
@@ -476,7 +478,7 @@ export class Game {
         const maze = parseMazeResource(mazeName, `${mazeName}:${++this.mazeSerial}`);
         const difficulty = difficultyFor(this.options, level);
         const pac = Object.assign(actor(), { canTurn: true, stuck: false });
-        const fruit = Object.assign(actor(), { type: 0, exitTile: point() }) as Fruit;
+        const fruit: Fruit = Object.assign(actor(), { type: 0, exitTile: point(), chosenRandom: new Set<string>(), chosenExit: new Set<string>() });
         const ghosts: Ghost[] = Array.from({ length: 4 }, () => Object.assign(actor(), {
             move: 'normal' as MoveMode, house: 'outside' as HouseMode, dotCounter: 0,
         }));
@@ -611,13 +613,17 @@ export class Game {
 
         if (((dx && pixel.x === center.x) || (dy && pixel.y === center.y)) && this.isWall(run.maze, point(tile.x + dx, tile.y + dy))) {
             pac.stuck = true;
+            pac.canTurn = true;
         } else {
             pac.stuck = false;
             pixel.x += dx;
             pixel.y += dy;
         }
+        // Native SetDir precedes SetPixel, whose tile-change callback unlocks the next turn.
+        const oldTile = tileAtPixel(point(pac.x, pac.y), point(dx, dy));
         pac.dx = dx; pac.dy = dy; pac.x = pixel.x; pac.y = pixel.y;
-        this.checkTunnel(pac, run.maze);
+        const warped = this.checkTunnel(pac, run.maze);
+        if (!same(oldTile, tileAtPixel(pixel, point(dx, dy))) || warped) pac.canTurn = true;
     }
 
     private advanceGhost(ghost: Ghost, run: LevelRun): void {
@@ -666,7 +672,7 @@ export class Game {
             this.sound('fruit-bounce');
         }
         fruit.x += dx; fruit.y += dy; fruit.dx = dx; fruit.dy = dy;
-        if (this.checkTunnel(fruit, run.maze)) fruit.active = false;
+        if (this.checkTunnel(fruit, run.maze)) this.resetFruit(fruit);
     }
 
     private ghostDecideDirection(actor: Actor, run: LevelRun, direction: Point, move: MoveMode | null, fruit = false): Point | null {
@@ -681,13 +687,8 @@ export class Game {
         if (!candidates.length) return point(-direction.x, -direction.y);
         if (candidates.length === 1) return point(candidates[0].x - tile.x, candidates[0].y - tile.y);
         if (fruit) {
-            if (run.fruitCounter > 0) {
-                const choice = candidates[Math.floor(this.random() * candidates.length) % candidates.length];
-                return point(choice.x - tile.x, choice.y - tile.y);
-            }
-            const target = run.fruit.exitTile;
-            const sorted = candidates.slice().sort((a, b) => this.distanceSquared(tileCenter(a), tileCenter(target)) - this.distanceSquared(tileCenter(b), tileCenter(target)));
-            return point(sorted[0].x - tile.x, sorted[0].y - tile.y);
+            const choice = this.fruitChooseTile(run, currentTile, candidates);
+            return point(choice.x - tile.x, choice.y - tile.y);
         }
         if (move === 'scared' || move === 'waiting') {
             const choice = candidates[Math.floor(this.random() * candidates.length) % candidates.length];
@@ -695,22 +696,43 @@ export class Game {
         }
         const index = run.ghosts.findIndex(item => item === actor);
         const target = this.ghostTarget(index, move, run);
-        const choice = candidates.reduce((best, candidate) =>
-            this.distanceSquared(tileCenter(candidate), target) < this.distanceSquared(tileCenter(best), target) ? candidate : best, candidates[0]);
+        const choice = this.closestTile(candidates, target);
         return point(choice.x - tile.x, choice.y - tile.y);
     }
 
-    private ghostTarget(index: number, move: MoveMode | null, run: LevelRun): Point {
-        const size = run.maze;
-        const targetScatter = [point(size.width - 3, -3), point(2, -3), point(size.width - 1, size.height + 1), point(0, size.height + 1)][Math.max(index, 0) % 4];
-        const scatter = run.ghostScatterCountdown > 0;
-        if (move === 'eyes') return run.ghostStartPixel;
-        if (scatter) {
-            const target = this.options.mazeSet === 'ms'
-                ? [point(size.width - 3, -3), point(2, -3), point(size.width - 1, size.height + 1), point(0, size.height + 1)][Math.floor(this.random() * 4)]
-                : targetScatter;
-            return tileCenter(target);
+    private fruitChooseTile(run: LevelRun, currentTile: Point, candidates: Point[]): Point {
+        const exiting = run.fruitCounter === 0;
+        const chosen = exiting ? run.fruit.chosenExit : run.fruit.chosenRandom;
+        const remaining = candidates.slice();
+        while (remaining.length) {
+            const choice = exiting
+                ? this.closestTile(remaining, tileCenter(run.fruit.exitTile))
+                : remaining[Math.floor(this.random() * remaining.length)];
+            const key = `${currentTile.x},${currentTile.y}:${choice.x},${choice.y}`;
+            if (chosen.has(key) || (!exiting && this.zoneAt(run.maze, choice) === 'ghostSlow')) {
+                remaining.splice(remaining.indexOf(choice), 1);
+            } else {
+                chosen.add(key);
+                return choice;
+            }
         }
+        return candidates[Math.floor(this.random() * candidates.length)];
+    }
+
+    private closestTile(candidates: Point[], target: Point): Point {
+        return candidates.reduce((best, candidate) =>
+            this.distanceSquared(tileCenter(candidate), target) < this.distanceSquared(tileCenter(best), target) ? candidate : best, candidates[0]);
+    }
+
+    private ghostScatterTarget(index: number, run: LevelRun): Point {
+        const size = run.maze;
+        if (this.options.mazeSet === 'ms') index = Math.floor(this.random() * 4);
+        return tileCenter([point(size.width - 3, -3), point(2, -3), point(size.width - 1, size.height + 1), point(0, size.height + 1)][index]);
+    }
+
+    private ghostTarget(index: number, move: MoveMode | null, run: LevelRun): Point {
+        if (move === 'eyes') return run.ghostStartPixel;
+        if (run.ghostScatterCountdown > 0 || !run.pac.active) return this.ghostScatterTarget(index, run);
         const pac = point(run.pac.x, run.pac.y);
         if (index === 0) return pac;
         if (index === 1) return point(pac.x + run.pac.dx * 32, pac.y + run.pac.dy * 32);
@@ -719,14 +741,13 @@ export class Game {
             return point(pac.x * 2 - red.x, pac.y * 2 - red.y);
         }
         const orange = run.ghosts[3];
-        return this.distanceSquared(pac, point(orange.x, orange.y)) >= 8192 ? pac : tileCenter(targetScatter);
+        return this.distanceSquared(pac, point(orange.x, orange.y)) >= 8192 ? pac : this.ghostScatterTarget(index, run);
     }
 
     private updateGhostMode(run: LevelRun): void {
         if (run.ghostEatenCountdown > 0) {
             if (--run.ghostEatenCountdown === 0) {
                 for (const ghost of run.ghosts) if (ghost.active && ghost.move === 'eaten') ghost.move = 'eyes';
-                run.ghostEatenIndex = 0;
             }
         } else if (run.ghostScaredCountdown > 0) {
             if (--run.ghostScaredCountdown === 0) this.scareGhosts(run, false);
@@ -851,7 +872,7 @@ export class Game {
     private eatGhost(player: PlayerRecord, run: LevelRun, ghost: Ghost): void {
         ghost.move = 'eaten';
         run.ghostEatenCountdown = 54;
-        const score = GHOST_POINTS[Math.min(run.ghostEatenIndex, GHOST_POINTS.length - 1)];
+        const score = GHOST_POINTS[run.ghostEatenIndex] ?? GHOST_POINTS[0];
         run.ghostEatenIndex++;
         player.score += score;
         run.points.push({ x: ghost.x, y: ghost.y, value: score, remaining: 54, color: 0x00ffff });
@@ -870,7 +891,13 @@ export class Game {
         this.sound('eat-fruit');
         this.events.push({ type: 'vibrate', duration: 500 });
         this.addParticles(run, point(run.fruit.x, run.fruit.y), 20, 13);
-        run.fruit.active = false;
+        this.resetFruit(run.fruit);
+    }
+
+    private resetFruit(fruit: Fruit): void {
+        Object.assign(fruit, actor(), { active: false, type: 0, exitTile: point() });
+        fruit.chosenRandom.clear();
+        fruit.chosenExit.clear();
     }
 
     private updateFruitMode(run: LevelRun, player: PlayerRecord): void {
@@ -878,7 +905,7 @@ export class Game {
         else if (!run.fruit.active && run.fruitIndex < 2 && run.dotCount > 0 && run.dotCount === run.fruitThresholds[run.fruitIndex] && difficultyFor(this.options, player.level).fruitType !== 13) {
             run.fruitIndex++;
             const difficulty = difficultyFor(this.options, player.level);
-            run.fruitCounter = (this.options.mazeSet === 'ms' ? 14 : 14) * 60 + Math.floor(this.random() * 60);
+            run.fruitCounter = 14 * 60 + Math.floor(this.random() * 60);
             run.fruit.active = true;
             if (run.fruitStarts.length) {
                 const start = run.fruitStarts[Math.floor(this.random() * run.fruitStarts.length) % run.fruitStarts.length];
@@ -894,7 +921,7 @@ export class Game {
             const type = difficulty.fruitType;
             run.fruit.type = type === 12 ? Math.floor(this.random() * 12) : type;
         }
-        if (run.fruitCounter === 0 && run.fruit.active && run.fruit.dx === 0 && run.fruit.dy === 0) run.fruit.active = false;
+        if (run.fruitCounter === 0 && run.fruit.active && run.fruit.dx === 0 && run.fruit.dy === 0) this.resetFruit(run.fruit);
     }
 
     private updatePoints(run: LevelRun): void {

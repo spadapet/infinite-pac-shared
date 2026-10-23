@@ -15,8 +15,9 @@ const keys: Record<string, Direction> = { ArrowUp: 'up', ArrowLeft: 'left', Arro
 
 export class InputController {
     private pointer?: { id: number; x: number; y: number };
-    private readonly buttons = new Map<number, { start: boolean; action: boolean }>();
+    private readonly buttons = new Map<number, { start: boolean; action: boolean; directions: Set<Direction> }>();
     private readonly heldKeys = new Map<string, Direction>();
+    private readonly heldGamepad = new Set<Direction>();
     private gamepadMoving = false;
 
     constructor(host: HTMLElement, private readonly actions: InputActions) {
@@ -47,6 +48,8 @@ export class InputController {
         const clearHeld = () => {
             const held = this.heldKeys.size > 0 || this.gamepadMoving;
             this.heldKeys.clear();
+            this.heldGamepad.clear();
+            for (const button of this.buttons.values()) button.directions.clear();
             this.gamepadMoving = false;
             this.pointer = undefined;
             if (held) actions.move(null);
@@ -95,7 +98,7 @@ export class InputController {
     }
 
     private moveKeyboard(): void {
-        const held = new Set(this.heldKeys.values());
+        const held = new Set([...this.heldKeys.values(), ...this.heldGamepad]);
         const x = held.has('left') ? -1 : held.has('right') ? 1 : 0;
         const y = held.has('up') ? -1 : held.has('down') ? 1 : 0;
         this.actions.move(x || y ? { x, y } : null);
@@ -103,34 +106,32 @@ export class InputController {
 
     poll(): void {
         if (document.hidden) return;
-        if (this.heldKeys.size && this.actions.active()) this.moveKeyboard();
-        if (!navigator.getGamepads) return;
-        let direction: Direction | undefined;
+        this.heldGamepad.clear();
         const connected = new Set<number>();
-        for (const pad of navigator.getGamepads()) {
-            if (!pad || !pad.connected) continue;
+        for (const pad of navigator.getGamepads?.() ?? []) {
+            if (!pad || !pad.connected || pad.mapping !== 'standard') continue;
             connected.add(pad.index);
-            if (pad.mapping !== 'standard') continue;
             const previous = this.buttons.get(pad.index);
             const start = pad.buttons[9]?.pressed ?? false;
             const action = pad.buttons[0]?.pressed ?? false;
             if (start && !previous?.start) this.actions.pause();
             if (action && !previous?.action) this.actions.action();
-            this.buttons.set(pad.index, { start, action });
             const x = pad.axes[0] ?? 0;
             const y = pad.axes[1] ?? 0;
-            if (pad.buttons[12]?.pressed) direction = 'up';
-            else if (pad.buttons[13]?.pressed) direction = 'down';
-            else if (pad.buttons[14]?.pressed) direction = 'left';
-            else if (pad.buttons[15]?.pressed) direction = 'right';
-            else if (Math.max(Math.abs(x), Math.abs(y)) > 0.35) direction = Math.abs(x) > Math.abs(y) ? (x < 0 ? 'left' : 'right') : (y < 0 ? 'up' : 'down');
+            const values: [Direction, number, number][] = [['up', -y, 12], ['down', y, 13], ['left', -x, 14], ['right', x, 15]];
+            const directions = new Set<Direction>();
+            for (const [direction, value, button] of values) {
+                // Match gamepad_device's separate press/release thresholds on each stick direction.
+                const stickHeld = value >= 0.5625 || (value >= 0.5 && !!previous?.directions.has(direction));
+                if (stickHeld) directions.add(direction);
+                if (stickHeld || pad.buttons[button]?.pressed) this.heldGamepad.add(direction);
+            }
+            this.buttons.set(pad.index, { start, action, directions });
         }
         for (const index of this.buttons.keys()) if (!connected.has(index)) this.buttons.delete(index);
-        if (!this.heldKeys.size) {
-            if (direction && this.actions.active()) this.actions.move(direction);
-            else if (!direction && this.gamepadMoving) this.actions.move(null);
-        }
-        this.gamepadMoving = direction !== undefined;
+        if (this.actions.active() && (this.heldKeys.size || this.heldGamepad.size)) this.moveKeyboard();
+        else if (this.gamepadMoving && !this.heldKeys.size && !this.heldGamepad.size) this.actions.move(null);
+        this.gamepadMoving = this.heldGamepad.size > 0;
     }
 
     private moveByDelta(x: number, y: number): void {

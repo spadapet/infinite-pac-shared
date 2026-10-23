@@ -10,7 +10,8 @@ class KeyEvent extends Event {
 function setup(t: TestContext) {
     const window = new EventTarget();
     const document = Object.assign(new EventTarget(), { hidden: false, querySelectorAll: () => [] });
-    for (const [name, value] of Object.entries({ window, document, navigator: { getGamepads: () => [] }, HTMLElement: ElementStub, HTMLButtonElement: ElementStub })) {
+    let pads: Gamepad[] = [];
+    for (const [name, value] of Object.entries({ window, document, navigator: { getGamepads: () => pads }, HTMLElement: ElementStub, HTMLButtonElement: ElementStub })) {
         const previous = Object.getOwnPropertyDescriptor(globalThis, name);
         Object.defineProperty(globalThis, name, { configurable: true, value });
         t.after(() => { if (previous) Object.defineProperty(globalThis, name, previous); else Reflect.deleteProperty(globalThis, name); });
@@ -22,7 +23,14 @@ function setup(t: TestContext) {
         point: () => null, pac: () => ({ x: 0, y: 0 }),
     });
     const key = (type: string, value: string, code: string, repeat = false) => window.dispatchEvent(new KeyEvent(type, value, code, repeat));
-    return { window, document, moves, controller, key, setActive: (value: boolean) => { active = value; } };
+    return { window, document, moves, controller, key, setActive: (value: boolean) => { active = value; },
+        setPads: (value: Gamepad[]) => { pads = value; } };
+}
+
+function pad(pressed: number[] = [], axes = [0, 0], index = 0): Gamepad {
+    return { index, connected: true, mapping: 'standard', id: `test-${index}`, timestamp: 0, axes,
+        buttons: Array.from({ length: 16 }, (_, button) => ({ pressed: pressed.includes(button), touched: pressed.includes(button), value: pressed.includes(button) ? 1 : 0 })),
+        vibrationActuator: { playEffect: async () => 'complete', reset: async () => 'complete' } };
 }
 
 test('releasing Up immediately restores still-held Right without another keydown or OS repeat', t => {
@@ -79,4 +87,70 @@ test('blur and hidden-tab transitions clear held keys, including releases during
     const afterHidden = moves.length;
     controller.poll();
     assert.equal(moves.length, afterHidden);
+});
+
+test('D-pad and analog stick preserve all four diagonals independently', t => {
+    const { controller, moves, setPads } = setup(t);
+    for (const [buttons, axes, expected] of [
+        [[12, 15], [0.8, -0.9], { x: 1, y: -1 }],
+        [[12, 14], [-0.8, -0.9], { x: -1, y: -1 }],
+        [[13, 15], [0.8, 0.9], { x: 1, y: 1 }],
+        [[13, 14], [-0.8, 0.9], { x: -1, y: 1 }],
+    ] as const) {
+        setPads([pad([...buttons])]);
+        controller.poll();
+        assert.deepEqual(moves.at(-1), expected);
+        setPads([pad([], [...axes])]);
+        controller.poll();
+        assert.deepEqual(moves.at(-1), expected);
+    }
+    setPads([pad()]);
+    controller.poll();
+    assert.equal(moves.at(-1), null);
+});
+
+test('stick uses native 0.5625 press and 0.5 release hysteresis on each axis', t => {
+    const { controller, moves, setPads } = setup(t);
+    for (const [axis, expected] of [
+        [0.55, null], [0.5625, { x: 1, y: 0 }], [0.5, { x: 1, y: 0 }],
+        [0.499, null], [0.55, null], [-0.5625, { x: -1, y: 0 }],
+    ] as const) {
+        const before = moves.length;
+        setPads([pad([], [axis, 0])]);
+        controller.poll();
+        if (expected) assert.deepEqual(moves.at(-1), expected);
+        else if (moves.length > before) assert.equal(moves.at(-1), null);
+        else assert.equal(moves.length, before);
+    }
+});
+
+test('keyboard, sticks, D-pad and multiple pads share native Up/Left priority', t => {
+    const { key, controller, moves, setPads } = setup(t);
+    key('keydown', 'ArrowRight', 'ArrowRight');
+    setPads([pad([12])]);
+    controller.poll();
+    assert.deepEqual(moves.at(-1), { x: 1, y: -1 });
+    setPads([pad([13, 15], [0, 0], 0), pad([12, 14], [0, 0], 1)]);
+    controller.poll();
+    assert.deepEqual(moves.at(-1), { x: -1, y: -1 });
+    setPads([]);
+    controller.poll();
+    assert.deepEqual(moves.at(-1), { x: 1, y: 0 }, 'disconnect restores the still-held keyboard direction');
+    key('keyup', 'ArrowRight', 'ArrowRight');
+    assert.equal(moves.at(-1), null);
+});
+
+test('D-pad and stick combine without dominant-axis selection; disconnect and pause clear stale turns', t => {
+    const { controller, moves, setPads, setActive } = setup(t);
+    setPads([pad([15], [0, -0.9])]);
+    controller.poll();
+    assert.deepEqual(moves.at(-1), { x: 1, y: -1 });
+    setActive(false);
+    setPads([]);
+    controller.poll();
+    assert.equal(moves.at(-1), null);
+    setActive(true);
+    const count = moves.length;
+    controller.poll();
+    assert.equal(moves.length, count);
 });
