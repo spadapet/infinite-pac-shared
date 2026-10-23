@@ -1,4 +1,5 @@
 export interface Vec { x: number; y: number }
+export interface JoystickView { offset: Vec; length: number }
 export type Direction = 'up' | 'left' | 'down' | 'right';
 export type Character = 'mr' | 'ms';
 export type Difficulty = 'easy' | 'normal' | 'hard';

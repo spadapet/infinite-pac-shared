@@ -51,7 +51,7 @@ test('turn lock does not block reversal and tunnel wrapping still runs on a tile
     assert.deepEqual([run.pac.x, run.pac.y, run.pac.dx], [19, 20, -1]);
     Object.assign(run.pac, { x: -8, y: 20, dx: -1, dy: 0, canTurn: false });
     game['advancePac'](run.pac, run);
-    assert.equal(run.pac.x, run.maze.width * 8);
+    assert.equal(run.pac.x, (run.maze.width + 1) * 8);
     assert.equal(run.pac.canTurn, true);
 });
 
@@ -142,7 +142,7 @@ test('fruit corridor choices bypass brain history and do not reverse at intersec
     run.fruitCounter = 100;
     run.maze.tiles[4][5].kind = 'wall';
     run.maze.tiles[6][5].kind = 'wall';
-    assert.deepEqual(game['ghostDecideDirection'](run.fruit, run, { x: 1, y: 0 }, null, true), { x: 1, y: 0 });
+    assert.equal(game['ghostDecideDirection'](run.fruit, run, { x: 1, y: 0 }, null, true), null, 'continuing forward has no queued press');
     assert.equal(run.fruit.chosenRandom.size, 0);
     run.maze.tiles[5][6].kind = 'wall';
     assert.deepEqual(game['ghostDecideDirection'](run.fruit, run, { x: 1, y: 0 }, null, true), { x: -1, y: -0 });
@@ -386,4 +386,58 @@ test('life reset preserves eaten dots and house quotas but clears fruit and ghos
     assert.equal(next.ghostEatenIndex, 0);
     assert.equal(next.ghostScaredCountdown, 0);
     assert.deepEqual([next.fruit.active, next.fruit.speed, next.fruit.advancePosition, next.fruit.chosenRandom.size, next.fruit.chosenExit.size], [false, 0, 0, 0, 0]);
+});
+
+test('Pac cuts all eight corner orientations diagonally while ghosts wait for the center line', () => {
+    for (const from of [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 }]) {
+        for (const side of [-1, 1]) {
+            const { game, run } = fixture();
+            openMaze(run);
+            const turn = from.x ? { x: 0, y: side } : { x: side, y: 0 };
+            const start = { x: 44 - from.x * 3, y: 44 - from.y * 3 };
+            Object.assign(run.pac, { ...start, dx: from.x, dy: from.y, canTurn: true });
+            const ghost = run.ghosts[0];
+            Object.assign(ghost, { ...start, dx: from.x, dy: from.y, pressX: turn.x, pressY: turn.y, house: 'outside' });
+            game.press(turn);
+            for (let step = 1; step <= 3; step++) {
+                game['advancePac'](run.pac, run);
+                game['advanceGhost'](ghost, run);
+                assert.deepEqual([run.pac.x, run.pac.y], [start.x + (from.x + turn.x) * step, start.y + (from.y + turn.y) * step]);
+                assert.deepEqual([ghost.x, ghost.y], [start.x + from.x * step, start.y + from.y * step]);
+            }
+            game['advancePac'](run.pac, run);
+            game['advanceGhost'](ghost, run);
+            assert.deepEqual([run.pac.x, run.pac.y], [44 + turn.x * 4, 44 + turn.y * 4]);
+            assert.deepEqual([ghost.x, ghost.y], [44 + turn.x, 44 + turn.y], 'ghost takes the new lane three pixel advances later than Pac');
+        }
+    }
+});
+
+test('all four tunnel directions retain native bounds and exact off-maze destinations', () => {
+    const { game, run } = fixture();
+    const cases = [
+        { dx: -1, dy: 0, before: { x: -7, y: 116 }, beyond: { x: -8, y: 116 }, expected: { x: 232, y: 116 } },
+        { dx: 1, dy: 0, before: { x: 231, y: 116 }, beyond: { x: 232, y: 116 }, expected: { x: -8, y: 116 } },
+        { dx: 0, dy: -1, before: { x: 100, y: -7 }, beyond: { x: 100, y: -8 }, expected: { x: 100, y: 256 } },
+        { dx: 0, dy: 1, before: { x: 100, y: 255 }, beyond: { x: 100, y: 256 }, expected: { x: 100, y: -8 } },
+    ];
+    for (const item of cases) {
+        Object.assign(run.pac, item.before, { dx: item.dx, dy: item.dy });
+        assert.equal(game['checkTunnel'](run.pac, run.maze), false);
+        assert.deepEqual([run.pac.x, run.pac.y], [item.before.x, item.before.y]);
+        Object.assign(run.pac, item.beyond);
+        assert.equal(game['checkTunnel'](run.pac, run.maze), true);
+        assert.deepEqual([run.pac.x, run.pac.y], [item.expected.x, item.expected.y]);
+    }
+});
+
+test('continuing straight clears ghost queued intent exactly like native GhostDecidePress', () => {
+    const { game, run } = fixture();
+    openMaze(run);
+    const ghost = run.ghosts[0];
+    Object.assign(ghost, { x: 44, y: 44, dx: 1, dy: 0, pressX: 0, pressY: 0, house: 'outside' });
+    run.maze.tiles[4][6].kind = 'wall';
+    run.maze.tiles[6][6].kind = 'wall';
+    game['advanceGhost'](ghost, run);
+    assert.deepEqual([ghost.x, ghost.y, ghost.dx, ghost.dy, ghost.pressX, ghost.pressY], [45, 44, 1, 0, 0, 0]);
 });

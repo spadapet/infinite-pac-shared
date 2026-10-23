@@ -1,6 +1,6 @@
 import { Application, Assets, Container, Graphics, Rectangle, Sprite, Texture, WebGLRenderer } from 'pixi.js';
 import { animationDefinition, nativeSprites, sampleAnimation, type AnimationVisual } from './native-animation';
-import type { GameView, MazeView, Tile, Vec } from './types';
+import type { GameView, JoystickView, MazeView, Tile, Vec } from './types';
 
 const TILE_PIXELS = 8;
 const HUD_TOP = 24;
@@ -144,6 +144,8 @@ export class GameRenderer {
     private readonly particleLayer = new Container();
     private readonly hudLayer = new Container();
     private readonly overlayLayer = new Container();
+    private readonly joystickLayer = new Container();
+    private readonly joystickPool: RenderableSprite[] = [];
     private readonly dotPool: RenderableSprite[] = [];
     private readonly actorPool: RenderableSprite[] = [];
     private readonly bubblePool: RenderableSprite[] = [];
@@ -226,6 +228,7 @@ export class GameRenderer {
             this.particleLayer,
             this.hudLayer,
             this.overlayLayer,
+            this.joystickLayer,
         );
         this.resizeObserver = new ResizeObserver(() => {
             this.resizeCanvas();
@@ -262,7 +265,7 @@ export class GameRenderer {
         }
     }
 
-    render(view: GameView, paused: boolean): void {
+    render(view: GameView, paused: boolean, joystick: JoystickView | null = null): void {
         if (this.destroyed) return;
         this.lastView = view;
         this.lastPaused = paused;
@@ -293,6 +296,7 @@ export class GameRenderer {
         this.drawParticles(view);
         this.drawHud(view);
         this.drawOverlay(view, paused);
+        this.drawJoystick(view, paused ? null : joystick);
         this.app.render();
     }
 
@@ -417,6 +421,19 @@ export class GameRenderer {
             this.paintSprite(this.obtainSprite(pool, parent, used++), visual.sprite, position, scale, rotation, visual);
         }
         return used;
+    }
+
+    private drawJoystick(view: GameView, joystick: JoystickView | null): void {
+        let used = 0;
+        if (joystick && joystick.length > 0) {
+            const scale = Math.min(3, (joystick.length - 20) / 100 + 1);
+            const sprite = this.obtainSprite(this.joystickPool, this.joystickLayer, used++);
+            const rotation = Math.atan2(joystick.offset.y, joystick.offset.x) * 180 / Math.PI;
+            this.paintSprite(sprite, 'char-sprites.move-arrow',
+                this.boardPosition(view.pac.position), { x: scale, y: scale }, rotation);
+            sprite.alpha = Math.max(0.25, Math.min(0.75, 1 / scale));
+        }
+        this.hideSprites(this.joystickPool, used);
     }
 
     private drawDots(view: GameView): void {

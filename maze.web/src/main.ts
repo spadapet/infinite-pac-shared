@@ -271,8 +271,7 @@ async function boot(): Promise<void> {
         pause: togglePause,
         mute: toggleSound,
         fullscreen,
-        point: (x, y) => renderer.screenToGame(x, y),
-        pac: () => game.view.pac.position,
+        direction: () => game.view.pac.direction,
     });
     if (!status.classList.contains('error')) status.textContent = 'Original graphics & sound. WebGL powered.';
     showMenu();
@@ -284,6 +283,7 @@ async function boot(): Promise<void> {
             if (mode === 'game' && !paused && !soundLoading && !graphicsLost && !document.hidden) {
                 accumulator += elapsed;
                 while (accumulator >= 1000 / 60) {
+                    input.advance();
                     game.advance();
                     accumulator -= 1000 / 60;
                     handleEvents();
@@ -296,7 +296,7 @@ async function boot(): Promise<void> {
             } else accumulator = 0;
             const view = game.view;
             view.highScore = Math.max(view.highScore, storage.scores(mode === 'game' ? options : settings)[0]?.score ?? 0);
-            renderer.render(view, paused);
+            renderer.render(view, paused, input.joystick);
             host.dataset.state = mode === 'menu' ? 'menu' : paused ? 'paused' : view.state;
             host.dataset.score = String(view.score);
             host.dataset.tick = String(view.tick);

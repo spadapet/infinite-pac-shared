@@ -19,12 +19,12 @@ function setup(t: TestContext) {
         frames.set(group, array);
         textures.push(texture);
     }
-    const actorPool: Sprite[] = [], dotPool: Sprite[] = [], livesPool: Sprite[] = [], fruitPool: Sprite[] = [], pointTextPool: Sprite[] = [];
-    const actorLayer = new Container(), dotLayer = new Container(), wallLayer = new Container(), hudLayer = new Container();
+    const actorPool: Sprite[] = [], dotPool: Sprite[] = [], livesPool: Sprite[] = [], fruitPool: Sprite[] = [], pointTextPool: Sprite[] = [], joystickPool: Sprite[] = [];
+    const actorLayer = new Container(), dotLayer = new Container(), wallLayer = new Container(), hudLayer = new Container(), joystickLayer = new Container();
     const background = new Graphics();
     const renderer = Object.create(GameRenderer.prototype);
     Object.assign(renderer, { textures: { frames }, boardTop: 24, layoutWidth: 224, layoutHeight: 296,
-        actorPool, actorLayer, dotPool, dotLayer, wallLayer, background, livesPool, fruitPool, pointTextPool, hudLayer, hudTextPool: [] });
+        actorPool, actorLayer, dotPool, dotLayer, wallLayer, background, livesPool, fruitPool, pointTextPool, hudLayer, hudTextPool: [], joystickPool, joystickLayer });
     const draw = (method: string, ...args: unknown[]) => Reflect.apply(Reflect.get(GameRenderer.prototype, method), renderer, args);
     const game = new Game({ character: 'mr', mazeSet: 'mr', difficulty: 'easy', players: 1 }, () => 0);
     const view = game.view;
@@ -33,12 +33,12 @@ function setup(t: TestContext) {
     view.pac.visible = false;
     view.ghosts = [];
     t.after(() => {
-        for (const layer of [actorLayer, dotLayer, wallLayer, hudLayer]) layer.destroy({ children: true });
+        for (const layer of [actorLayer, dotLayer, wallLayer, hudLayer, joystickLayer]) layer.destroy({ children: true });
         background.destroy();
         for (const texture of textures) texture.destroy();
         source.destroy();
     });
-    return { draw, view, frames, actorPool, dotPool, livesPool, fruitPool, pointTextPool, wallLayer };
+    return { draw, view, frames, actorPool, dotPool, livesPool, fruitPool, pointTextPool, wallLayer, joystickPool };
 }
 
 test('all sixteen native maze variants render every wall/door through the original three-layer patterns', t => {
@@ -134,4 +134,31 @@ test('status icons use original animation/sprite transforms and retain native si
     assert.deepEqual(livesPool.map(sprite => sprite.x), [24, 40, 56, 72, 88]);
     assert.ok(fruitPool.every(sprite => sprite.width === 14 && sprite.height === 14));
     assert.deepEqual(fruitPool.map(sprite => sprite.x), [200, 184]);
+});
+
+test('held pointer draws the original orange arrow with native handle, angle, scale, opacity and Pac-relative position', t => {
+    const { draw, view, joystickPool, frames } = setup(t);
+    view.pac.position = { x: 100, y: 120 };
+    draw('drawJoystick', view, { offset: { x: 60, y: -60 }, length: 120 });
+    assert.equal(joystickPool.length, 1);
+    const arrow = joystickPool[0];
+    assert.equal(arrow.texture, frames.get('char-sprites.move-arrow')?.[0]);
+    assert.deepEqual({ x: arrow.x, y: arrow.y }, { x: 100, y: 144 }, 'arrow origin shares Pac screen coordinates, including the score-area transform only once');
+    assert.deepEqual({ x: arrow.anchor.x, y: arrow.anchor.y }, { x: 16 / 50, y: 0.5 });
+    assert.equal(arrow.rotation, -Math.PI / 4);
+    assert.equal(arrow.width, 50);
+    assert.equal(arrow.height, 32);
+    assert.equal(arrow.alpha, 0.5);
+    draw('drawJoystick', view, { offset: { x: 0, y: 500 }, length: 500 });
+    assert.equal(arrow.rotation, Math.PI / 2);
+    assert.equal(arrow.width, 75, 'scale caps at three times the native half-size sprite');
+    assert.equal(arrow.alpha, 1 / 3);
+    draw('drawJoystick', view, { offset: { x: 10, y: 0 }, length: 10 });
+    assert.equal(arrow.width, 22.5, 'native feedback remains visible for nonzero drags inside the input dead zone');
+    assert.equal(arrow.alpha, 0.75);
+    draw('drawJoystick', view, { offset: { x: 0, y: 0 }, length: 0 });
+    assert.equal(arrow.visible, false);
+    draw('drawJoystick', view, null);
+    assert.equal(arrow.visible, false);
+    assert.equal(joystickPool.length, 1, 'the arrow is reused rather than recreated per frame');
 });

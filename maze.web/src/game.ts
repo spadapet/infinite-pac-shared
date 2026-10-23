@@ -685,19 +685,16 @@ export class Game {
         const candidates = [point(tile.x, tile.y - 1), point(tile.x - 1, tile.y), point(tile.x, tile.y + 1), point(tile.x + 1, tile.y)]
             .filter(next => !same(next, previous) && !this.isWall(run.maze, next));
         if (!candidates.length) return point(-direction.x, -direction.y);
-        if (candidates.length === 1) return point(candidates[0].x - tile.x, candidates[0].y - tile.y);
-        if (fruit) {
-            const choice = this.fruitChooseTile(run, currentTile, candidates);
-            return point(choice.x - tile.x, choice.y - tile.y);
+        let choice: Point;
+        if (candidates.length === 1) choice = candidates[0];
+        else if (fruit) choice = this.fruitChooseTile(run, currentTile, candidates);
+        else if (move === 'scared' || move === 'waiting') choice = candidates[Math.floor(this.random() * candidates.length) % candidates.length];
+        else {
+            const index = run.ghosts.findIndex(item => item === actor);
+            choice = this.closestTile(candidates, this.ghostTarget(index, move, run));
         }
-        if (move === 'scared' || move === 'waiting') {
-            const choice = candidates[Math.floor(this.random() * candidates.length) % candidates.length];
-            return point(choice.x - tile.x, choice.y - tile.y);
-        }
-        const index = run.ghosts.findIndex(item => item === actor);
-        const target = this.ghostTarget(index, move, run);
-        const choice = this.closestTile(candidates, target);
-        return point(choice.x - tile.x, choice.y - tile.y);
+        const press = point(choice.x - tile.x, choice.y - tile.y);
+        return same(press, direction) ? null : press;
     }
 
     private fruitChooseTile(run: LevelRun, currentTile: Point, candidates: Point[]): Point {
@@ -1028,9 +1025,9 @@ export class Game {
     private checkTunnel(value: Actor, maze: MazeView): boolean {
         const tile = tileAtPixel(point(value.x, value.y), point(value.dx, value.dy));
         let moved = false;
-        if (value.dx < 0 && tile.x < -1) { value.x = maze.width * 8; moved = true; }
+        if (value.dx < 0 && tile.x < -1) { value.x = (maze.width + 1) * 8; moved = true; }
         else if (value.dx > 0 && tile.x > maze.width) { value.x = -8; moved = true; }
-        else if (value.dy < 0 && tile.y < -1) { value.y = maze.height * 8; moved = true; }
+        else if (value.dy < 0 && tile.y < -1) { value.y = (maze.height + 1) * 8; moved = true; }
         else if (value.dy > 0 && tile.y > maze.height) { value.y = -8; moved = true; }
         return moved;
     }
