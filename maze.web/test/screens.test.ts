@@ -87,3 +87,64 @@ test('score directional navigation follows native nearest-aligned letter and fal
     score.move('left'); assert.equal(score.selected, 28);
     score.move('up'); assert.equal(score.selected, 21);
 });
+
+test('title reuses borrowed views and text slots while settings, hover fades and in-place score edits update', () => {
+    const settings = { ...defaultSettings };
+    const scores = [{ score: 10, name: 'ace', level: 1, date: '' }];
+    const title = new TitleScreen(settings);
+    const first = title.view(settings, scores, false);
+    const texts = [...first.texts];
+    const pac = first.pac;
+    const labels = title.menuLabels(settings, false);
+    for (let tick = 0; tick < 100; tick++) {
+        title.advance();
+        assert.equal(title.view(settings, scores, false), first);
+        first.texts.forEach((text, index) => assert.equal(text, texts[index]));
+        assert.equal(first.pac, pac);
+        assert.equal(title.menuLabels(settings, false), labels);
+    }
+    scores[0].score = 1234;
+    scores[0].name = 'new';
+    settings.sound = false;
+    title.hover = 3;
+    title.advance();
+    const changed = title.view(settings, scores, true);
+    assert.equal(changed.texts.find(text => text.y === 152)?.text, '   1234  new');
+    assert.equal(changed.texts.find(text => text.text === 'SOUND:OFF')?.color, 0xffffff);
+    assert.equal(changed.texts.find(text => text.text === 'FULL SCREEN:ON')?.color, 0xffffff);
+    assert.equal(changed.texts.find(text => text.color === 0x597ccf)?.alpha, 1);
+    title.hover = -1;
+    title.advance();
+    assert.equal(title.view(settings, scores, true).texts.find(text => text.color === 0x597ccf)?.alpha, 1 - 1 / 24);
+    title.selected = 3;
+    assert.equal(title.view(settings, scores, true).texts.some(text => text.y === 152), false);
+    title.selected = 0;
+    assert.equal(title.view(settings, scores, true).texts.find(text => text.y === 152)?.text, '   1234  new');
+});
+
+test('score screen reuses borrowed text slots through blinking, name edits, End and Back', () => {
+    const score = new ScoreScreen(1000, 9);
+    const background = new Game(defaultSettings).view;
+    const view = score.view(background);
+    const slots = [...view.texts];
+    const pac = view.pac;
+    for (let tick = 0; tick < 120; tick++) {
+        score.advance();
+        const current = score.view(background);
+        assert.equal(current, view);
+        assert.equal(current.pac, pac);
+        current.texts.forEach((text, index) => assert.equal(text, slots[index]));
+        const blink = (Math.max(0, score.ticks - 1) % 60) < 30;
+        assert.equal(current.texts.find(text => /^-+$/.test(text.text))?.text, blink ? '--------' : '---------');
+    }
+    score.name = 'abcdefghi';
+    score.selected = 29;
+    assert.equal(score.view(background).texts.some(text => /^-+$/.test(text.text)), false);
+    score.selected = 28;
+    score.execute();
+    score.ticks = 31;
+    const current = score.view(background);
+    assert.equal(current.texts.find(text => text.x === 72 && text.y === 144)?.text, 'abcdefgh');
+    assert.equal(current.texts.find(text => /^-+$/.test(text.text))?.text, '-');
+    assert.equal(current.texts.find(text => text.y === 88)?.text, ' New high score 10!');
+});

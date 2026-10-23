@@ -15,6 +15,7 @@ export interface InputActions {
 }
 const keys: Record<string, Direction> = { ArrowUp: 'up', ArrowLeft: 'left', ArrowDown: 'down', ArrowRight: 'right',
     w: 'up', a: 'left', s: 'down', d: 'right' };
+const padDirections = [['up', 1, -1, 12], ['down', 1, 1, 13], ['left', 0, -1, 14], ['right', 0, 1, 15]] as const;
 
 export class InputController {
     private pointer?: { id: number; origin: Vec; position: Vec };
@@ -22,6 +23,8 @@ export class InputController {
     private readonly buttons = new Map<number, { start: boolean; action: boolean; directions: Set<Direction> }>();
     private readonly heldKeys = new Map<string, Direction>();
     private readonly heldGamepad = new Set<Direction>();
+    private readonly held = new Set<Direction>();
+    private readonly connected = new Set<number>();
     private navigationDirection: Direction | undefined;
     private navigationRepeat = 0;
     private cancelHeld = false;
@@ -66,11 +69,13 @@ export class InputController {
         host.addEventListener('pointermove', event => {
             if (!this.pointer || this.pointer.id !== event.pointerId || !actions.active()) return;
             event.preventDefault();
-            this.pointer.position = { x: event.clientX, y: event.clientY };
+            this.pointer.position.x = event.clientX;
+            this.pointer.position.y = event.clientY;
         });
         host.addEventListener('pointerup', event => {
             if (this.pointer?.id !== event.pointerId) return;
-            this.pointer.position = { x: event.clientX, y: event.clientY };
+            this.pointer.position.x = event.clientX;
+            this.pointer.position.y = event.clientY;
             const joystick = this.joystick;
             this.touchPress = joystick && joystick.length >= 20 ? pointerDirection(joystick.offset) : { x: 0, y: 0 };
             this.pointer = undefined;
@@ -114,7 +119,10 @@ export class InputController {
 
     advance(): void {
         if (!this.actions.active()) return;
-        const held = new Set([...this.heldKeys.values(), ...this.heldGamepad]);
+        const held = this.held;
+        held.clear();
+        for (const direction of this.heldKeys.values()) held.add(direction);
+        for (const direction of this.heldGamepad) held.add(direction);
         const x = held.has('left') ? -1 : held.has('right') ? 1 : 0;
         const y = held.has('up') ? -1 : held.has('down') ? 1 : 0;
         if (x || y) {
@@ -137,7 +145,8 @@ export class InputController {
     poll(): void {
         if (document.hidden) return;
         this.heldGamepad.clear();
-        const connected = new Set<number>();
+        const connected = this.connected;
+        connected.clear();
         let cancel = false;
         for (const pad of navigator.getGamepads?.() ?? []) {
             if (!pad || !pad.connected || (pad.mapping !== 'standard' && !isXboxGamepad(pad))) continue;
@@ -148,22 +157,26 @@ export class InputController {
             cancel ||= pad.buttons[1]?.pressed ?? false;
             if (start && !previous?.start) { if (this.actions.start) this.actions.start(); else this.actions.pause(); }
             if (action && !previous?.action) this.actions.action();
-            const x = pad.axes[0] ?? 0;
-            const y = pad.axes[1] ?? 0;
-            const values: [Direction, number, number][] = [['up', -y, 12], ['down', y, 13], ['left', -x, 14], ['right', x, 15]];
-            const directions = new Set<Direction>();
-            for (const [direction, value, button] of values) {
+            const state = previous ?? { start: false, action: false, directions: new Set<Direction>() };
+            for (const [direction, axis, sign, button] of padDirections) {
+                const value = (pad.axes[axis] ?? 0) * sign;
                 // Match gamepad_device's separate press/release thresholds on each stick direction.
-                const stickHeld = value >= 0.5625 || (value >= 0.5 && !!previous?.directions.has(direction));
-                if (stickHeld) directions.add(direction);
+                const stickHeld = value >= 0.5625 || (value >= 0.5 && state.directions.has(direction));
+                if (stickHeld) state.directions.add(direction);
+                else state.directions.delete(direction);
                 if (stickHeld || pad.buttons[button]?.pressed) this.heldGamepad.add(direction);
             }
-            this.buttons.set(pad.index, { start, action, directions });
+            state.start = start;
+            state.action = action;
+            if (!previous) this.buttons.set(pad.index, state);
         }
         for (const index of this.buttons.keys()) if (!connected.has(index)) this.buttons.delete(index);
         if (cancel && !this.cancelHeld) this.actions.cancel?.();
         this.cancelHeld = cancel;
-        const direction = this.actions.menuActive?.() ? (['up', 'down', 'left', 'right'] as const).find(value => this.heldGamepad.has(value)) : undefined;
+        let direction: Direction | undefined;
+        if (this.actions.menuActive?.()) for (const [candidate] of padDirections) {
+            if (this.heldGamepad.has(candidate)) { direction = candidate; break; }
+        }
         const now = performance.now();
         if (direction && (direction !== this.navigationDirection || now >= this.navigationRepeat)) {
             this.actions.navigate?.(direction);

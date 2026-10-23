@@ -10,7 +10,7 @@ function graphicsFillAlpha(graphics: Graphics): unknown {
     assert.ok(instruction);
     const style = instruction.data.style;
     assert.ok(typeof style === 'object' && style !== null && 'alpha' in style);
-    return style.alpha;
+    return graphics.visible ? Number(style.alpha) * graphics.alpha : 0;
 }
 
 function setup(t: TestContext) {
@@ -37,6 +37,7 @@ function setup(t: TestContext) {
     const renderer: GameRenderer = Object.create(GameRenderer.prototype);
     Object.assign(renderer, { textures: { frames }, boardTop: 24, layoutWidth: 224, layoutHeight: 288,
         spriteDescriptors: new Map(), animationSamplers: new Map(),
+        dotCaches: new WeakMap(), glyphCaches: new WeakMap(), rectangles: new WeakMap(), scoreValues: [], scoreTexts: [],
         dotSamplers: [], powerSampler: new AnimationSampler('power-anim'),
         actorPool, actorLayer, dotPool, dotLayer, wallLayer, background, livesPool, fruitPool, pointTextPool, hudLayer, hudTextPool: [], joystickPool, joystickLayer,
         screenDotPool, screenActorPool, screenTextPool, screenLayer, screenWallLayer, screenDotLayer, screenActorLayer, screenTextLayer, screenWash, screenFade, pauseFade,
@@ -64,7 +65,7 @@ test('all sixteen native maze variants render every wall/door through the origin
         for (let index = 0; index < 4; index++) {
             for (const variant of [0, 1]) {
                 const maze = parseMazeResource(`${set}-maze-${index}-${variant}`);
-                draw('rebuildStaticMaze', maze, maze.id, false);
+                draw('rebuildStaticMaze', maze, false);
                 const wallCount = maze.tiles.flat().filter(tile => ['wall', 'ghostWall', 'door'].includes(tile.kind)).length;
                 assert.equal(wallLayer.children.length, wallCount * 3 + 1, maze.id);
                 for (const child of wallLayer.children.slice(1)) {
@@ -125,7 +126,7 @@ test('dots share exact-phase samples and retain sprite and descriptor identities
 test('transparent native maze colors remain transparent in wall layers', t => {
     const { draw, view, wallLayer } = setup(t);
     const maze = { ...view.maze, borderColor: 0x00112233, fillColor: 0x00445566, backgroundColor: 0x00778899 };
-    draw('rebuildStaticMaze', maze, maze.id, false);
+    draw('rebuildStaticMaze', maze, false);
 
     let spriteIndex = 1;
     for (const tile of maze.tiles.flat()) {
@@ -346,7 +347,7 @@ test('score entry dims complete pushed gameplay below its foreground and preserv
     assert.deepEqual([renderer['screenTextPool'][0].x, renderer['screenTextPool'][0].y], [72, 144]);
     assert.equal(graphicsFillAlpha(renderer['screenWash']), 0.875);
     assert.deepEqual(renderer['screenLayer'].children, [renderer['screenWash'], screenWallLayer, renderer['screenDotLayer'], renderer['screenActorLayer'], renderer['screenTextLayer'], renderer['screenFade']]);
-    assert.equal(renderer['screenFade'].context.instructions.length, 0, 'title fade must not darken score-entry foreground');
+    assert.equal(renderer['screenFade'].visible, false, 'title fade must not darken score-entry foreground');
     assert.deepEqual(renderer.screenPoint(164, 318), { x: 72, y: 144 });
     assert.deepEqual(renderer.screenPoint(20, 30), { x: 0, y: 0 });
 
@@ -392,7 +393,7 @@ test('score entry dims complete pushed gameplay below its foreground and preserv
     assert.equal(graphicsFillAlpha(renderer['screenFade']), 1);
     for (const fade of [1 - 1 / 64, 1 / 64, 0, 1 / 64, 1]) {
         renderer.renderScreen({ ...screen, kind: 'title', fade });
-        if (fade === 0) assert.equal(renderer['screenFade'].context.instructions.length, 0);
+        if (fade === 0) assert.equal(renderer['screenFade'].visible, false);
         else assert.equal(graphicsFillAlpha(renderer['screenFade']), fade);
     }
     renderer.renderScreen(screen);
@@ -402,7 +403,7 @@ test('score entry dims complete pushed gameplay below its foreground and preserv
     assert.equal(renderer['hudLayer'].visible, false);
     assert.equal(renderer['overlayLayer'].visible, false);
     assert.equal(renderer['wallLayer'].visible, false);
-    assert.equal(renderer['screenWash'].context.instructions.length, 0);
+    assert.equal(renderer['screenWash'].visible, false);
 });
 
 test('bitmap text supports native pause scaling, alpha, and line breaks', t => {
@@ -505,4 +506,114 @@ test('ready and player-gameover overlays retain native phase visibility, anchors
     view.playerGameOver = false;
     draw('drawOverlay', view, false);
     assert.deepEqual(labels, [{ text: 'GAME OVER', x: 72, y: 160, tint: 0xff0000 }]);
+});
+
+test('winning flashes and palette changes retain every wall and floor across all sixteen mazes', t => {
+    const { renderer, draw, wallLayer } = setup(t);
+    const build = t.mock.fn(renderer['renderMazeLayer'].bind(renderer));
+    renderer['renderMazeLayer'] = build;
+    for (const set of ['mr', 'ms']) for (let index = 0; index < 4; index++) for (const variant of [0, 1]) {
+        const maze = parseMazeResource(`${set}-maze-${index}-${variant}`);
+        draw('updateStaticMaze', maze, false);
+        const children = [...wallLayer.children];
+        const floor = children[0];
+        assert.ok(floor instanceof Graphics);
+        const instructions = [...floor.context.instructions];
+        const builds = build.mock.callCount();
+        for (const flash of [true, false, true, false]) {
+            draw('updateStaticMaze', maze, flash);
+            assert.equal(build.mock.callCount(), builds, 'palette transitions never rerun wall matching');
+            assert.equal(floor.visible, !flash);
+            assert.deepEqual(floor.context.instructions, instructions);
+            children.forEach((child, slot) => assert.equal(wallLayer.children[slot], child));
+            let slot = 1;
+            for (const row of maze.tiles) for (const tile of row) {
+                if (tile.kind !== 'wall' && tile.kind !== 'ghostWall' && tile.kind !== 'door') continue;
+                const background = children[slot++], fill = children[slot++], border = children[slot++];
+                assert.ok(background instanceof Sprite && fill instanceof Sprite && border instanceof Sprite);
+                const door = tile.kind === 'door';
+                assert.equal(background.alpha, flash ? 0 : (maze.backgroundColor >>> 24) / 255);
+                assert.equal(fill.alpha, door ? 1 : flash ? 0 : (maze.fillColor >>> 24) / 255);
+                assert.equal(border.alpha, flash || door ? 1 : (maze.borderColor >>> 24) / 255);
+                assert.equal(fill.tint, door ? 0xffb8ff : flash ? 0 : maze.fillColor & 0xffffff);
+                assert.equal(border.tint, door ? 0xffb8ff : flash ? 0xffffff : maze.borderColor & 0xffffff);
+            }
+        }
+        const recolored = { ...maze, backgroundColor: 0x80112233, fillColor: 0x40445566, borderColor: 0x20778899 };
+        draw('updateStaticMaze', recolored, false);
+        assert.equal(build.mock.callCount(), builds);
+        assert.equal(floor.tint, 0x112233);
+        assert.equal(floor.alpha, 128 / 255);
+        children.forEach((child, slot) => assert.equal(wallLayer.children[slot], child));
+    }
+    assert.equal(build.mock.callCount(), 16, 'a real board change rebuilds each geometry once');
+});
+
+test('consuming early, middle and final dots never reassigns surviving sprites or resurrects consumed tiles', t => {
+    const { renderer, draw, view, dotPool } = setup(t);
+    draw('drawDots', view);
+    const sprites = [...dotPool];
+    const entries = renderer['dotCaches'].get(dotPool)!.entries;
+    const paint = t.mock.fn(renderer['paintSprite'].bind(renderer));
+    renderer['paintSprite'] = paint;
+    draw('drawDots', view);
+    assert.equal(paint.mock.callCount(), 0, 'an unchanged dot tick does not repaint static foreground pellets');
+    const consumed = [0, Math.floor(entries.length / 2), entries.length - 1];
+    for (const index of consumed) entries[index].tile.kind = 'path';
+    draw('drawDots', view);
+    for (const index of consumed) assert.equal(dotPool[index].visible, false, 'consumption still hides dots on an unchanged animation tick');
+    for (const state of ['playing', 'dead', 'playing'] as const) {
+        view.state = state;
+        view.stateTick = 20;
+        view.animation.dotTicks++;
+        draw('drawDots', view);
+        for (let index = 0; index < entries.length; index++) {
+            assert.equal(dotPool[index], sprites[index]);
+            assert.equal(dotPool[index].visible, state !== 'dead' && !consumed.includes(index));
+        }
+    }
+    view.maze = new Game({ character: 'ms', mazeSet: 'ms', difficulty: 'normal', players: 2 }).view.maze;
+    draw('drawDots', view);
+    const count = view.maze.tiles.flat().filter(tile => tile.kind === 'dot' || tile.kind === 'power').length;
+    assert.equal(dotPool.filter(sprite => sprite.visible).length, count);
+    assert.equal(renderer['dotCaches'].get(dotPool)!.tiles, view.maze.tiles);
+});
+
+test('warm bitmap glyphs skip painting while visibility, color, opacity, layout and replacement text stay correct', t => {
+    const { renderer, draw } = setup(t);
+    const pool: Sprite[] = [];
+    const parent = new Container();
+    const paint = t.mock.fn(renderer['paintSprite'].bind(renderer));
+    renderer['paintSprite'] = paint;
+    try {
+        draw('drawBitmapText', 'AB', 10, 20, 0xffffff, pool, 0, parent);
+        assert.equal(paint.mock.callCount(), 2);
+        draw('hideSprites', pool, 0);
+        draw('drawBitmapText', 'AB', 10, 20, 0xff00ff, pool, 0, parent, 1, 0.25);
+        assert.equal(paint.mock.callCount(), 2, 'unchanged glyph transforms are not repainted');
+        assert.deepEqual(pool.map(sprite => [sprite.visible, sprite.tint, sprite.alpha]), [[true, 0xff00ff, 0.25], [true, 0xff00ff, 0.25]]);
+        draw('drawBitmapText', 'BA', 10, 20, 0xffffff, pool, 0, parent, 2, 1);
+        assert.equal(paint.mock.callCount(), 4);
+        assert.deepEqual(pool.map(sprite => [sprite.x, sprite.y, sprite.width, sprite.alpha]), [[10, 20, 16, 1], [26, 20, 16, 1]]);
+        draw('drawBitmapText', 'A', 10, 20, 0xffffff, pool, 1, parent);
+        assert.equal(pool[1].x, 10, 'overlapping text slots cannot return stale cached transforms');
+        assert.equal(pool[1].width, 8);
+    } finally { parent.destroy({ children: true }); }
+});
+
+test('fade steps retain graphics instructions and resize geometry only when logical dimensions change', t => {
+    const { renderer, draw } = setup(t);
+    const fade = renderer['screenFade'];
+    draw('setRectangle', fade, 0.25);
+    const instruction = fade.context.instructions[0];
+    for (const alpha of [0, 0.125, 0.5, 0.875, 1]) {
+        draw('setRectangle', fade, alpha);
+        assert.equal(fade.context.instructions[0], instruction);
+        assert.equal(graphicsFillAlpha(fade), alpha);
+        assert.equal(fade.visible, alpha > 0);
+    }
+    renderer['layoutHeight'] = 248;
+    draw('setRectangle', fade, 0.5);
+    assert.notEqual(fade.context.instructions[0], instruction);
+    assert.equal(fade.getLocalBounds().height, 248);
 });

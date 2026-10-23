@@ -160,7 +160,7 @@ animation) are not listed.
 This section records a separate review of the current web implementation. The older parity
 findings above are historical and were not revalidated by this performance review. These are
 optimization candidates, not claims that the game currently misses its frame budget. Status
-notes below track the first allocation-focused implementation pass; unmarked entries remain open.
+notes below track both allocation-focused implementation passes; explicit deferrals remain open.
 
 ### Baseline and design constraints
 
@@ -183,13 +183,21 @@ notes below track the first allocation-focused implementation pass; unmarked ent
 - Measure CPU preparation time, allocation/GC behavior, draw calls, buffer uploads, and memory
   before/after changes. Use actual hardware for GPU timing. Do not add an ECS, workers, or a
   custom renderer without evidence that the complexity is warranted.
+- Second-pass validation: build, 219 unit tests and 65 browser tests passed. A separate in-memory
+  comparison against the pre-pass renderer/screens matched SHA-256 hashes of WebGL pixel buffers
+  exactly across 55 gameplay, flash-boundary, pause, title/hover and score/fade cases. No compared
+  case increased draw submissions: representative gameplay remained 3 and title changed from 5
+  to 3 in the 448 x 576 logical-host, headless Edge/SwiftShader fixture. This is rendering-parity
+  and submission evidence, not a real-GPU timing or whole-application allocation measurement.
 
 ### P1. Skip completely covered or unchanged canvas rendering
 
 - **Status: implemented for About, hidden tabs, and unchanged paused gameplay.** Controller
   polling remains active; resize, DPR changes, pause/resume, and graphics recovery invalidate
   frozen presentation. Browser tests count actual WebGL submissions and exercise invalidation.
-  Avoiding duplicate active-scene preparation on high-refresh displays remains open.
+  Active scenes also skip duplicate display frames without changing the fixed 60 Hz simulation.
+  A controlled 240 Hz browser test requires one presentation per changed simulation state,
+  zero repeated-frame submissions, and immediate keyboard/controller repaint between ticks.
 - **Where:** `main.ts` frame loop; `renderer.ts` `render()` and `renderScreen()`.
 - **Issue:** About freezes simulation but continues preparing/rendering the covered title.
   Paused gameplay also repaints unchanged dots, actors, HUD, and overlays every animation frame.
@@ -246,6 +254,10 @@ notes below track the first allocation-focused implementation pass; unmarked ent
 
 ### P4. Make DOM layout, labels, and diagnostics change-driven
 
+- **Status: implemented.** Host/canvas resize, DPR, fullscreen and screen changes invalidate hit
+  geometry. Settings invalidate cached title labels; sound accessibility keeps its original names.
+  Diagnostics stay available but write only changed attributes. The controlled browser test
+  asserts zero steady-state hit-region mutations and zero layout-bound reads across 240 frames.
 - **Where:** `main.ts` `layoutScreenControls()` and frame-loop `dataset` writes.
 - **Issue:** Every frame reads layout bounds and writes mostly unchanged positions, transforms,
   accessibility labels, sound attributes, and diagnostic strings.
@@ -260,6 +272,10 @@ notes below track the first allocation-focused implementation pass; unmarked ent
 
 ### P5. Retain wall geometry through winning flashes
 
+- **Status: implemented.** Palette/flash changes update retained floor/wall tint, alpha and
+  visibility, without recreating sprites or rerunning wall matching. Geometry still rebuilds
+  for board identity, dimensions, tile storage or offset changes. Regression tests cover every
+  wall/door across all sixteen maze variants, including transparent colors and repeated flashes.
 - **Where:** `renderer.ts` maze cache keys, `rebuildStaticMaze()`, and `renderMazeLayer()`.
 - **Issue:** Winning-flash transitions invalidate the cache, destroy/recreate wall sprites, and
   rerun wall-pattern matching even though geometry has not changed.
@@ -290,6 +306,11 @@ notes below track the first allocation-focused implementation pass; unmarked ent
 
 ### P7. Give dots stable tile-associated sprites
 
+- **Status: implemented.** Each active dot pool retains a bounded list of original pellet tiles,
+  positions and exact phase offsets. Consumed dots hide without shifting other sprite slots.
+  Unchanged dot ticks skip painting, including static title/score foreground pellets; consumption
+  is still checked on every presentation. Board/tile-storage/offset changes replace the list,
+  so player/level switches cannot reuse stale tile references or accumulate past-board caches.
 - **Where:** `renderer.ts` `drawMazeDots()` and dot pools.
 - **Issue:** All maze tiles are scanned each render and surviving dots are packed into sequential
   pool slots. Consuming an early dot can shift many later sprite assignments.
@@ -303,11 +324,13 @@ notes below track the first allocation-focused implementation pass; unmarked ent
 
 ### P8. Update persistent text and score snapshots only when changed
 
-- **Status: partially implemented.** `topScore()` avoids copying tables for the HUD; the title
-  takes a score snapshot on settings changes/return from gameplay instead of every frame. Fruit
-  history rendering no longer slices its array, and popup digit layout uses two bounded passes
-  instead of constructing glyph/width arrays. Persistent text/glyph caching and change-driven
-  title/score-screen text construction remain open and are priority allocation follow-ups.
+- **Status: implemented.** `topScore()` avoids copying tables for the HUD; the title takes a
+  score snapshot on settings changes/return from gameplay. Title/score views, cursor objects,
+  text arrays and text slots are borrowed reusable buffers. Labels, score rows, HUD scores and
+  dash strings format only when changed (or once at construction). Glyph transforms/textures
+  repaint only when their character/layout changes; tint, alpha and visibility still update.
+  Fruit history avoids slicing and popup digits use bounded passes without temporary arrays.
+  Dynamic point-popup strings and icon transforms remain deliberately simple and uncached.
 - **Where:** `renderer.ts` HUD/bitmap text; `screens.ts` screen view construction;
   `storage.ts` `scores()`; `main.ts` high-score lookup.
 - **Issue:** Static glyphs are repainted and score strings are formatted repeatedly. `scores()`
@@ -321,6 +344,10 @@ notes below track the first allocation-focused implementation pass; unmarked ent
 
 ### P9. Reuse simple background and fade geometry
 
+- **Status: implemented.** Background, screen wash, title fade and pause fade retain their black
+  Graphics rectangles. Only logical dimension changes rebuild instructions; fades update alpha
+  and visibility, preserving existing layer order. Empty gameplay overlays also skip door scans.
+  Tests assert retained instruction identity, fade endpoints/intermediate alpha and resizing.
 - **Where:** `renderer.ts` `renderScreen()` and `drawOverlay()`.
 - **Issue:** Background rectangles, screen washes, and pause fades are cleared/reconstructed
   repeatedly although only their alpha, visibility, or dimensions may change.
@@ -331,6 +358,9 @@ notes below track the first allocation-focused implementation pass; unmarked ent
 
 ### P10. Benchmark native/capped render resolution or logical-resolution static caching
 
+- **Status: deferred pending representative hardware GPU measurements.** No resolution cap,
+  render texture or extra compositing pass was added. Existing pixel fidelity and DPR behavior
+  are preserved; software-WebGL tests cannot establish a real-device GPU win.
 - **Where:** `renderer.ts` `resizeCanvas()` and static maze layers.
 - **Issue:** Drawing-buffer size follows display scale times DPR, increasing rasterization and
   framebuffer memory on large/high-DPI displays despite the low-resolution source art.
@@ -345,6 +375,12 @@ notes below track the first allocation-focused implementation pass; unmarked ent
 
 ### P11. Reduce smaller input, AI, and particle allocations if profiling warrants it
 
+- **Status: low-risk recurring input allocations removed; AI/particle restructuring deferred.**
+  Input reuses connected/held Sets, controller state and stick-hysteresis Sets, static axis
+  metadata, and live pointer positions. Disconnect clears state; action callbacks retain their
+  existing independently owned vectors. Tests pin collection identity, reconnect thresholds,
+  direction priority, button edges and all pointer sectors. More invasive simulation/pool changes
+  are not justified for four ghosts and small particle populations without profiling evidence.
 - **Where:** `input.ts` `advance()`/`poll()`; `game.ts` ghost decisions and particle updates.
 - **Issue:** Small Sets/arrays/points are created for input and movement decisions; particles are
   allocated individually and removed using `splice()`.

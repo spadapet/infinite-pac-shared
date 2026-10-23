@@ -34,6 +34,15 @@ export class TitleScreen {
     readonly maze = parseMazeResource('title-maze-front');
     readonly background = Game.titleBackground();
     private readonly backgroundView = this.background.view;
+    private readonly textPool: ScreenText[] = [];
+    private readonly presentation: NativeScreenView = { kind: 'title', maze: this.maze, texts: [],
+        pac: { x: 44, y: 32, character: 'mr', frame: 0 }, fade: 1 };
+    private labelSettings?: Settings;
+    private fullscreen = false;
+    private labels: string[] = [];
+    private readonly scoreValues: number[] = [];
+    private readonly scoreNames: string[] = [];
+    private readonly scoreLines: string[] = [];
     selected: number;
     hover = -1;
     readonly hoverOpacity = titleRows.map(() => 0);
@@ -66,21 +75,45 @@ export class TitleScreen {
             && position.y >= titleRows[index] - 6 && position.y < titleRows[index] + 6);
     }
 
-    view(settings: Settings, scores: HighScore[], fullscreen: boolean): NativeScreenView {
-        const texts: ScreenText[] = titleLabels(settings, fullscreen).flatMap((text, i) => [
-            { text, x: 56, y: titleRows[i] - 4, color: 0xffffff },
-            ...this.hoverOpacity[i] > 0 ? [{ text, x: 56, y: titleRows[i] - 4, color: 0x597ccf, alpha: this.hoverOpacity[i] }] : [],
-        ]);
-        texts.push({ text: ' START GAME:', x: 48, y: 16, color: 0xbf0000 });
-        if (this.selected < 2) {
-            texts.push({ text: 'HIGH SCORES:', x: 48, y: 140, color: 0xbf0000 });
-            for (let i = 0; i < 10; i++) texts.push({
-                text: `${formatScore(scores[i]?.score ?? 0)}  ${scores[i]?.name || '---'}`, x: 48, y: 152 + i * 8, color: 0xffffff,
-            });
+    menuLabels(settings: Settings, fullscreen: boolean): string[] {
+        const previous = this.labelSettings;
+        if (!previous || previous.players !== settings.players || previous.difficulty !== settings.difficulty
+            || previous.sound !== settings.sound || previous.vibration !== settings.vibration || this.fullscreen !== fullscreen) {
+            this.labels = titleLabels(settings, fullscreen);
+            this.labelSettings = { ...settings };
+            this.fullscreen = fullscreen;
         }
-        const character = this.selected === 1 ? 'ms' : 'mr';
-        return { kind: 'title', maze: this.maze, background: this.background.readView(this.backgroundView), texts,
-            pac: { x: 44, y: titleRows[this.selected], character, frame: Math.max(0, this.ticks - 1) * animationDefinition(`${character}-char-anim`).fps / 60 }, fade: this.fade };
+        return this.labels;
+    }
+
+    view(settings: Settings, scores: HighScore[], fullscreen: boolean): NativeScreenView {
+        const screen = this.presentation;
+        const labels = this.menuLabels(settings, fullscreen);
+        for (let i = 0; i < 10; i++) {
+            const score = scores[i]?.score ?? 0, name = scores[i]?.name || '---';
+            if (this.scoreValues[i] !== score || this.scoreNames[i] !== name) {
+                this.scoreValues[i] = score;
+                this.scoreNames[i] = name;
+                this.scoreLines[i] = `${formatScore(score)}  ${name}`;
+            }
+        }
+        let used = 0;
+        for (let i = 0; i < labels.length; i++) {
+            writeText(screen.texts, this.textPool, used++, labels[i], 56, titleRows[i] - 4, 0xffffff);
+            if (this.hoverOpacity[i] > 0) writeText(screen.texts, this.textPool, used++, labels[i], 56, titleRows[i] - 4, 0x597ccf, this.hoverOpacity[i]);
+        }
+        writeText(screen.texts, this.textPool, used++, ' START GAME:', 48, 16, 0xbf0000);
+        if (this.selected < 2) {
+            writeText(screen.texts, this.textPool, used++, 'HIGH SCORES:', 48, 140, 0xbf0000);
+            for (let i = 0; i < 10; i++) writeText(screen.texts, this.textPool, used++, this.scoreLines[i], 48, 152 + i * 8, 0xffffff);
+        }
+        screen.texts.length = used;
+        screen.background = this.background.readView(this.backgroundView);
+        screen.pac.y = titleRows[this.selected];
+        screen.pac.character = this.selected === 1 ? 'ms' : 'mr';
+        screen.pac.frame = Math.max(0, this.ticks - 1) * animationDefinition(`${screen.pac.character}-char-anim`).fps / 60;
+        screen.fade = this.fade;
+        return screen;
     }
 }
 
@@ -94,8 +127,16 @@ export class ScoreScreen {
     selected = 0;
     name = '';
     ticks = 0;
+    private readonly textPool: ScreenText[] = [];
+    private readonly presentation: NativeScreenView = { kind: 'score', maze: this.maze, texts: [],
+        pac: { x: 0, y: 0, character: 'mr', frame: 0 }, fade: 0 };
+    private readonly scoreText: string;
+    private readonly slotText: string;
 
-    constructor(readonly score: number, readonly slot: number) {}
+    constructor(readonly score: number, readonly slot: number) {
+        this.scoreText = `      ${formatScore(score)}`;
+        this.slotText = ` New high score ${String(slot + 1).padStart(2, '0')}!`;
+    }
 
     advance(): void { this.ticks++; }
 
@@ -129,7 +170,7 @@ export class ScoreScreen {
     }
 
     type(key: string): boolean {
-        const index = key === 'Backspace' ? 28 : [...'abcdefghijklmnopqrstuvwxyz .'].indexOf(key.toLowerCase());
+        const index = key === 'Backspace' ? 28 : 'abcdefghijklmnopqrstuvwxyz .'.indexOf(key.toLowerCase());
         if (index < 0) return false;
         this.selected = index;
         this.execute();
@@ -138,19 +179,39 @@ export class ScoreScreen {
     }
 
     view(background: GameView): NativeScreenView {
-        const texts: ScreenText[] = scoreLetters.map(letter => ({ ...letter, color: 0xffffff }));
+        const screen = this.presentation;
+        const texts = screen.texts;
+        let used = 0;
+        for (const entry of scoreLetters) writeText(texts, this.textPool, used++, entry.text, entry.x, entry.y, 0xffffff);
         const letter = scoreLetters[this.selected];
-        texts.push({ text: letter.text, x: letter.x - 1, y: letter.y - 1, color: 0xff00ff });
-        texts.push({ text: `      ${formatScore(this.score)}`, x: 32, y: 56, color: 0xffffff },
-            { text: ` New high score ${String(this.slot + 1).padStart(2, '0')}!`, x: 32, y: 88, color: 0xffffff },
-            { text: '    Enter name:', x: 32, y: 104, color: 0xffffff },
-            { text: this.name, x: 72, y: 144, color: 0xffffff });
+        writeText(texts, this.textPool, used++, letter.text, letter.x - 1, letter.y - 1, 0xff00ff);
+        writeText(texts, this.textPool, used++, this.scoreText, 32, 56, 0xffffff);
+        writeText(texts, this.textPool, used++, this.slotText, 32, 88, 0xffffff);
+        writeText(texts, this.textPool, used++, '    Enter name:', 32, 104, 0xffffff);
+        writeText(texts, this.textPool, used++, this.name, 72, 144, 0xffffff);
         const blink = (Math.max(0, this.ticks - 1) % 60) < 30 && this.selected < 28;
         const dashes = blink ? 8 : 9;
-        if (this.name.length < dashes) texts.push({ text: '-'.repeat(dashes - this.name.length),
-            x: (9 + 9 - dashes + this.name.length) * 8, y: 144, color: 0xffffff });
-        if (this.name.length < 9 && blink) texts.push({ text: letter.text, x: 72 + this.name.length * 8, y: 144, color: 0xff00ff });
-        return { kind: 'score', maze: this.maze, background, texts,
-            pac: { x: letter.x + 4, y: letter.y + 4, character: 'mr', frame: Math.max(0, this.ticks - 1) * animationDefinition('mr-char-anim').fps / 60 }, fade: 0 };
+        if (this.name.length < dashes) writeText(texts, this.textPool, used++, DASHES[dashes - this.name.length],
+            (9 + 9 - dashes + this.name.length) * 8, 144, 0xffffff);
+        if (this.name.length < 9 && blink) writeText(texts, this.textPool, used++, letter.text, 72 + this.name.length * 8, 144, 0xff00ff);
+        texts.length = used;
+        screen.background = background;
+        screen.pac.x = letter.x + 4;
+        screen.pac.y = letter.y + 4;
+        screen.pac.frame = Math.max(0, this.ticks - 1) * animationDefinition('mr-char-anim').fps / 60;
+        return screen;
     }
+}
+
+const DASHES = Array.from({ length: 10 }, (_, length) => '-'.repeat(length));
+
+function writeText(texts: ScreenText[], pool: ScreenText[], index: number, text: string, x: number, y: number, color: number, alpha?: number): void {
+    const entry = pool[index] ?? (pool[index] = { text, x, y, color });
+    entry.text = text;
+    entry.x = x;
+    entry.y = y;
+    entry.color = color;
+    if (alpha === undefined) delete entry.alpha;
+    else entry.alpha = alpha;
+    texts[index] = entry;
 }

@@ -440,7 +440,7 @@ function hudRecorder() {
     const text: string[] = [];
     const fruits: Array<{ name: string; x: number }> = [];
     let lives = 0;
-    Object.assign(renderer, { layoutWidth: 224, boardTop: 24,
+    Object.assign(renderer, { layoutWidth: 224, boardTop: 24, scoreValues: [], scoreTexts: [],
         hudTextPool: [], livesPool: [], fruitPool: [], pointTextPool: [] });
     renderer['drawBitmapText'] = (value, _x, _y, _tint, _pool, count) => {
         text.push(value);

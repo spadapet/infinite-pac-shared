@@ -3,7 +3,7 @@ import { Game } from './game';
 import { GameRenderer } from './renderer';
 import { GameAudio } from './audio';
 import { GameStorage } from './storage';
-import { ScoreScreen, TitleScreen, scoreLetters, titleLabels, titleRows } from './screens';
+import { ScoreScreen, TitleScreen, scoreLetters, titleRows } from './screens';
 import { InputController } from './input';
 import { GameVibration } from './vibration';
 import type { Direction, GameOptions, GameEvent } from './types';
@@ -65,12 +65,16 @@ let soundError: string | undefined;
 let starting = false;
 let graphicsLost = false;
 let presentationDirty = true;
+let controlsDirty = true;
+let controlLabels: string[] | undefined;
 let presentationPixelRatio = 0;
 const pendingScores: Extract<GameEvent, { type: 'gameOver' }>[] = [];
 
 function updateSoundButton(): void {
-    soundButton.setAttribute('aria-label', settings.sound ? 'Sound on' : 'Sound off');
-    soundButton.setAttribute('aria-pressed', String(settings.sound));
+    const label = settings.sound ? 'Sound on' : 'Sound off';
+    const pressed = String(settings.sound);
+    if (soundButton.getAttribute('aria-label') !== label) soundButton.setAttribute('aria-label', label);
+    if (soundButton.getAttribute('aria-pressed') !== pressed) soundButton.setAttribute('aria-pressed', pressed);
 }
 updateSoundButton();
 function unlockSound(): Promise<void> {
@@ -110,6 +114,7 @@ function saveSettings(): void {
     settings.character = settings.mazeSet;
     storage.saveSettings(settings);
     titleScores = storage.scores(settings);
+    presentationDirty = true;
     updateSoundButton();
 }
 async function startGame(): Promise<void> {
@@ -134,6 +139,7 @@ function beginGame(): void {
     pendingScores.length = 0;
     mode = 'game';
     presentationDirty = true;
+    controlsDirty = true;
     paused = false;
     starting = false;
     accumulator = 0;
@@ -152,6 +158,7 @@ function showMenu(): void {
     void audio.setPaused(false).catch(failure);
     mode = 'menu';
     presentationDirty = true;
+    controlsDirty = true;
     paused = false;
     starting = false;
     pendingScores.length = 0;
@@ -195,6 +202,8 @@ function showAbout(): void {
     accumulator = 0;
 }
 function closeAbout(): void {
+    presentationDirty = true;
+    controlsDirty = true;
     aboutScreen.hidden = true;
     menu.hidden = false;
     accumulator = 0;
@@ -203,6 +212,7 @@ function closeAbout(): void {
 }
 aboutBack.addEventListener('click', closeAbout);
 function toggleSound(): void {
+    presentationDirty = true;
     settings.sound = !settings.sound;
     audio.setMuted(!settings.sound);
     storage.saveSettings(settings);
@@ -222,6 +232,8 @@ function fullscreen(): void {
     });
 }
 function showNextScore(): void {
+    presentationDirty = true;
+    controlsDirty = true;
     while (pendingScores.length && !storage.qualifies(options, pendingScores[0].score)) pendingScores.shift();
     const entry = pendingScores[0];
     if (!entry) {
@@ -298,6 +310,7 @@ async function executeTitle(index: number, left = false): Promise<void> {
     await menuEffect('fruit-bounce');
 }
 function navigateScreen(direction: Direction): void {
+    presentationDirty = true;
     if (!aboutScreen.hidden) {
         const selected = aboutActions.findIndex(control => control === document.activeElement);
         const offset = direction === 'up' || direction === 'left' ? -1 : 1;
@@ -320,12 +333,14 @@ function navigateScreen(direction: Direction): void {
 function finishScore(save: boolean): void {
     const entry = pendingScores[0];
     if (!scoreScreen || !entry || scoreClosing) return;
+    presentationDirty = true;
     if (save) storage.addScore(options, { name: scoreScreen.name, score: entry.score, level: entry.level, date: new Date().toISOString() });
     pendingScores.shift();
     scoreClosing = true;
     if (graphicsLost) showNextScore();
 }
 function action(): void {
+    presentationDirty = true;
     if (!aboutScreen.hidden) {
         const selected = aboutActions.find(control => control === document.activeElement) ?? aboutBack;
         selected.click();
@@ -338,8 +353,8 @@ function action(): void {
 }
 for (const [index, button] of titleButtons.entries()) {
     button.addEventListener('click', () => { void executeTitle(index); });
-    button.addEventListener('pointerenter', () => { title.hover = index; });
-    button.addEventListener('pointerleave', () => { title.hover = -1; });
+    button.addEventListener('pointerenter', () => { title.hover = index; presentationDirty = true; });
+    button.addEventListener('pointerleave', () => { title.hover = -1; presentationDirty = true; });
 }
 for (const [index, letter] of scoreLetters.entries()) {
     const button = document.createElement('button');
@@ -349,7 +364,7 @@ for (const [index, letter] of scoreLetters.entries()) {
     button.style.top = `${letter.y - 4}px`;
     button.style.width = `${letter.text.length * 8 + 8}px`;
     button.style.height = '16px';
-    button.addEventListener('pointerenter', () => { if (scoreScreen) scoreScreen.selected = index; });
+    button.addEventListener('pointerenter', () => { if (scoreScreen) { scoreScreen.selected = index; presentationDirty = true; } });
     button.addEventListener('click', () => { if (scoreScreen) { scoreScreen.selected = index; action(); } });
     scoreEntry.append(button);
 }
@@ -357,6 +372,7 @@ pauseButton.addEventListener('click', togglePause);
 element('resume', HTMLButtonElement).addEventListener('click', () => setPaused(false));
 element('home', HTMLButtonElement).addEventListener('click', showMenu);
 document.addEventListener('keydown', event => {
+    presentationDirty = true;
     if (!aboutScreen.hidden) {
         const directions: Record<string, Direction> = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' };
         if (event.key === 'Escape' || event.key === 'Enter' || event.key === ' ' || directions[event.key]) {
@@ -393,13 +409,24 @@ function layoutScreenControls(): void {
         controls.style.height = controls === menu ? '248px' : '288px';
         controls.style.transform = `scale(${scale})`;
     }
-    const labels = titleLabels(settings, !!document.fullscreenElement);
+    controlsDirty = false;
+}
+function updateControlLabels(): void {
+    const labels = title.menuLabels(settings, !!document.fullscreenElement);
+    if (controlLabels === labels) return;
+    controlLabels = labels;
     titleButtons.forEach((button, index) => {
         button.style.left = '54px'; button.style.top = `${titleRows[index] - 6}px`;
         button.style.width = `${labels[index].length * 8 + 4}px`; button.style.height = '12px';
-        if (index >= 2) button.setAttribute('aria-label', labels[index]);
+        if (index >= 2 && index !== 4) button.setAttribute('aria-label', labels[index]);
     });
-    updateSoundButton();
+}
+function diagnostic(key: string, value: string): void {
+    if (host.dataset[key] !== value) host.dataset[key] = value;
+}
+document.addEventListener('fullscreenchange', () => { presentationDirty = true; controlsDirty = true; });
+for (const event of ['pointerdown', 'pointermove', 'pointerup', 'pointercancel', 'lostpointercapture']) {
+    host.addEventListener(event, () => { presentationDirty = true; });
 }
 document.addEventListener('visibilitychange', () => { if (document.hidden) { vibration.stop(); setPaused(true); } });
 window.addEventListener('blur', () => { vibration.stop(); setPaused(true); });
@@ -420,7 +447,10 @@ host.addEventListener('webglcontextrestored', () => {
 
 async function boot(): Promise<void> {
     renderer = await GameRenderer.create(host);
-    new ResizeObserver(() => { presentationDirty = true; }).observe(host);
+    const layoutObserver = new ResizeObserver(() => { presentationDirty = true; controlsDirty = true; });
+    layoutObserver.observe(host);
+    const canvas = host.querySelector('canvas');
+    if (canvas) layoutObserver.observe(canvas);
     const input = new InputController(host, {
         active: () => mode === 'game' && !paused && !graphicsLost && game.state !== 'gameover',
         move: direction => game.press(direction),
@@ -445,6 +475,7 @@ async function boot(): Promise<void> {
                 && (mode === 'menu' || scoreScreen || (!paused && !soundLoading))) {
                 accumulator += elapsed;
                 while (accumulator >= 1000 / 60) {
+                    presentationDirty = true;
                     accumulator -= 1000 / 60;
                     if (mode === 'menu') {
                         if (title.done) { beginGame(); break; }
@@ -462,28 +493,33 @@ async function boot(): Promise<void> {
                     }
                 }
             } else accumulator = 0;
-            if (aboutScreen.hidden && !document.hidden && (!paused || scoreScreen || presentationDirty || presentationPixelRatio !== window.devicePixelRatio)) {
+            if (aboutScreen.hidden && !document.hidden && (presentationDirty || presentationPixelRatio !== window.devicePixelRatio)) {
+                if (presentationPixelRatio !== window.devicePixelRatio) controlsDirty = true;
                 const view = game.readView(presentationView);
                 view.highScore = Math.max(view.highScore, storage.topScore(mode === 'game' ? options : settings));
                 if (mode === 'menu') renderer.renderScreen(title.view(settings, titleScores, !!document.fullscreenElement));
-                else if (scoreScreen) renderer.renderScreen({ ...scoreScreen.view(view), backgroundFade: scoreFade,
-                    showForeground: !scoreClosing && scoreFade === 0.875 });
-                else renderer.render(view, paused, input.joystick);
-                layoutScreenControls();
-                element('loading', HTMLElement).hidden = true;
-                host.dataset.state = mode === 'menu' ? 'menu' : scoreScreen ? 'score' : paused ? 'paused' : view.state;
-                host.dataset.character = mode === 'menu' ? settings.character : options.character;
-                host.dataset.mazeSet = mode === 'menu' ? settings.mazeSet : options.mazeSet;
-                host.dataset.selection = String(scoreScreen?.selected ?? title.selected);
-                host.dataset.name = scoreScreen?.name ?? '';
-                host.dataset.score = String(view.score);
-                host.dataset.tick = String(view.tick);
-                host.dataset.position = `${view.pac.position.x},${view.pac.position.y}`;
-                host.dataset.level = String(view.level);
-                host.dataset.player = String(view.player);
+                else if (scoreScreen) {
+                    const screen = scoreScreen.view(view);
+                    screen.backgroundFade = scoreFade;
+                    screen.showForeground = !scoreClosing && scoreFade === 0.875;
+                    renderer.renderScreen(screen);
+                } else renderer.render(view, paused, input.joystick);
+                if (controlsDirty) layoutScreenControls();
+                updateControlLabels();
+                if (!element('loading', HTMLElement).hidden) element('loading', HTMLElement).hidden = true;
+                diagnostic('state', mode === 'menu' ? 'menu' : scoreScreen ? 'score' : paused ? 'paused' : view.state);
+                diagnostic('character', mode === 'menu' ? settings.character : options.character);
+                diagnostic('mazeSet', mode === 'menu' ? settings.mazeSet : options.mazeSet);
+                diagnostic('selection', String(scoreScreen?.selected ?? title.selected));
+                diagnostic('name', scoreScreen?.name ?? '');
+                diagnostic('score', String(view.score));
+                diagnostic('tick', String(view.tick));
+                diagnostic('position', `${view.pac.position.x},${view.pac.position.y}`);
+                diagnostic('level', String(view.level));
+                diagnostic('player', String(view.player));
                 presentationDirty = false;
                 presentationPixelRatio = window.devicePixelRatio;
-            } else if (!aboutScreen.hidden) host.dataset.state = 'about';
+            } else if (!aboutScreen.hidden) diagnostic('state', 'about');
             requestAnimationFrame(frame);
         } catch (error) {
             audio.stopAll();

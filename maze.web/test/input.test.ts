@@ -389,3 +389,35 @@ test('native screens receive controller direction edges and B cancellation witho
     assert.equal(starts, 1, 'the pause key is not a title-screen launch action');
     assert.deepEqual(moves, []);
 });
+
+test('controller polling reuses state and scratch collections but forgets disconnected stick hysteresis', t => {
+    const { controller, setPads, moves, pointer } = setup(t);
+    setPads([pad([], [0.8, -0.8])]);
+    controller.poll();
+    const state = controller['buttons'].get(0)!;
+    const directions = state.directions;
+    const connected = controller['connected'];
+    const held = controller['held'];
+    for (let index = 0; index < 100; index++) {
+        controller.poll();
+        controller.advance();
+        assert.equal(controller['buttons'].get(0), state);
+        assert.equal(state.directions, directions);
+        assert.equal(controller['connected'], connected);
+        assert.equal(controller['held'], held);
+        assert.deepEqual(moves.at(-1), { x: 1, y: -1 });
+    }
+    setPads([]);
+    controller.poll();
+    assert.equal(controller['buttons'].size, 0);
+    setPads([pad([], [0.55, -0.55])]);
+    controller.poll();
+    controller.advance();
+    assert.notEqual(controller['buttons'].get(0), state);
+    assert.equal(moves.at(-1), null, 'a reconnected stick must cross the press threshold again');
+    pointer('pointerdown', 100, 100);
+    const position = controller['pointer']!.position;
+    pointer('pointermove', 150, 120);
+    assert.equal(controller['pointer']!.position, position);
+    assert.deepEqual(position, { x: 150, y: 120 });
+});
